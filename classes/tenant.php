@@ -39,8 +39,8 @@ class tenant {
 
         if (empty($this->tenant->id)) {
             $this->tenant = (object) $params;
-            $this->tenant->consumerkey = '';
-            $this->tenant->consumersecret = '';
+            $this->tenant->consumerkey = optional_param('consumerkey', '', PARAM_ALPHANUM);
+            $this->tenant->consumersecret = optional_param('consumersecret', '', PARAM_ALPHANUM);
             $this->tenant->id = $DB->insert_record('local_webuntis_tenant', $this->tenant);
         }
         if (!empty($this->tenant->id) && !empty($school) && $this->tenant->school != $school) {
