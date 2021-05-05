@@ -22,13 +22,27 @@
  */
 
 require_once('../../config.php');
-require_login();
+
+print_r($_REQUEST);
+
+$tenant_id = required_param('tenant_id', PARAM_INT);
+$lesson = optional_param('lesson', '', PARAM_ALPHANUM);
+$school = optional_param('school', '', PARAM_ALPHANUM);
+
+$TENANT = new \local_webuntis\tenant($tenant_id, $school);
+
+$urlparams = [ 'tenant_id' => $tenand_id ];
+// Identify action by parameters.
+$action = 'tenant_page';
+if (!empty($lesson)) {
+    $action = 'lesson_page';
+}
 
 $PAGE->set_context(\context_system::instance());
 $PAGE->set_url('/local/webuntis/index.php', array());
 $PAGE->set_title(get_string('pluginname', 'local_webuntis'));
 $PAGE->set_heading(get_string('pluginname', 'local_webuntis'));
-$PAGE->set_layout('redirect');
+$PAGE->set_pagelayout('redirect');
 
 echo $OUTPUT->header();
 echo "Landing page";

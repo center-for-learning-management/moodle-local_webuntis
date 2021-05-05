@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/webuntis/db" VERSION="20210505" COMMENT="XMLDB file for Moodle local/webuntis"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="local_webuntis_usermap" COMMENT="Mapping of users">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="true" COMMENT="id"/>
+        <FIELD NAME="tenant_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="tenant_id"/>
+        <FIELD NAME="school" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="school name from webuntis instance"/>
+        <FIELD NAME="remoteuserid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="userid in webuntis"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="userid in moodle"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="time mapping was created"/>
+        <FIELD NAME="lastaccess" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="timestamp of last access"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="tenant_id_remoteuserid" UNIQUE="true" FIELDS="courseid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_webuntis_tenant" COMMENT="List of tenants">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="tenant_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="school" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="host" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="webuntis server hostname, e.g. integration.webuntis.com =&amp;gt; integration"/>
+        <FIELD NAME="consumerkey" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" COMMENT="the oauth consumerkey"/>
+        <FIELD NAME="consumersecret" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" COMMENT="the oauth consumer secret"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="idx_tenant_id" UNIQUE="true" FIELDS="tenant_id"/>
+        <INDEX NAME="idx_school" UNIQUE="true" FIELDS="school"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>
