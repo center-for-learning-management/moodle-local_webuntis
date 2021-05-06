@@ -25,9 +25,9 @@ require_once('../../config.php');
 
 print_r($_REQUEST);
 
-$tenant_id = required_param('tenant_id', PARAM_INT);
-$lesson = optional_param('lesson', '', PARAM_ALPHANUM);
-$school = optional_param('school', '', PARAM_ALPHANUM);
+$tenant_id = optional_param('tenant_id', 0, PARAM_INT);
+$lesson    = optional_param('lesson', '', PARAM_ALPHANUM);
+$school    = optional_param('school', '', PARAM_ALPHANUM);
 
 \local_webuntis\tenant::__load($tenant_id, $school);
 \local_webuntis\tenant::auth();

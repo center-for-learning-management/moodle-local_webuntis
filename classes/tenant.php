@@ -28,7 +28,15 @@ defined('MOODLE_INTERNAL') || die;
 class tenant {
     private static $tenant;
 
-    public static function __load($tenant_id, $school = "") {
+    public static function __load($tenant_id = 0, $school = "") {
+        $tenant = \local_webuntis\locallib::cache_get('session', 'tenant');
+        if (!empty($tenant->tenant_id)) {
+            self::$tenant = $tenant;
+        }
+        if (!empty($tenant->tenant_id) && ($tenant->tenant_id == $tenant_id || empty($tenant_it))) {
+            return;
+        }
+
         global $DB;
         $sql = "SELECT *
             FROM {local_webuntis_tenant}
@@ -57,6 +65,8 @@ class tenant {
             self::$tenant->host = str_replace('/', '', self::$tenant->host);
             $DB->set_field('local_webuntis_tenant', 'host', self::$tenant->host, array('id' => self::$tenant->id));
         }
+
+        \local_webuntis\locallib::cache_set('session', 'tenant', self::$tenant);
     }
 
     /**
@@ -68,21 +78,27 @@ class tenant {
         if (empty($endpoints->authorization_endpoint)) {
             throw new \moodle_exception('endpointmissing', 'local_webuntis', $CFG->wwwroot);
         }
+
         $uuid = self::get_uuid();
         if (empty($uuid)) {
-            $path = $endpoints->authorization_endpoint;
-            $path .= '/?response_type=code';
-            $path .= '&scope=openid';
-            $path .= '&client_id=' . self::get_client();
-            $path .= '&school=' . self::get_school(true);
-            $path .= '&redirect_url=' . $CFG->wwwroot . '/local/webuntis/index.php';
+            $code = optional_param('code', '', PARAM_ALPHANUM);
+            if (!empty($code)) {
+                $path = $endpoints->userinfo_endpoint;
+                $path .= '/?code=' . $code;
+                $path .= '&redirect_uri=' . urlencode($CFG->wwwroot . '/local/webuntis/index.php');
+                echo "Redirect $path";die();
+            } else {
+                $path = $endpoints->authorization_endpoint;
+                $path .= '/?response_type=code';
+                $path .= '&scope=openid';
+                $path .= '&client_id=' . self::get_client();
+                $path .= '&school=' . self::get_school(true);
+                $path .= '&redirect_uri=' . urlencode($CFG->wwwroot . '/local/webuntis/index.php');
+            }
             redirect($path);
         }
 
         global $USER;
-
-
-
     }
     private static function get_endpoints() {
         $endpoints = \local_webuntis\locallib::cache_get('application', 'endpoints-' . self::get_tenant_id());
