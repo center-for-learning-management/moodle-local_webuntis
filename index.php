@@ -29,7 +29,8 @@ $tenant_id = required_param('tenant_id', PARAM_INT);
 $lesson = optional_param('lesson', '', PARAM_ALPHANUM);
 $school = optional_param('school', '', PARAM_ALPHANUM);
 
-$TENANT = new \local_webuntis\tenant($tenant_id, $school);
+\local_webuntis\tenant::__load($tenant_id, $school);
+\local_webuntis\tenant::auth();
 
 $urlparams = [ 'tenant_id' => $tenand_id ];
 // Identify action by parameters.

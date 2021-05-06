@@ -17,12 +17,17 @@
 /**
  * @package    local_webuntis
  * @copyright  2021 Zentrum für Lernmanagement (www.lernmanagement.at)
- * @author    Robert Schrenk
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @author     Robert Schrenk
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['cachedef_application'] = 'Cache for local_webunits for whole application';
-$string['cachedef_session'] = 'Cache for local_webunits for user session';
-$string['endpointmissing'] = 'The oAuth-endpoint of the webuntis instance is unknown.';
-$string['pluginname'] = 'WebUntis Integration';
-$string['privacy:metadata'] = 'This plugin does not store any personal data';
+defined('MOODLE_INTERNAL') || die;
+
+$definitions = array(
+    'application' => array(
+        'mode' => cache_store::MODE_APPLICATION,
+    ),
+    'session' => array(
+        'mode' => cache_store::MODE_SESSION,
+    )
+);

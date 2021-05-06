@@ -26,5 +26,51 @@ namespace local_webuntis;
 defined('MOODLE_INTERNAL') || die;
 
 class locallib {
-
+    /**
+     * Retrieve a key from cache.
+     * @param cache cache object to use (application or session)
+     * @param key the key.
+     * @return whatever is in the cache.
+     */
+    public static function cache_get($cache, $key) {
+        if (!in_array($cache, [ 'application', 'session'])) return;
+        $cache = \cache::make('local_webuntis', $cache);
+        return $cache->get($key);
+    }
+    /**
+     * Set a cache object.
+     * @param cache cache object to use (application or session)
+     * @param key the key.
+     * @param value the value.
+     * @param delete whether or not the key should be removed from cache.
+     */
+    public static function cache_set($cache, $key, $value, $delete = false) {
+        if (!in_array($cache, [ 'application', 'session'])) return;
+        $cache = \cache::make('local_webuntis', $cache);
+        if ($delete) {
+            $cache->delete($key);
+        } else {
+            $cache->set($key, $value);
+        }
+    }
+    /**
+     * Retrieve contents from an url.
+     * @param url the url to open.
+     * @param post variables to attach using post.
+     */
+    public static function curl($url, $post = null) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        if(!empty($post)) {
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+        }
+        $result = curl_exec($ch);
+        curl_close($ch);
+        return $result;
+    }
 }

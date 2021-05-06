@@ -22,3 +22,4 @@
  */
 
 $string['pluginname'] = 'WebUntis Integration';
+$string['endpointmissing'] = 'Der oAuth-Endpunkt der Webuntis-Instanz ist unbekannt.';
