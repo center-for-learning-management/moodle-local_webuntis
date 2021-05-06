@@ -57,7 +57,7 @@ function xmldb_local_webuntis_upgrade($oldversion=0) {
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-        upgrade_plugin_savepoint(true, 021050604, 'local', 'webuntis');
+        upgrade_plugin_savepoint(true, 2021050604, 'local', 'webuntis');
     }
 
     return true;
