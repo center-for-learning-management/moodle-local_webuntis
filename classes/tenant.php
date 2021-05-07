@@ -47,9 +47,9 @@ class tenant {
 
         if (empty(self::$tenant->id)) {
             self::$tenant = (object) $params;
-            self::$tenant->client = optional_param('client', '', PARAM_ALPHANUM);
-            self::$tenant->consumerkey = optional_param('consumerkey', '', PARAM_ALPHANUM);
-            self::$tenant->consumersecret = optional_param('consumersecret', '', PARAM_ALPHANUM);
+            self::$tenant->client = optional_param('client', '', PARAM_TEXT);
+            self::$tenant->consumerkey = optional_param('consumerkey', '', PARAM_TEXT);
+            self::$tenant->consumersecret = optional_param('consumersecret', '', PARAM_TEXT);
             self::$tenant->id = $DB->insert_record('local_webuntis_tenant', self::$tenant);
         }
         if (!empty(self::$tenant->id) && !empty($school) && self::$tenant->school != $school) {
@@ -81,12 +81,31 @@ class tenant {
 
         $uuid = self::get_uuid();
         if (empty($uuid)) {
-            $code = optional_param('code', '', PARAM_ALPHANUM);
+            $code = optional_param('code', '', PARAM_TEXT);
             if (!empty($code)) {
-                $path = $endpoints->userinfo_endpoint;
-                $path .= '/?code=' . $code;
-                $path .= '&redirect_uri=' . urlencode($CFG->wwwroot . '/local/webuntis/index.php');
-                echo "Redirect $path";die();
+                $path = $endpoints->token_endpoint;
+                $params = [
+                    'grant_type' => 'authorization_code',
+                    'client_id' => self::get_client(),
+                    'client_secret' => self::get_consumerkey(),
+                    'code' => $code,
+                    'redirect_uri' => $CFG->wwwroot . '/local/webuntis/index.php',
+                ];
+                echo "calling $path using the following params<br />";
+                echo "<pre>" . print_r($params, 1) . "</pre>";
+                $userinfo = \local_webuntis\locallib::curl($path, $params);
+                if (!empty($userinfo)) {
+                    $userinfo = json_decode($userinfo);
+                }
+                echo "<pre>" . print_r($userinfo, 1) . "</pre>";
+                echo "Token:<br />";
+                $token = json_decode(base64_decode(str_replace('_', '/', str_replace('-','+',explode('.', $userinfo->id_token)[1]))));
+                echo "<pre>" . print_r($token, 1) . "</pre>";
+                require_once($CFG->dirroot . '/local/webuntis/classes/jwt.php');
+                $decoded = \local_webuntis\JWT::decode($userinfo->id_token, self::get_consumerkey(), array($token->signatureAlgorithm));
+                echo "<pre>" . print_r($decoded, 1) . "</pre>";
+                die();
+
             } else {
                 $path = $endpoints->authorization_endpoint;
                 $path .= '/?response_type=code';

@@ -66,8 +66,13 @@ class locallib {
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         if(!empty($post)) {
+            $fields_string = "";
+            foreach($post as $key => $value) {
+                $fields_string .= $key . '=' . $value . '&';
+            }
+            rtrim($fields_string, '&');
             curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
         }
         $result = curl_exec($ch);
         curl_close($ch);
