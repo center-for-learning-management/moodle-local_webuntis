@@ -27,6 +27,7 @@ defined('MOODLE_INTERNAL') || die;
 
 class tenant {
     private static $tenant;
+    private static $debug = false;
 
     public static function __load($tenant_id = 0, $school = "") {
         $tenant = \local_webuntis\locallib::cache_get('session', 'tenant');
@@ -91,20 +92,41 @@ class tenant {
                     'code' => $code,
                     'redirect_uri' => $CFG->wwwroot . '/local/webuntis/index.php',
                 ];
-                echo "calling $path using the following params<br />";
-                echo "<pre>" . print_r($params, 1) . "</pre>";
+                if (self::$debug) echo "calling $path using the following params<br />";
+                if (self::$debug) echo "<pre>" . print_r($params, 1) . "</pre>";
                 $userinfo = \local_webuntis\locallib::curl($path, $params);
                 if (!empty($userinfo)) {
                     $userinfo = json_decode($userinfo);
+                    \local_webuntis\locallib::cache_set('session', 'userinfo', $userinfo);
                 }
-                echo "<pre>" . print_r($userinfo, 1) . "</pre>";
-                echo "Token:<br />";
+                if (self::$debug) echo "Userinfo";
+                if (self::$debug) echo "<pre>" . print_r($userinfo, 1) . "</pre>";
+                if (self::$debug) echo "Token:<br />";
                 $token = json_decode(base64_decode(str_replace('_', '/', str_replace('-','+',explode('.', $userinfo->id_token)[1]))));
-                echo "<pre>" . print_r($token, 1) . "</pre>";
-                require_once($CFG->dirroot . '/local/webuntis/classes/jwt.php');
-                $decoded = \local_webuntis\JWT::decode($userinfo->id_token, self::get_consumerkey(), array($token->signatureAlgorithm));
-                echo "<pre>" . print_r($decoded, 1) . "</pre>";
-                die();
+                if (self::$debug) echo "<pre>" . print_r($token, 1) . "</pre>";
+
+                \local_webuntis\locallib::cache_set('session', 'token', $token);
+
+                $path = "https://api-integration.webuntis.com/ims/oneroster/v1p1/users/$token->sub"; // /$token->sub";
+                $params = [ 'access_token' => $userinfo->access_token ];
+                $getuser = \local_webuntis\locallib::curl($path, $params);
+                if (self::$debug) echo "Getuser:<br />";
+                $getuser = json_decode($getuser);
+                if (self::$debug) echo "<pre>" . print_r($getuser, 1) . "</pre>";
+
+                // Fake the user and course id.
+                $userid = 15;
+                $courseid = 248;
+
+                $user = \core_user::get_user($userid);
+
+                \complete_user_login($user);
+
+                if (\user_not_fully_set_up($user, true)) {
+                    redirect($CFG->wwwroot.'/user/edit.php?id='.$userid.'&course='.SITEID);
+                } else {
+                    redirect($CFG->wwwroot.'/course/view.php?id='.$courseid);
+                }
 
             } else {
                 $path = $endpoints->authorization_endpoint;
@@ -113,6 +135,7 @@ class tenant {
                 $path .= '&client_id=' . self::get_client();
                 $path .= '&school=' . self::get_school(true);
                 $path .= '&redirect_uri=' . urlencode($CFG->wwwroot . '/local/webuntis/index.php');
+                //die($path);
             }
             redirect($path);
         }

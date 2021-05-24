@@ -65,7 +65,7 @@ class locallib {
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        if(!empty($post)) {
+        if(!empty($post) && count($post) > 0) {
             $fields_string = "";
             foreach($post as $key => $value) {
                 $fields_string .= $key . '=' . $value . '&';
