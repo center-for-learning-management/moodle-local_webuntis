@@ -26,14 +26,15 @@ namespace local_webuntis;
 defined('MOODLE_INTERNAL') || die;
 
 class tenant {
-    private static $tenant;
-    private static $debug = false;
+    public static $tenant;
+    private static $debug = true;
 
     public static function __load($tenant_id = 0, $school = "") {
         $tenant = \local_webuntis\locallib::cache_get('session', 'tenant');
         if (!empty($tenant->tenant_id)) {
             self::$tenant = $tenant;
         }
+
         if (!empty($tenant->tenant_id) && ($tenant->tenant_id == $tenant_id || empty($tenant_it))) {
             return;
         }
@@ -94,7 +95,9 @@ class tenant {
                 ];
                 if (self::$debug) echo "calling $path using the following params<br />";
                 if (self::$debug) echo "<pre>" . print_r($params, 1) . "</pre>";
+
                 $userinfo = \local_webuntis\locallib::curl($path, $params);
+
                 if (!empty($userinfo)) {
                     $userinfo = json_decode($userinfo);
                     \local_webuntis\locallib::cache_set('session', 'userinfo', $userinfo);
@@ -106,28 +109,19 @@ class tenant {
                 if (self::$debug) echo "<pre>" . print_r($token, 1) . "</pre>";
 
                 \local_webuntis\locallib::cache_set('session', 'token', $token);
+                $usermap = self::do_userlogin($token->sub);
 
-                $path = "https://api-integration.webuntis.com/ims/oneroster/v1p1/users/$token->sub"; // /$token->sub";
+
+                $path = "https://api-integration.webuntis.com/ims/oneroster/v1p1/users/$token->sub";
+                echo "Path $path<br />";
                 $params = [ 'access_token' => $userinfo->access_token ];
+                echo "Params<br /><pre>" . print_r($params, 1) . "</pre>";
                 $getuser = \local_webuntis\locallib::curl($path, $params);
                 if (self::$debug) echo "Getuser:<br />";
                 $getuser = json_decode($getuser);
                 if (self::$debug) echo "<pre>" . print_r($getuser, 1) . "</pre>";
 
-                // Fake the user and course id.
-                $userid = 15;
-                $courseid = 248;
-
-                $user = \core_user::get_user($userid);
-
-                \complete_user_login($user);
-
-                if (\user_not_fully_set_up($user, true)) {
-                    redirect($CFG->wwwroot.'/user/edit.php?id='.$userid.'&course='.SITEID);
-                } else {
-                    redirect($CFG->wwwroot.'/course/view.php?id='.$courseid);
-                }
-
+                die();
             } else {
                 $path = $endpoints->authorization_endpoint;
                 $path .= '/?response_type=code';
@@ -135,18 +129,56 @@ class tenant {
                 $path .= '&client_id=' . self::get_client();
                 $path .= '&school=' . self::get_school(true);
                 $path .= '&redirect_uri=' . urlencode($CFG->wwwroot . '/local/webuntis/index.php');
-                //die($path);
             }
             redirect($path);
         }
 
         global $USER;
     }
+
+    /**
+     * Do the user login based on the "sub"-value.
+     * @param sub user-identificator in webuntis.
+     */
+    private static function do_userlogin($sub) {
+        global $DB, $USER;
+        $usermap = $DB->get_record('local_webuntis_usermap', array('tenant_id' => self::get_tenant_id(), 'remoteuserid' => $token->sub));
+        if (empty($usermap->id)) {
+            $usermap = (object) array(
+                'tenant_id' => self::get_tenant_id(),
+                'school' => self::get_school(),
+                'remoteuserid' => $token->sub,
+                'timecreated' => time(),
+                'timemodified' => time(),
+                'lastaccess' => time(),
+            );
+            $usermap->id = $DB->insert_record('local_webuntis_usermap', $usermap);
+        } else {
+            $DB->set_field('local_webuntis_usermap', 'lastaccess', time(), array('id' => $usermap->id));
+        }
+
+        if (!empty($usermap->userid)) {
+            $user = \core_user::get_user($usermap->userid);
+            \complete_user_login($user);
+        } else {
+            if (!isloggedin() || isguestuser()) {
+                require_login();
+            } else {
+                $usermap->userid = $USER->id;
+                $DB->set_field('local_webuntis_usermap', 'userid', $USER->id, array('id' => $usermap->id));
+            }
+        }
+        return $usermap;
+    }
+
     private static function get_endpoints() {
         $endpoints = \local_webuntis\locallib::cache_get('application', 'endpoints-' . self::get_tenant_id());
-        if (empty($endpoints)) {
+        if (empty($endpoints) || empty($endpoints->authorization_endpoint)) {
             $host = self::get_host();
             $school = self::get_school(true);
+            if (empty($host) || empty($school)) {
+                throw new \moodle_exception('invalid_webuntis_instance', 'local_webuntis', $CFG->wwwroot);
+            }
             $path = "https://$host.webuntis.com/WebUntis/api/sso/$school/.well-known/openid-configuration";
             $endpoints = json_decode(\local_webuntis\locallib::curl($path));
             \local_webuntis\locallib::cache_set('application', 'endpoints-' . self::get_tenant_id(), $endpoints);

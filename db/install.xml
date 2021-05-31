@@ -9,7 +9,7 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="true" COMMENT="id"/>
         <FIELD NAME="tenant_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="tenant_id"/>
         <FIELD NAME="school" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="school name from webuntis instance"/>
-        <FIELD NAME="remoteuserid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="userid in webuntis"/>
+        <FIELD NAME="remoteuserid" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="sub value of webuntis"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="userid in moodle"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="time mapping was created"/>
         <FIELD NAME="lastaccess" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="timestamp of last access"/>
@@ -18,7 +18,7 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="tenant_id_remoteuserid" UNIQUE="true" FIELDS="courseid"/>
+        <INDEX NAME="tenant_id_remoteuserid" UNIQUE="true" FIELDS="tenant_id,remoteuserid"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="local_webuntis_tenant" COMMENT="List of tenants">
