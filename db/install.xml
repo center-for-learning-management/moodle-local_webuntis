@@ -4,12 +4,27 @@
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
+      <TABLE NAME="local_webuntis_coursemap" COMMENT="Mapping of source points to courses">
+        <FIELDS>
+          <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="true" COMMENT="id"/>
+          <FIELD NAME="tenant_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="tenant_id"/>
+          <FIELD NAME="lessonid" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="the lesson identifier, 'main' for general sourcepoint"/>
+          <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="courseid in moodle"/>
+        </FIELDS>
+        <KEYS>
+          <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        </KEYS>
+        <INDEXES>
+          <INDEX NAME="idx_tenant_id_lessonid" UNIQUE="true" FIELDS="tenant_id,lessonid"/>
+        </INDEXES>
+      </TABLE>
     <TABLE NAME="local_webuntis_usermap" COMMENT="Mapping of users">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="true" COMMENT="id"/>
         <FIELD NAME="tenant_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="tenant_id"/>
         <FIELD NAME="school" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="school name from webuntis instance"/>
         <FIELD NAME="remoteuserid" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="sub value of webuntis"/>
+        <FIELD NAME="remoteuserrole" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="users role in webuntis"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="userid in moodle"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="time mapping was created"/>
         <FIELD NAME="lastaccess" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="timestamp of last access"/>

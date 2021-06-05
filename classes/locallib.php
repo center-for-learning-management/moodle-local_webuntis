@@ -57,8 +57,9 @@ class locallib {
      * Retrieve contents from an url.
      * @param url the url to open.
      * @param post variables to attach using post.
+     * @param headers custom request headers.
      */
-    public static function curl($url, $post = null) {
+    public static function curl($url, $post = null, $headers = null) {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -66,13 +67,20 @@ class locallib {
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         if(!empty($post) && count($post) > 0) {
-            $fields_string = "";
+            $fields = array();
             foreach($post as $key => $value) {
-                $fields_string .= $key . '=' . $value . '&';
+                $fields[] = $key . '=' . $value;
             }
-            rtrim($fields_string, '&');
+            $fields_string = implode('&', $fields);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
+        }
+        if (!empty($headers) && count($headers) > 0) {
+            $strheaders = array();
+            foreach ($headers as $key => $value) {
+                $strheaders[] = "$key: $value";
+            }
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $strheaders);
         }
         $result = curl_exec($ch);
         curl_close($ch);

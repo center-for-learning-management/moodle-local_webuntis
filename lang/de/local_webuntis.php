@@ -22,5 +22,8 @@
  */
 
 $string['pluginname'] = 'WebUntis Integration';
+$string['disconnect:course'] = 'WebUntis-Kursverknüpfung lösen';
+$string['disconnect:user'] = 'WebUntis trennen';
 $string['endpointmissing'] = 'Der oAuth-Endpunkt der Webuntis-Instanz ist unbekannt.';
+$string['invalidinput'] = 'Ungültige Eingabe.';
 $string['invalidwebuntisinstance'] = 'Die Webuntis-Instanz scheint ungültig zu sein.';

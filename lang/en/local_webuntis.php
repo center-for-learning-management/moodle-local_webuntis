@@ -23,7 +23,10 @@
 
 $string['cachedef_application'] = 'Cache for local_webunits for whole application';
 $string['cachedef_session'] = 'Cache for local_webunits for user session';
+$string['disconnect:course'] = 'Remove WebUntis-Courselink';
+$string['disconnect:user'] = 'Disconnect from webuntis';
 $string['endpointmissing'] = 'The oAuth-endpoint of the webuntis instance is unknown.';
+$string['invalidinput'] = 'Invalid input.';
 $string['invalidwebuntisinstance'] = 'The webuntis instance is invalid.';
 $string['pluginname'] = 'WebUntis Integration';
 $string['privacy:metadata'] = 'This plugin does not store any personal data';

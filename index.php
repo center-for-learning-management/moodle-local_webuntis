@@ -17,13 +17,15 @@
 /**
  * @package    local_webuntis
  * @copyright  2021 Zentrum für Lernmanagement (www.lernmanagement.at)
- * @author    Robert Schrenk
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @author     Robert Schrenk
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once('../../config.php');
 
-$fake = true;
+$debug = false;
+
+$fake = false;
 if ($fake) {
     // Fake the user and course id.
     $userid = 15;
@@ -40,36 +42,55 @@ if ($fake) {
     }
 }
 
-
-echo "Received:<br />";
-echo "<pre>" . print_r($_REQUEST, 1) . "</pre>";
+if ($debug) {
+    echo "Received:<br />";
+    echo "<pre>" . print_r($_REQUEST, 1) . "</pre>";
+}
 
 
 $tenant_id = optional_param('tenant_id', 0, PARAM_INT);
-$lesson    = optional_param('lesson', '', PARAM_ALPHANUM);
+$lesson    = optional_param('lesson', 'main', PARAM_ALPHANUM);
 $school    = optional_param('school', '', PARAM_TEXT);
 
 \local_webuntis\tenant::__load($tenant_id, $school);
+\local_webuntis\lessonmap::__load($lesson);
 
 // Reload params in case we retrieved them from cache.
 $tenant_id = \local_webuntis\tenant::get_tenant_id();
 $school = \local_webuntis\tenant::get_school();
 
-$urlparams = [ 'tenant_id' => $tenand_id ];
-// Identify action by parameters.
-$action = 'tenant_page';
-if (!empty($lesson)) {
-    $action = 'lesson_page';
-}
+$urlparams = [ 'tenant_id' => $tenant_id, 'school' => $school ];
 
 $PAGE->set_context(\context_system::instance());
 $PAGE->set_url('/local/webuntis/index.php', array('tenant_id' => $tenant_id, 'school' => $school));
 $PAGE->set_title(get_string('pluginname', 'local_webuntis'));
 $PAGE->set_heading(get_string('pluginname', 'local_webuntis'));
-$PAGE->set_pagelayout('redirect');
+$PAGE->set_pagelayout('standard');
 
 \local_webuntis\tenant::auth();
 
-echo $OUTPUT->header();
-echo "Landing page";
-echo $OUTPUT->footer();
+if (!\local_webuntis\lessonmap::redirect()) {
+    echo $OUTPUT->header();
+    if (
+        !empty($lesson) && \local_webuntis\usermap::is_teacher() ||
+        \local_webuntis\usermap::is_administrator()
+        ) {
+        echo "Choose a course as target";
+        $allcourses = enrol_get_all_users_courses($USER->id, true);
+        $courses = [];
+        foreach ($allcourses as $course) {
+            $ctx = \context_course::instance($course->id);
+            if (has_capability('moodle/course:update', $ctx)) {
+                $courses[] = $course;
+            }
+        }
+        print_r($courses);
+    } else {
+        if (!empty($lesson)) {
+            echo "Sorry, your teacher has not yet selected a course";
+        } else {
+            echo "Sorry, your administrator has not yet selected a course";
+        }
+    }
+    echo $OUTPUT->footer();
+}
