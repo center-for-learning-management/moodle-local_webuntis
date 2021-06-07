@@ -21,9 +21,10 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'WebUntis Integration';
 $string['disconnect:course'] = 'WebUntis-Kursverknüpfung lösen';
 $string['disconnect:user'] = 'WebUntis trennen';
 $string['endpointmissing'] = 'Der oAuth-Endpunkt der Webuntis-Instanz ist unbekannt.';
 $string['invalidinput'] = 'Ungültige Eingabe.';
 $string['invalidwebuntisinstance'] = 'Die Webuntis-Instanz scheint ungültig zu sein.';
+$string['pluginname'] = 'WebUntis Integration';
+$string['selectcourse_for_target'] = 'Wählen Sie einen Kurs für dieses Ziel';

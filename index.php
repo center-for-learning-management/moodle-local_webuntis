@@ -25,7 +25,7 @@ require_once('../../config.php');
 
 $debug = false;
 
-$fake = false;
+$fake = true;
 if ($fake) {
     // Fake the user and course id.
     $userid = 15;
@@ -75,16 +75,17 @@ if (!\local_webuntis\lessonmap::redirect()) {
         !empty($lesson) && \local_webuntis\usermap::is_teacher() ||
         \local_webuntis\usermap::is_administrator()
         ) {
-        echo "Choose a course as target";
         $allcourses = enrol_get_all_users_courses($USER->id, true);
         $courses = [];
         foreach ($allcourses as $course) {
             $ctx = \context_course::instance($course->id);
             if (has_capability('moodle/course:update', $ctx)) {
+                $course->courseimage = \local_webuntis\locallib::get_courseimage($course->id);
+                $course->is_selected = \local_webuntis\lessonmap::is_selected($course->id);
                 $courses[] = $course;
             }
         }
-        print_r($courses);
+        echo $OUTPUT->render_from_template('local_webuntis/selecttarget', [ 'courses' => $courses]);
     } else {
         if (!empty($lesson)) {
             echo "Sorry, your teacher has not yet selected a course";

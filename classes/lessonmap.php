@@ -26,7 +26,7 @@ namespace local_webuntis;
 defined('MOODLE_INTERNAL') || die;
 
 class lessonmap {
-    private static $lessonmap;
+    private static $lessonmaps;
     private static $debug;
 
     /**
@@ -48,27 +48,42 @@ class lessonmap {
             'lessonid' => $lesson,
         ];
 
-        self::$lessonmap = $DB->get_record('local_webuntis_coursemap', $params);
+        self::$lessonmaps = array_values($DB->get_records('local_webuntis_coursemap', $params));
         if (self::$debug) {
             echo "Found lessonmap\n";
-            echo "<pre>" . print_r(self::$lessonmap, 1) . "</pre>\n";
+            echo "<pre>" . print_r(self::$lessonmaps, 1) . "</pre>\n";
         }
     }
 
+    /**
+     * Get the lesson information from cache.
+     */
     public static function get_lesson() {
         return \local_webuntis\locallib::cache_get('session', 'lesson');
     }
 
+    /**
+     * Check whether or not a course is selected in this mapping.
+     * @param courseid
+     */
+    public static function is_selected($courseid) {
+        return !empty(self::$lessonmaps[$courseid]);
+    }
+
+    /**
+     * Redirect user to appropriate target.
+     */
     public static function redirect() {
-        if (!empty($lessonmap) && !empty($lessonmap->courseid)) {
+        $lessonmaps = array_values(self::$lessonmaps);
+        if (!empty($lessonmaps) && count($lessonmaps) > 1) {
+            // Redirect to selection list.
+        }
+        if (!empty($lessonmaps) && !empty($lessonmaps[0]->courseid)) {
             if (is_loggedin() && !is_guestuser()) {
                 // @todo check enrolment of user.
             }
-            $url = new \moodle_url('/course/view.php', array('id' => $lessonmap->courseid));
-            if (self::$debug) {
-                echo "Redirect to $url\n";
-            }
-            //redirect($url);
+            $url = new \moodle_url('/course/view.php', array('id' => $lessonmaps[0]->courseid));
+            redirect($url);
         }
         return false;
     }

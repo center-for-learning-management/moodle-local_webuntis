@@ -86,4 +86,29 @@ class locallib {
         curl_close($ch);
         return $result;
     }
+
+    /**
+     * Find the overview image of a course.
+     * @param courseid
+     */
+    public static function get_courseimage($courseid) {
+        global $CFG;
+        //require_once($CFG->libdir . '/coursecatlib.php');
+        $course = \get_course($courseid);
+        $course = new \core_course_list_element($course);
+
+        $outputimage = '';
+        foreach ($course->get_course_overviewfiles() as $file) {
+            if ($file->is_valid_image()) {
+                $imagepath = '/' . $file->get_contextid() .
+                        '/' . $file->get_component() .
+                        '/' . $file->get_filearea() .
+                        $file->get_filepath() .
+                        $file->get_filename();
+                $imageurl = file_encode_url($CFG->wwwroot . '/pluginfile.php', $imagepath, false);
+                break;
+            }
+        }
+        return $imageurl;
+    }
 }

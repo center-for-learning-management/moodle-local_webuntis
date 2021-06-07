@@ -28,40 +28,6 @@ function xmldb_local_webuntis_upgrade($oldversion=0) {
     global $DB;
     $dbman = $DB->get_manager();
 
-    if ($oldversion < 2021060500) {
-        $table = new xmldb_table('local_webuntis_usermap');
-        $field = new xmldb_field('remoteuserrole', XMLDB_TYPE_CHAR, '20', null, null, null, null, 'remoteuserid');
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-        upgrade_plugin_savepoint(true, 2021060500, 'local', 'webuntis');
-    }
-    if ($oldversion < 2021060501) {
-
-        // Define table local_webuntis_coursemap to be created.
-        $table = new xmldb_table('local_webuntis_coursemap');
-
-        // Adding fields to table local_webuntis_coursemap.
-        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, null, XMLDB_SEQUENCE, null);
-        $table->add_field('tenant_id', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
-        $table->add_field('lessonid', XMLDB_TYPE_CHAR, '50', null, null, null, null);
-        $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
-
-        // Adding keys to table local_webuntis_coursemap.
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
-
-        // Adding indexes to table local_webuntis_coursemap.
-        $table->add_index('idx_tenant_id_lessonid', XMLDB_INDEX_UNIQUE, ['tenant_id', 'lessonid']);
-
-        // Conditionally launch create table for local_webuntis_coursemap.
-        if (!$dbman->table_exists($table)) {
-            $dbman->create_table($table);
-        }
-
-        // Webuntis savepoint reached.
-        upgrade_plugin_savepoint(true, 2021060501, 'local', 'webuntis');
-    }
-
 
     return true;
 }

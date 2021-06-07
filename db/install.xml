@@ -15,7 +15,7 @@
           <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         </KEYS>
         <INDEXES>
-          <INDEX NAME="idx_tenant_id_lessonid" UNIQUE="true" FIELDS="tenant_id,lessonid"/>
+          <INDEX NAME="idx_tenant_id_lessonid" UNIQUE="false" FIELDS="tenant_id,lessonid"/>
         </INDEXES>
       </TABLE>
     <TABLE NAME="local_webuntis_usermap" COMMENT="Mapping of users">

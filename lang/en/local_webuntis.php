@@ -30,3 +30,4 @@ $string['invalidinput'] = 'Invalid input.';
 $string['invalidwebuntisinstance'] = 'The webuntis instance is invalid.';
 $string['pluginname'] = 'WebUntis Integration';
 $string['privacy:metadata'] = 'This plugin does not store any personal data';
+$string['selectcourse_for_target'] = 'Select course for this target';

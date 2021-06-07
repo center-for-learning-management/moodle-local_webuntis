@@ -1,0 +1,66 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_webuntis/selecttarget
+
+    The purpose of this template is to show the block content.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * wwwroot
+    * showwarning
+
+    Example context (json):
+    {
+        "courses": [
+            {
+                "courseimage": "http://moodle-url.org/the-image-url",
+                "fullname": 'fullname of course',
+                "id": 123,
+                "is_selected": 1,
+                "shortname": 'shortname of course',
+            },
+        ]
+    }
+}}
+
+<div id="local_webuntis_selecttarget_{{uniqid}}" class="local_webuntis selecttarget">
+    <p>{{#str}} selectcourse_for_target, local_webuntis {{/str}}:</p>
+    <table class="generaltable">
+    {{#courses}}
+        <tr class="course-{{id}}">
+            <td class="trigger">
+                <a href="#" onclick="require(['local_webuntis/main', function(M) { M.selectTarget('{{uniqid}}', {{id}}); }]); return false;">
+                {{#is_selected}}
+                    <i class="fa fa-icon fa-toggle-on" style="font-size: 18px;"></i>
+                {{/is_selected}}
+                {{^is_selected}}
+                    <i class="fa fa-icon fa-toggle-off" style="font-size: 18px;"></i>
+                {{/is_selected}}
+                </a>
+            </td>
+            <td><img src="{{courseimage}}" style="height: 50px;" /></td>
+            <td>{{fullname}}</td>
+        </tr>
+    {{/courses}}
+    </table>
+</div>
