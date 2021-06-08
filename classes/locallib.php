@@ -26,6 +26,8 @@ namespace local_webuntis;
 defined('MOODLE_INTERNAL') || die;
 
 class locallib {
+    private static $preserved_caches = array();
+
     /**
      * Retrieve a key from cache.
      * @param cache cache object to use (application or session)
@@ -36,6 +38,45 @@ class locallib {
         if (!in_array($cache, [ 'application', 'session'])) return;
         $cache = \cache::make('local_webuntis', $cache);
         return $cache->get($key);
+    }
+    /**
+     * Store caches temporarily to preserve them when logging user in or out.
+     * @param read if true store contents in local variable, if false restore cache.
+     */
+    public static function cache_preserve($read) {
+        $preserves = array(
+            // lessonmap
+            array('type' => 'session', 'identifier' => \local_webuntis\lessonmap::get_cacheidentifier()),
+            array('type' => 'session', 'identifier' => 'lesson'),
+            // tenant
+            array('type' => 'application', 'identifier' => 'endpoints-' . \local_webuntis\tenant::get_tenant_id()),
+            array('type' => 'session', 'identifier' => 'tenant'),
+            array('type' => 'session', 'identifier' => 'uuid'),
+            // usermap
+            array('type' => 'session', 'identifier' => 'token'),
+            array('type' => 'session', 'identifier' => 'userinfo'),
+            array('type' => 'session', 'identifier' => 'usermap'),
+        );
+        switch ($read) {
+            case true:
+                self::$preserved_caches = array();
+                foreach ($preserves as $preserve) {
+                    self::$preserved_caches[$preserve['type']][$preserve['identifier']] =
+                        \local_webuntis\locallib::cache_get($preserve['type'], $preserve['identifier']);
+                }
+            break;
+            case false:
+                foreach (self::$preserved_caches as $type => $identifiers) {
+                    foreach ($identifiers as $identifier => $value) {
+                        \local_webuntis\locallib::cache_set($type, $identifier, $value);
+                    }
+                }
+            break;
+        }
+    }
+    public static function cache_print() {
+        self::cache_preserve(true);
+        return self::$preserved_caches;
     }
     /**
      * Set a cache object.
@@ -53,6 +94,7 @@ class locallib {
             $cache->set($key, $value);
         }
     }
+
     /**
      * Retrieve contents from an url.
      * @param url the url to open.
@@ -97,7 +139,6 @@ class locallib {
         $course = \get_course($courseid);
         $course = new \core_course_list_element($course);
 
-        $outputimage = '';
         foreach ($course->get_course_overviewfiles() as $file) {
             if ($file->is_valid_image()) {
                 $imagepath = '/' . $file->get_contextid() .
@@ -106,9 +147,8 @@ class locallib {
                         $file->get_filepath() .
                         $file->get_filename();
                 $imageurl = file_encode_url($CFG->wwwroot . '/pluginfile.php', $imagepath, false);
-                break;
+                return $imageurl;
             }
         }
-        return $imageurl;
     }
 }

@@ -23,80 +23,50 @@
 
 require_once('../../config.php');
 
-$debug = false;
+// Only used during development for demonstration purposes of Gruber & Petters.
+require_once($CFG->dirroot . '/local/webuntis/fakemode.php');
 
-$fake = true;
-if ($fake) {
-    // Fake the user and course id.
-    $userid = 15;
-    $courseid = 248;
-
-    $user = \core_user::get_user($userid);
-
-    \complete_user_login($user);
-
-    if (\user_not_fully_set_up($user, true)) {
-        redirect($CFG->wwwroot.'/user/edit.php?id='.$userid.'&course='.SITEID);
-    } else {
-        redirect($CFG->wwwroot.'/course/view.php?id='.$courseid);
-    }
-}
+$debug =true;
 
 if ($debug) {
     echo "Received:<br />";
     echo "<pre>" . print_r($_REQUEST, 1) . "</pre>";
 }
 
-
-$tenant_id = optional_param('tenant_id', 0, PARAM_INT);
 $lesson    = optional_param('lesson', 'main', PARAM_ALPHANUM);
 $school    = optional_param('school', '', PARAM_TEXT);
+$tenant_id = optional_param('tenant_id', 0, PARAM_INT);
 
 \local_webuntis\tenant::__load($tenant_id, $school);
 \local_webuntis\lessonmap::__load($lesson);
 
-// Reload params in case we retrieved them from cache.
-$tenant_id = \local_webuntis\tenant::get_tenant_id();
-$school = \local_webuntis\tenant::get_school();
-
-$urlparams = [ 'tenant_id' => $tenant_id, 'school' => $school ];
-
 $PAGE->set_context(\context_system::instance());
-$PAGE->set_url('/local/webuntis/index.php', array('tenant_id' => $tenant_id, 'school' => $school));
+$params = array(
+    'lesson'     => \local_webuntis\lessonmap::get_lesson(),
+    'school'     => \local_webuntis\tenant::get_school(),
+    'tenant_id'  => \local_webuntis\tenant::get_tenant_id(),
+);
+$PAGE->set_url('/local/webuntis/index.php', $params);
 $PAGE->set_title(get_string('pluginname', 'local_webuntis'));
 $PAGE->set_heading(get_string('pluginname', 'local_webuntis'));
 $PAGE->set_pagelayout('standard');
 
 \local_webuntis\tenant::auth();
 
-if (!\local_webuntis\lessonmap::redirect()) {
-    echo $OUTPUT->header();
-    if (
-        !empty($lesson) && \local_webuntis\usermap::is_teacher() ||
-        \local_webuntis\usermap::is_administrator()
-        ) {
-        $allcourses = enrol_get_all_users_courses($USER->id, true);
-        $courses = [];
-        foreach ($allcourses as $course) {
-            $ctx = \context_course::instance($course->id);
-            if (has_capability('moodle/course:update', $ctx)) {
-                $course->courseimage = \local_webuntis\locallib::get_courseimage($course->id);
-                $course->is_selected = \local_webuntis\lessonmap::is_selected($course->id);
-                $courses[] = $course;
-            }
-        }
-        $params = [
-            'courses' => $courses,
-            'lesson' => \local_webuntis\lessonmap::get_lesson(),
-            'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
-        ];
-        echo $OUTPUT->render_from_template('local_webuntis/selecttarget', $params);
-    } else {
-        if (!empty($lesson)) {
-            echo "Sorry, your teacher has not yet selected a course";
-        } else {
-            echo "Sorry, your administrator has not yet selected a course";
-        }
-    }
-    echo $OUTPUT->footer();
+if (\local_webuntis\lessonmap::get_count() > 0) {
+    \local_webuntis\lessonmap::redirect();
 }
+if (\local_webuntis\lessonmap::can_edit()) {
+    redirect(\local_webuntis\lessonmap::get_edit_url());
+}
+
+echo $OUTPUT->header();
+
+
+if ($debug) {
+    echo "<pre>";
+    print_r(\local_webuntis\locallib::cache_print());
+    echo "</pre>";
+}
+
+echo $OUTPUT->footer();

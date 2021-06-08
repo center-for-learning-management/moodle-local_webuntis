@@ -26,9 +26,10 @@ namespace local_webuntis;
 defined('MOODLE_INTERNAL') || die;
 
 class tenant {
+    private static $debug;
+    private static $isloaded;
     private static $tenant;
     private static $usermap;
-    private static $debug;
 
     public static function __load($tenant_id = 0, $school = "") {
         global $debug; self::$debug = $debug;
@@ -37,7 +38,9 @@ class tenant {
             self::$tenant = $tenant;
         }
 
-        if (!empty($tenant->tenant_id) && ($tenant->tenant_id == $tenant_id || empty($tenant_it))) {
+        if (!empty($tenant->tenant_id) && ($tenant->tenant_id == $tenant_id || empty($tenant_id))) {
+            // Tenant was loaded from cache and we are done.
+            self::$isloaded = true;
             return;
         }
 
@@ -49,7 +52,7 @@ class tenant {
         $params = [ 'school' => $school, 'tenant_id' => $tenant_id ];
         self::$tenant = $DB->get_record_sql($sql, $params);
 
-        if (empty(self::$tenant->id)) {
+        if (empty(self::$tenant->id) && !empty(self::$tenant->tenant_id)) {
             self::$tenant = (object) $params;
             self::$tenant->client = optional_param('client', '', PARAM_TEXT);
             self::$tenant->consumerkey = optional_param('consumerkey', '', PARAM_TEXT);
@@ -71,12 +74,14 @@ class tenant {
         }
 
         \local_webuntis\locallib::cache_set('session', 'tenant', self::$tenant);
+        self::$isloaded = true;
     }
 
     /**
      * Ensure the user was authenticated against WebUntis.
      */
     public static function auth() {
+        self::is_loaded();
         global $CFG, $PAGE;
         $endpoints = self::get_endpoints();
         if (empty($endpoints->authorization_endpoint)) {
@@ -118,6 +123,7 @@ class tenant {
     }
 
     private static function get_endpoints() {
+        self::is_loaded();
         $endpoints = \local_webuntis\locallib::cache_get('application', 'endpoints-' . self::get_tenant_id());
         if (empty($endpoints) || empty($endpoints->authorization_endpoint)) {
             $host = self::get_host();
@@ -133,36 +139,48 @@ class tenant {
     }
 
     public static function get_id() {
+        self::is_loaded();
         return self::$tenant->id;
     }
     public static function get_client() {
+        self::is_loaded();
         return self::$tenant->client;
     }
     public static function get_consumerkey() {
+        self::is_loaded();
         return self::$tenant->consumerkey;
     }
     public static function get_consumersecret() {
+        self::is_loaded();
         return self::$tenant->consumersecret;
     }
     public static function get_host() {
+        self::is_loaded();
         return self::$tenant->host;
     }
     public static function get_school($lcase = false) {
+        self::is_loaded();
         if ($lcase) return strtolower(self::$tenant->school);
         else return self::$tenant->school;
     }
     public static function get_tenant_id() {
+        self::is_loaded();
         return self::$tenant->tenant_id;
     }
     /**
      * @return the webuntis users uuid.
      */
     public static function get_uuid() {
+        self::is_loaded();
         return \local_webuntis\locallib::cache_get('session', 'uuid');
     }
 
+    public static function is_loaded() {
+        if (!self::$isloaded) self::__load();
+    }
 
     public static function set_oauth_keys($consumerkey, $consumersecret) {
+        self::is_loaded();
         global $DB;
         self::$tenant->consumerkey = $consumerkey;
         self::$tenant->consumersecret = $consumersecret;
@@ -173,6 +191,7 @@ class tenant {
      * @param uuid of webuntis.
      */
     public static function static_uuid($uuid) {
+        self::is_loaded();
         \local_webuntis\locallib::cache_set('session', 'uuid', $uuid);
     }
 }

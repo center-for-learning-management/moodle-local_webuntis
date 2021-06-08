@@ -15,9 +15,9 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template local_webuntis/selecttarget
+    @template local_webuntis/landingedit
 
-    The purpose of this template is to show the block content.
+    This template allows users to enable/disable target courses for a webuntis lesson.
 
     Classes required for JS:
     * none
@@ -26,11 +26,13 @@
     * none
 
     Context variables required for this template:
+    * canproceed
+    * courses
     * wwwroot
-    * showwarning
 
     Example context (json):
     {
+        "canproceed": 1,
         "courses": [
             {
                 "courseimage": "http://moodle-url.org/the-image-url",
@@ -40,22 +42,30 @@
                 "shortname": 'shortname of course',
             },
         ],
-        "lesson": "main"
-        "tenant_id": 1300,
+        "wwwroot": 'https://www.xy.z'
     }
 }}
 
-<div id="local_webuntis_selecttarget_{{uniqid}}" class="local_webuntis selecttarget">
+<div class="local_webuntis landingedit">
     <div class="fitem row">
-        <p class="col-md-9">{{#str}} selectcourse_for_target, local_webuntis {{/str}}:</p>
-        <p class="col-md-3">{{#str}} finish, local_webuntis {{/str}}:</p>
+        <p class="col-md-10">
+            {{#str}} selectcourse_for_target, local_webuntis {{/str}}:<br />
+            <i class="fa fa-filter"></i>&nbsp;
+            <input type="text" id="filter-{{uniqid}}" placeholder="{{#str}} search {{/str}}" />
+        </p>
+        <p class="col-md-2">
+            <a href="{{wwwroot}}/local/webuntis/landing.php"
+                id="proceed-{{uniqid}}" class="btn btn-primary btn-block {{^canproceed}} disabled {{/canproceed}}">
+                {{#str}} proceed, local_webuntis {{/str}}
+            </a>
+        </p>
     </div>
 
-    <table class="generaltable">
+    <table id="table-{{uniqid}}" class="generaltable">
     {{#courses}}
         <tr>
-            <td class="trigger">
-                <a href="#" id="trigger_{{uniqid}}_{{id}}" onclick="require(['local_webuntis/main'], function(M) { M.selectTarget('{{uniqid}}', {{id}}, {{tenant_id}}, '{{lesson}}'); }); return false;">
+            <td class="trigger" width="30">
+                <a href="#" id="trigger_{{uniqid}}_{{id}}" onclick="require(['local_webuntis/main'], function(M) { M.selectTarget('{{uniqid}}', {{id}}); }); return false;">
                 {{#is_selected}}
                     <i class="fa fa-icon fa-toggle-on" style="font-size: 18px;"></i>
                 {{/is_selected}}
@@ -64,9 +74,18 @@
                 {{/is_selected}}
                 </a>
             </td>
-            <td><img src="{{courseimage}}" style="height: 50px;" /></td>
+            <td width="50"><img src="{{courseimage}}" style="height: 50px;" /></td>
             <td>{{fullname}}</td>
         </tr>
     {{/courses}}
     </table>
 </div>
+
+{{#js}}
+    $('#filter-{{uniqid}}').on("keyup", function() {
+        var filter = $(this).val().toLowerCase();
+        $('#table-{{uniqid}} tr').filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(filter) > -1);
+        });
+    });
+{{/js}}

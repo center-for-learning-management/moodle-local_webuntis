@@ -29,31 +29,24 @@ class local_webuntis_external extends external_api {
     public static function selecttarget_parameters() {
         return new external_function_parameters(array(
             'courseid' => new external_value(PARAM_INT, 'the course id'),
-            'lesson' => new external_value(PARAM_TEXT, 'the lesson identifier'),
             'status' => new external_value(PARAM_INT, '1 or 0'),
-            'tenant_id' => new external_value(PARAM_INT, 'the tenant id'),
         ));
     }
 
     /**
      * Toggle status.
      */
-    public static function selecttarget($courseid, $lesson, $status, $tenant_id) {
+    public static function selecttarget($courseid, $status) {
         global $DB, $USER;
-        $params = self::validate_parameters(self::selecttarget_parameters(), array('courseid' => $courseid, 'lesson' => $lesson, 'status' => $status, 'tenant_id' => $tenant_id));
+        $params = self::validate_parameters(self::selecttarget_parameters(), array('courseid' => $courseid, 'status' => $status));
 
         $courseid = $params['courseid'];
         if ($params['status'] == 0) $courseid = $courseid*-1;
+        \local_webuntis\lessonmap::change_map($courseid);
 
-        if (\local_webuntis\lessonmap::change_map($courseid)) {
-            return $params;
-        }
-        return [
-            'courseid' => 0,
-            'lesson' => '',
-            'status' => -1,
-            'tenant_id' => 0,
-        ];
+        $params['canproceed'] = (\local_webuntis\lessonmap::get_count() > 0) ? 1 : 0;
+        $params['lesson'] = \local_webuntis\lessonmap::get_lesson();
+        $params['tenant_id'] = \local_webuntis\tenant::get_tenant_id();
 
         return $params;
     }
@@ -63,6 +56,7 @@ class local_webuntis_external extends external_api {
      */
     public static function selecttarget_returns() {
         return new external_single_structure(array(
+            'canproceed' => new external_value(PARAM_INT, '1 if user can proceed'),
             'courseid' => new external_value(PARAM_INT, 'courseid or 0 if failed'),
             'lesson' => new external_value(PARAM_TEXT, 'the lesson identifier'),
             'status' => new external_value(PARAM_INT, 'current status'),

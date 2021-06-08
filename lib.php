@@ -31,7 +31,7 @@ function local_webuntis_extend_navigation($navigation) {
     if (empty(\local_webuntis\usermap::get_id())) return;
 
     global $USER;
-    $nodehome = $navigation->get('home');
+    $nodehome = $navigation->get('actionmenu');
     if (empty($nodehome)){
         $nodehome = $navigation;
     }
@@ -50,7 +50,7 @@ function local_webuntis_extend_navigation_course($nav, $course, $context) {
     if (empty(\local_webuntis\usermap::get_id())) return;
 
     if (!empty(\local_webuntis\lessonmap::get_lesson())) {
-        
+
     }
 
     $coursecontext = \context_course::instance($course->id);

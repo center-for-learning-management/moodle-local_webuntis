@@ -2,31 +2,36 @@ define(
     ['jquery', 'core/ajax', 'core/notification'],
     function($, AJAX, NOTIFICATION) {
     return {
-        debug: false,
-        selectTarget: function(uniqid, courseid, tenant_id, lesson) {
+        debug: true,
+        selectTarget: function(uniqid, courseid) {
             var MAIN = this;
-            if (MAIN.debug) console.log('local_webuntis/main:selectTarget(uniqid, courseid, tenant_id, lesson)', uniqid, courseid, tenant_id, lesson);
+            if (MAIN.debug) console.log('local_webuntis/main:selectTarget(uniqid, courseid)', uniqid, courseid);
 
             var trigger = $('#trigger_' + uniqid + '_' + courseid + ' i');
-            var status = trigger.hasClass('fa-toggle-on');
-            if (status) {
-                $(trigger).removeClass('fa-toggle-on').addClass('fa-toggle-off');
-            } else {
-                $(trigger).removeClass('fa-toggle-off').addClass('fa-toggle-on');
-            }
+            $(trigger).css('filter', 'blur(4px)');
 
-            var setto = (status) ? 0 : 1;
+            var setto = ($(trigger).hasClass('fa-toggle-on')) ? 0 : 1;
             if (MAIN.debug) console.log('setto', setto);
             AJAX.call([{
                 methodname: 'local_webuntis_selecttarget',
-                args: { 'courseid': courseid, 'lesson': lesson, 'status': setto, 'tenant_id': tenant_id },
+                args: { 'courseid': courseid, 'status': setto },
                 done: function(result) {
+                    $(trigger).css('filter', 'unset');
                     if (MAIN.debug) console.log('=> Result for ' + uniqid + '-' + courseid, result);
                     if (typeof result.courseid !== 'undefined' && result.courseid == courseid && typeof result.status !== 'undefined') {
-                        if (result.status) {
-                            $('#local_webuntis_selecttarget_' + uniqid + ' tr.course-' + courseid + ' a i').hasClass('fa-toggle-off');
+                        if (MAIN.debug) console.log('===> status', result.status);
+                        if (result.status == 1) {
+                            $(trigger).removeClass('fa-toggle-off').addClass('fa-toggle-on');
                         } else {
-                            $('#local_webuntis_selecttarget_' + uniqid + ' tr.course-' + courseid + ' a i').hasClass('fa-toggle-on');
+                            $(trigger).removeClass('fa-toggle-on').addClass('fa-toggle-off');
+                        }
+                    }
+                    if (typeof result.canproceed !== 'undefined') {
+                        if (MAIN.debug) console.log('===> canproceed', result.canproceed);
+                        if (result.canproceed == 1) {
+                            $('#proceed-' + uniqid).removeClass('disabled');
+                        } else {
+                            $('#proceed-' + uniqid).addClass('disabled');
                         }
                     }
                 },
