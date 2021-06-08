@@ -17,15 +17,20 @@
 /**
  * @package    local_webuntis
  * @copyright  2021 Zentrum für Lernmanagement (www.lernmanagement.at)
- * @author    Robert Schrenk
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @author     Robert Schrenk
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die;
 
-$plugin->version  = 2021060701;
-$plugin->requires = 2014051200;
-$plugin->component = 'local_webuntis';
-$plugin->release = '0.1 (Build: 2021050604)';
-$plugin->maturity = MATURITY_STABLE;
-$plugin->dependencies = array();
+// We define the web service functions to install.
+$functions = array(
+    'local_webuntis_selecttarget' => array(
+        'classname'   => 'local_webuntis_external',
+        'methodname'  => 'selecttarget',
+        'classpath'   => 'local/webuntis/externallib.php',
+        'description' => 'Toggles selection of course as target.',
+        'type'        => 'write',
+        'ajax'        => 1,
+    ),
+);

@@ -39,17 +39,23 @@
                 "is_selected": 1,
                 "shortname": 'shortname of course',
             },
-        ]
+        ],
+        "lesson": "main"
+        "tenant_id": 1300,
     }
 }}
 
 <div id="local_webuntis_selecttarget_{{uniqid}}" class="local_webuntis selecttarget">
-    <p>{{#str}} selectcourse_for_target, local_webuntis {{/str}}:</p>
+    <div class="fitem row">
+        <p class="col-md-9">{{#str}} selectcourse_for_target, local_webuntis {{/str}}:</p>
+        <p class="col-md-3">{{#str}} finish, local_webuntis {{/str}}:</p>
+    </div>
+
     <table class="generaltable">
     {{#courses}}
-        <tr class="course-{{id}}">
+        <tr>
             <td class="trigger">
-                <a href="#" onclick="require(['local_webuntis/main', function(M) { M.selectTarget('{{uniqid}}', {{id}}); }]); return false;">
+                <a href="#" id="trigger_{{uniqid}}_{{id}}" onclick="require(['local_webuntis/main'], function(M) { M.selectTarget('{{uniqid}}', {{id}}, {{tenant_id}}, '{{lesson}}'); }); return false;">
                 {{#is_selected}}
                     <i class="fa fa-icon fa-toggle-on" style="font-size: 18px;"></i>
                 {{/is_selected}}

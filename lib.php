@@ -49,6 +49,10 @@ function local_webuntis_extend_navigation_course($nav, $course, $context) {
     // Only do something, if we came through webuntis.
     if (empty(\local_webuntis\usermap::get_id())) return;
 
+    if (!empty(\local_webuntis\lessonmap::get_lesson())) {
+        
+    }
+
     $coursecontext = \context_course::instance($course->id);
     if (has_capability('moodle/course:delete', $coursecontext)) {
         $url = new \moodle_url('/local/webuntis/disconnect.php', array('courseid' => $course->id));

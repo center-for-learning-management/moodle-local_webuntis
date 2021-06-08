@@ -77,8 +77,10 @@ class usermap {
      */
     private static function do_userlogin($sub) {
         global $DB, $USER;
-        self::$usermap = $DB->get_record('local_webuntis_usermap', array('tenant_id' => \local_webuntis\tenant::get_tenant_id(), 'remoteuserid' => $sub));
-        if (empty(self::$usermap->id)) {
+
+        $params = array('tenant_id' => \local_webuntis\tenant::get_tenant_id(), 'remoteuserid' => $sub);
+        self::$usermap = $DB->get_record('local_webuntis_usermap', $params);
+        if (empty(self::$usermap->id) && !empty($token->sub)) {
             self::$usermap = (object) array(
                 'tenant_id' => self::get_tenant_id(),
                 'school' => self::get_school(),
@@ -90,10 +92,10 @@ class usermap {
             );
             self::$usermap->id = $DB->insert_record('local_webuntis_usermap', $usermap);
         } else {
-            $DB->set_field('local_webuntis_usermap', 'lastaccess', time(), array('id' => self::$usermap->id));
+            $DB->set_field('local_webuntis_usermap', 'lastaccess', time(), $params);
         }
 
-        if (!empty($usermap->userid)) {
+        if (!empty(self::$usermap->userid)) {
             $user = \core_user::get_user(self::$usermap->userid);
             \complete_user_login($user);
         } else {

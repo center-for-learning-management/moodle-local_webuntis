@@ -27,6 +27,7 @@ defined('MOODLE_INTERNAL') || die;
 
 class lessonmap {
     private static $lessonmaps;
+    private static $cacheidentifier;
     private static $debug;
 
     /**
@@ -42,17 +43,46 @@ class lessonmap {
         } else {
             \local_webuntis\locallib::cache_set('session', 'lesson', $lesson);
         }
-
         $params = [
             'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
             'lessonid' => $lesson,
         ];
+        if (empty(self::$cacheidentifier)) {
+            self::$cacheidentifier = "lessonmaps_{$params['tenant_id']}_{$params['lessonid']}";
+        }
 
-        self::$lessonmaps = array_values($DB->get_records('local_webuntis_coursemap', $params));
+        self::$lessonmaps = \local_webuntis\locallib::cache_get('session', self::$cacheidentifier);
+        if (count(self::$lessonmaps) == 0) {
+            self::$lessonmaps = array_values($DB->get_records('local_webuntis_coursemap', $params));
+            \local_webuntis\locallib::cache_set('session', $identifier, self::$cacheidentifier);
+        }
         if (self::$debug) {
             echo "Found lessonmap\n";
             echo "<pre>" . print_r(self::$lessonmaps, 1) . "</pre>\n";
         }
+    }
+
+    /**
+     * Add or remove a course from map.
+     */
+    public static function change_map($courseid) {
+        global $DB;
+
+        $dbparams = array(
+            'tenant_id' => $tenant_id,
+            'lessonid' => $lesson,
+            'courseid' => $courseid
+        );
+        if ($courseid < 0) {
+            // We want to remove it.
+            $dbparams['courseid'] = $dbparams['courseid'] * -1;
+            unset(self::$lessonmaps[$dbparams['courseid']]);
+            $DB->delete_records('local_webuntis_coursemap', $dbparams);
+        } else {
+            $dbparams['id'] = $DB->insert_record('local_webuntis_coursemap', $dbparams);
+            self::$lessonmaps[$dbparams['courseid']] = $dbparams;
+        }
+        \local_webuntis\locallib::cache_set('session', self::$cacheidentifier, self::$lessonmaps);
     }
 
     /**
@@ -67,7 +97,12 @@ class lessonmap {
      * @param courseid
      */
     public static function is_selected($courseid) {
-        return !empty(self::$lessonmaps[$courseid]);
+        foreach (self::$lessonmaps as $lessonmap) {
+            if ($lessonmap->courseid == $courseid) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -77,13 +112,14 @@ class lessonmap {
         $lessonmaps = array_values(self::$lessonmaps);
         if (!empty($lessonmaps) && count($lessonmaps) > 1) {
             // Redirect to selection list.
+            die("redirect not implemented");
         }
         if (!empty($lessonmaps) && !empty($lessonmaps[0]->courseid)) {
-            if (is_loggedin() && !is_guestuser()) {
+            if (\isloggedin() && !\isguestuser()) {
                 // @todo check enrolment of user.
             }
             $url = new \moodle_url('/course/view.php', array('id' => $lessonmaps[0]->courseid));
-            redirect($url);
+            \redirect($url);
         }
         return false;
     }

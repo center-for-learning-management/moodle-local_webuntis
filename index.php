@@ -85,7 +85,12 @@ if (!\local_webuntis\lessonmap::redirect()) {
                 $courses[] = $course;
             }
         }
-        echo $OUTPUT->render_from_template('local_webuntis/selecttarget', [ 'courses' => $courses]);
+        $params = [
+            'courses' => $courses,
+            'lesson' => \local_webuntis\lessonmap::get_lesson(),
+            'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
+        ];
+        echo $OUTPUT->render_from_template('local_webuntis/selecttarget', $params);
     } else {
         if (!empty($lesson)) {
             echo "Sorry, your teacher has not yet selected a course";
