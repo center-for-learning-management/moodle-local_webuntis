@@ -25,42 +25,42 @@ require_once('../../config.php');
 
 // Only used during development for demonstration purposes of Gruber & Petters.
 require_once($CFG->dirroot . '/local/webuntis/fakemode.php');
-$debug = true;
+$debug = false;
 
 if ($debug) {
     echo "Received:<br />";
     echo "<pre>" . print_r($_REQUEST, 1) . "</pre>";
 }
 
-$lesson_id    = optional_param('lesson_id', 'main', PARAM_INT);
-$school    = optional_param('school', '', PARAM_TEXT);
-$tenant_id = optional_param('tenant_id', 0, PARAM_INT);
+$lesson_id    = optional_param('lesson_id', -1, PARAM_INT);
+$school       = optional_param('school', '', PARAM_TEXT);
+$tenant_id    = optional_param('tenant_id', 0, PARAM_INT);
 
 // For some reason, webuntis provides an empty tenant_id...
 if (empty($tenant_id)) $tenant_id = 1300;
 
+// If tenant_id and school are given, but not lesson_id, this is link
+// from the main menu in Webuntis.
+if ($lesson_id == -1 && !empty($tenant_id) && !empty($school)) {
+    $lesson_id = 0;
+}
+
 \local_webuntis\tenant::__load($tenant_id, $school);
 \local_webuntis\lessonmap::__load($lesson_id);
 
-
 $PAGE->set_context(\context_system::instance());
-$params = array(
-    'lesson_id'  => \local_webuntis\lessonmap::get_lesson_id(),
-    'school'     => \local_webuntis\tenant::get_school(),
-    'tenant_id'  => \local_webuntis\tenant::get_tenant_id(),
-);
-$PAGE->set_url(new \moodle_url('/local/webuntis/index.php', $params));
+$PAGE->set_url(\local_webuntis\tenant::get_init_url());
 $PAGE->set_title(get_string('pluginname', 'local_webuntis'));
 $PAGE->set_heading(get_string('pluginname', 'local_webuntis'));
 $PAGE->set_pagelayout('standard');
+$PAGE->navbar->add(get_string('pluginname', 'local_webuntis'), $PAGE->url);
 
 \local_webuntis\tenant::auth();
 
 if (!empty(\local_webuntis\tenant::get_tenant_id()) && empty(\local_webuntis\usermap::get_userid())) {
+    require_login();
     redirect(\local_webuntis\usermap::get_map_url());
 }
-
-
 
 if (\local_webuntis\lessonmap::get_count() > 0) {
     \local_webuntis\lessonmap::redirect();
@@ -69,13 +69,9 @@ if (\local_webuntis\lessonmap::can_edit()) {
     redirect(\local_webuntis\lessonmap::get_edit_url());
 }
 
-//echo $OUTPUT->header();
-
-
-if ($debug) {
-    echo "Cache_print:<pre>";
-    print_r(\local_webuntis\locallib::cache_print());
-    echo "</pre>";
-}
-
-//echo $OUTPUT->footer();
+echo $OUTPUT->header();
+$params = [
+    'urltodashboard' =>  new \moodle_url('/my'),
+];
+echo $OUTPUT->render_from_template('local_webuntis/landingmissing', $params);
+echo $OUTPUT->footer();

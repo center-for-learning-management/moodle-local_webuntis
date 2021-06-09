@@ -74,9 +74,18 @@ class locallib {
             break;
         }
     }
-    public static function cache_print() {
+    /**
+     * Return cache or print it.
+     * @param die if true will echo and die.
+     */
+    public static function cache_print($die = false) {
         self::cache_preserve(true);
-        return self::$preserved_caches;
+        echo "Cache_print:<pre>";
+        print_r(self::$preserved_caches);
+        echo "</pre>";
+        if ($die) {
+            die();
+        }
     }
     /**
      * Set a cache object.

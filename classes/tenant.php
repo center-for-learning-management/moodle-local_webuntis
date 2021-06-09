@@ -138,10 +138,7 @@ class tenant {
         return $endpoints;
     }
 
-    public static function get_id() {
-        self::is_loaded();
-        return self::$tenant->id;
-    }
+
     public static function get_client() {
         self::is_loaded();
         return self::$tenant->client;
@@ -157,6 +154,18 @@ class tenant {
     public static function get_host() {
         self::is_loaded();
         return self::$tenant->host;
+    }
+    public static function get_id() {
+        self::is_loaded();
+        return self::$tenant->id;
+    }
+    public static function get_init_url() {
+        $params = [
+            'tenant_id' => self::get_tenant_id(),
+            'school' => self::get_school(),
+            'lesson_id' => \local_webuntis\lessonmap::get_lesson_id(),
+        ];
+        return new \moodle_url('/local/webuntis/index.php', $params);
     }
     public static function get_school($lcase = false) {
         self::is_loaded();

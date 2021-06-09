@@ -27,33 +27,32 @@ $userid = optional_param('userid', 0, PARAM_INT);
 
 \local_webuntis\tenant::__load();
 
-if (!empty($userid)) {
-    $PAGE->set_context(\context_user::instance($USER->id));
-    $PAGE->set_url(new \moodle_url('/local/webuntis/disconnect.php', array('userid' => $userid)));
-    $PAGE->set_title(get_string('disconnect:user', 'local_webuntis'));
-    $PAGE->set_heading(get_string('disconnect:user', 'local_webuntis'));
-    $PAGE->set_pagelayout('standard');
+$PAGE->set_context(\context_system::instance());
+$PAGE->set_url(new \moodle_url('/local/webuntis/disconnect.php', array('userid' => $userid)));
+$PAGE->set_title(get_string('disconnect:user', 'local_webuntis'));
+$PAGE->set_heading(get_string('disconnect:user', 'local_webuntis'));
+$PAGE->set_pagelayout('standard');
 
-    if ($USER->id != $userid) {
-        throw new \moodle_exception('invalidinput', 'local_webuntis', $CFG->wwwroot);
-    }
+if ($USER->id != $userid) {
+    throw new \moodle_exception('invalidinput', 'local_webuntis', $CFG->wwwroot);
 }
+
 // @todo show confirmation dialog prior to action.
-$confirmed = optional_param('confirmed', 1, PARAM_INT);
+$confirmed = optional_param('confirmed', 0, PARAM_INT);
 
 if (empty($confirmed)) {
     echo $OUTPUT->header();
-
-
+    $params = [
+        'userid' => $USER->id,
+        'wwwroot' => $CFG->wwwroot,
+    ];
+    echo $OUTPUT->render_from_template('local_webuntis/disconnect', $params);
     echo $OUTPUT->footer();
 } else {
     if (!empty($userid)) {
+        $url = \local_webuntis\tenant::get_init_url();
         \local_webuntis\usermap::release();
-        \local_webuntis\locallib::cache_preserve(true);
         require_logout();
-        \local_webuntis\locallib::cache_preserve(false);
-
-        $url = new \moodle_url('/local/webuntis/disconnected.php');
         redirect($url);
     }
 

@@ -30,16 +30,18 @@ function local_webuntis_extend_navigation($navigation) {
     // Only do something, if we came through webuntis.
     if (empty(\local_webuntis\tenant::get_tenant_id())) return;
 
-    global $USER;
-    $nodehome = $navigation->get('actionmenu');
-    if (empty($nodehome)){
-        $nodehome = $navigation;
+    if (\local_webuntis\usermap::get_userid() > 0) {
+        global $USER;
+        $nodehome = $navigation->get('actionmenu');
+        if (empty($nodehome)){
+            $nodehome = $navigation;
+        }
+        $label = get_string('disconnect:user', 'local_webuntis');
+        $url = new moodle_url('/local/webuntis/disconnect.php', array('userid' => $USER->id));
+        $icon = new pix_icon('i/user', '', '');
+        $nodemyorgs = $nodehome->add($label, $url, navigation_node::NODETYPE_LEAF, $label, 'disconnectuser', $icon);
+        $nodemyorgs->showinflatnavigation = true;
     }
-    $label = get_string('disconnect:user', 'local_webuntis');
-    $url = new moodle_url('/local/webuntis/disconnect.php', array('userid' => $USER->id));
-    $icon = new pix_icon('i/user', '', '');
-    $nodemyorgs = $nodehome->add($label, $url, navigation_node::NODETYPE_LEAF, $label, 'disconnectuser', $icon);
-    $nodemyorgs->showinflatnavigation = true;
 }
 
 /**

@@ -22,15 +22,18 @@
  */
 
 $string['disconnect:course'] = 'WebUntis-Kursverknüpfung lösen';
+$string['disconnect:description'] = 'Wollen Sie wirklich die Nutzerkonten von WebUntis und Moodle trennen?';
 $string['disconnect:user'] = 'WebUntis trennen';
 $string['endpointmissing'] = 'Der oAuth-Endpunkt der Webuntis-Instanz ist unbekannt.';
 $string['invalidinput'] = 'Ungültige Eingabe.';
 $string['invalidwebuntisinstance'] = 'Die Webuntis-Instanz scheint ungültig zu sein oder wurde noch nicht konfiguriert.';
 $string['landing:pagetitle'] = 'Kurs auswählen';
 $string['landing:select_target'] = 'Bitte wählen Sie aus den folgenden Kursen';
-$string['landinguser:mapcurrent'] = 'Aktuelles Konto "<i>{$a->fullname}</i>" verknüpfen';
+$string['landingmissing:description'] = 'Leider wurden an dieser Stelle noch keine Kurse verknüpft.';
+$string['landinguser:mapcurrent'] = '<i>{$a->fullname}</i> verknüpfen';
 $string['landinguser:mapother'] = 'Anderes Konto verknüpfen';
 $string['landinguser:mapnew'] = 'Konto erstellen';
+$string['landinguser:pagetitle'] = 'Nutzerkonten verknüpfen';
 $string['landinguser:select_option'] = 'Bitte wählen Sie eine der folgenden Optionen';
 $string['pluginname'] = 'WebUntis Integration';
 $string['proceed'] = 'Weiter';

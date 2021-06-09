@@ -35,6 +35,7 @@ class usermap {
     public static function __load($userinfo = "") {
         global $DB, $USER;
         global $debug; self::$debug = $debug;
+
         if (!empty($userinfo)) {
             self::$userinfo = $userinfo;
             self::$token = json_decode(
@@ -70,7 +71,7 @@ class usermap {
                     $DB->set_field('local_webuntis_usermap', 'lastaccess', time(), $params);
                 }
 
-
+                // ATTENTION: In this section you must not call functions like ::get_id, this will cause a loop.
                 /*
                 // Try to receive the users role.
                 $path = "https://api-integration.webuntis.com/ims/oneroster/v1p1/users"; ///$token->sub";
@@ -97,7 +98,7 @@ class usermap {
                 if (self::$usermap->remoteuserrole != $foundrole) {
                     self::$usermap->remoteuserrole = $foundrole;
                     global $DB;
-                    $DB->set_field('local_webuntis_usermap', 'remoteuserrole', $foundrole, array('id' => self::get_id()));
+                    $DB->set_field('local_webuntis_usermap', 'remoteuserrole', $foundrole, array('id' => self::$usermap->id));
                 }
             }
         } else {
@@ -107,11 +108,6 @@ class usermap {
         }
         self::$isloaded = true;
         self::set_cache();
-        // Do the mapping in case it is not yet set.
-        if (isloggedin() && !isguestuser() && self::$usermap->userid != $USER->id) {
-            $url = new \moodle_url('/local/webuntis/landinguser.php');
-            redirect($url);
-        }
         // Ensure the user is logged in.
         if (!empty(self::$usermap->userid)) {
             self::do_userlogin();
@@ -189,10 +185,7 @@ class usermap {
     /**
      * Ensures all data is written to cache.
      */
-    private static function set_cache($nocheckisloaded = false) {
-        if (!empty($nocheckisloaded)) {
-            self::is_loaded();
-        }
+    private static function set_cache() {
         \local_webuntis\locallib::cache_set('session', 'token', self::$token);
         \local_webuntis\locallib::cache_set('session', 'usermap', self::$usermap);
         \local_webuntis\locallib::cache_set('session', 'userinfo', self::$userinfo);

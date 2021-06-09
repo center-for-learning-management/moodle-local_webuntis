@@ -29,7 +29,10 @@ $PAGE->set_title(get_string('landing:pagetitle', 'local_webuntis'));
 $PAGE->set_heading(get_string('landing:pagetitle', 'local_webuntis'));
 $PAGE->set_pagelayout('standard');
 
+$PAGE->navbar->add(get_string('landing:pagetitle', 'local_webuntis'), $PAGE->url);
+
 echo $OUTPUT->header();
+
 if (\local_webuntis\lessonmap::can_edit()) {
     $allcourses = enrol_get_all_users_courses($USER->id, true);
     $courses = [];

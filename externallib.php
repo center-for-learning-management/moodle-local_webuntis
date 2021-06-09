@@ -40,13 +40,21 @@ class local_webuntis_external extends external_api {
         global $DB, $USER;
         $params = self::validate_parameters(self::selecttarget_parameters(), array('courseid' => $courseid, 'status' => $status));
 
-        $courseid = $params['courseid'];
-        if ($params['status'] == 0) $courseid = $courseid*-1;
-        \local_webuntis\lessonmap::change_map($courseid);
+        if (\local_webuntis\lessonmap::can_edit()) {
+            $courseid = $params['courseid'];
+            if ($params['status'] == 0) $courseid = $courseid*-1;
+            \local_webuntis\lessonmap::change_map($courseid);
 
-        $params['canproceed'] = (\local_webuntis\lessonmap::get_count() > 0) ? 1 : 0;
-        $params['lesson_id'] = \local_webuntis\lessonmap::get_lesson_id();
-        $params['tenant_id'] = \local_webuntis\tenant::get_tenant_id();
+            $params['canproceed'] = (\local_webuntis\lessonmap::get_count() > 0) ? 1 : 0;
+            $params['lesson_id'] = \local_webuntis\lessonmap::get_lesson_id();
+            $params['tenant_id'] = \local_webuntis\tenant::get_tenant_id();
+        } else {
+            $params['canproceed'] = 0;
+            $params['lesson_id'] = 0;
+            $params['tenant_id'] = 0;
+        }
+
+
 
         return $params;
     }
@@ -58,7 +66,7 @@ class local_webuntis_external extends external_api {
         return new external_single_structure(array(
             'canproceed' => new external_value(PARAM_INT, '1 if user can proceed'),
             'courseid' => new external_value(PARAM_INT, 'courseid or 0 if failed'),
-            'lesson_id' => new external_value(PARAM_TEXT, 'the lesson id'),
+            'lesson_id' => new external_value(PARAM_INT, 'the lesson id'),
             'status' => new external_value(PARAM_INT, 'current status'),
             'tenant_id' => new external_value(PARAM_INT, 'the tenant id'),
         ));

@@ -29,6 +29,8 @@ $PAGE->set_title(get_string('landing:pagetitle', 'local_webuntis'));
 $PAGE->set_heading(get_string('landing:pagetitle', 'local_webuntis'));
 $PAGE->set_pagelayout('standard');
 
+$PAGE->navbar->add(get_string('landing:pagetitle', 'local_webuntis'), $PAGE->url);
+
 $params = [
     'courses' => array_values(\local_webuntis\lessonmap::get_courses()),
     'editurl' => \local_webuntis\lessonmap::get_edit_url(),

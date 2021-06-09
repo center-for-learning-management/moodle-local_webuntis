@@ -27,9 +27,12 @@ $confirmed = optional_param('confirmed', 0, PARAM_INT);
 
 $PAGE->set_context(\context_system::instance());
 $PAGE->set_url(new \moodle_url('/local/webuntis/landinguser.php', array('confirmed' => $confirmed)));
-$PAGE->set_title(get_string('landing:pagetitle', 'local_webuntis'));
-$PAGE->set_heading(get_string('landing:pagetitle', 'local_webuntis'));
+$PAGE->set_title(get_string('landinguser:pagetitle', 'local_webuntis'));
+$PAGE->set_heading(get_string('landinguser:pagetitle', 'local_webuntis'));
 $PAGE->set_pagelayout('standard');
+
+$PAGE->navbar->add(get_string('landinguser:pagetitle', 'local_webuntis'), $PAGE->url);
+$PAGE->requires->css('/local/webuntis/style/main.css');
 
 $params = [
     'canmapnew' => 0,
@@ -38,6 +41,11 @@ $params = [
     'userfullname' => \fullname($USER),
     'wwwroot' => $CFG->wwwroot,
 ];
+
+if (strlen($params['userfullname']) > 20) {
+    $params['userfullname'] = substr($params['userfullname'], 0, 18) . '...';
+}
+
 $params['count'] = $params['canmapnew'] + $params['canmapcurrent'] + $params['canmapother'];
 
 switch ($confirmed) {
@@ -51,26 +59,30 @@ switch ($confirmed) {
         if (empty($params['canmapcurrent'])) {
             throw new \moodle_exception(get_string('forbidden'));
         }
-        \local_webuntis\usermap::set_userid();
-        if (\local_webuntis\usermap::get_userid() == $USER->id) {
-            $url = new \moodle_url('/local/webuntis/index.php');
-            redirect($url, get_string('usermap:success', 'local_webuntis'), 0, \core\output\notification::NOTIFY_SUCCESS);
+        if (isloggedin() && !isguestuser()) {
+            \local_webuntis\usermap::set_userid();
+            if (\local_webuntis\usermap::get_userid() == $USER->id) {
+                $url = \local_webuntis\tenant::get_init_url();
+                redirect($url, get_string('usermap:success', 'local_webuntis'), 0, \core\output\notification::NOTIFY_SUCCESS);
+            } else {
+                throw new \moodle_exception(get_string('usermap:failed', 'local_webuntis'));
+            }
         } else {
             throw new \moodle_exception(get_string('usermap:failed', 'local_webuntis'));
         }
-
     break;
     case 3: // Use other users
         if (empty($params['canmapother'])) {
             throw new \moodle_exception(get_string('forbidden'));
         }
         // Safely logout.
+        $url = \local_webuntis\tenant::get_init_url();
         \local_webuntis\usermap::release();
-        \local_webuntis\locallib::cache_preserve(true);
+        //\local_webuntis\locallib::cache_preserve(true);
         require_logout();
-        \local_webuntis\locallib::cache_preserve(false);
-        require_login();
-        die("mapother");
+        //\local_webuntis\locallib::cache_preserve(false);
+        //require_login();
+        redirect($url);
     break;
 }
 
@@ -81,6 +93,5 @@ if ($params['canmapnew'] == 0 && $params['canmapcurrent'] == 0 && $params['canma
 }
 
 echo $OUTPUT->header();
-echo "confirmed $confirmed";
 echo $OUTPUT->render_from_template('local_webuntis/landinguser', $params);
 echo $OUTPUT->footer();

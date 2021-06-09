@@ -39,6 +39,7 @@ class lessonmap {
         global $debug; self::$debug = $debug;
         global $DB;
 
+        $old_lesson_id = \local_webuntis\locallib::cache_get('session', 'lesson_id');
         if ($lesson_id == -1) {
             $lesson_id = \local_webuntis\locallib::cache_get('session', 'lesson_id');
         } else {
@@ -53,7 +54,7 @@ class lessonmap {
         }
 
         self::$lessonmaps = \local_webuntis\locallib::cache_get('session', self::$cacheidentifier);
-        if (empty(self::$lessonmaps) || count(self::$lessonmaps) == 0) {
+        if (empty(self::$lessonmaps) || count(self::$lessonmaps) == 0 || $lesson_id != $old_lesson_id) {
             self::$lessonmaps = array_values($DB->get_records('local_webuntis_coursemap', $params));
             \local_webuntis\locallib::cache_set('session', self::$cacheidentifier, self::$lessonmaps);
         }
@@ -89,7 +90,9 @@ class lessonmap {
             'lesson_id' => self::get_lesson_id(),
             'courseid' => $courseid
         );
-        if (empty($dbparams['tenant_id']) || empty($dbparams['lesson_id'])) return;
+
+        if (!self::can_edit()) return;
+
         if ($courseid < 0) {
             // We want to remove it.
             $dbparams['courseid'] = $dbparams['courseid'] * -1;
