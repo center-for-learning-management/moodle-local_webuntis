@@ -33,23 +33,23 @@ class lessonmap {
 
     /**
      * Load a lessonmap.
-     * @param lesson the lesson identifier. Empty for general link.
+     * @param lesson the lesson identifier. -1 loads from cache.
      */
-    public static function __load($lesson = "") {
+    public static function __load($lesson_id = -1) {
         global $debug; self::$debug = $debug;
         global $DB;
 
-        if (empty($lesson)) {
-            $lesson = \local_webuntis\locallib::cache_get('session', 'lesson');
+        if ($lesson_id == -1) {
+            $lesson_id = \local_webuntis\locallib::cache_get('session', 'lesson_id');
         } else {
-            \local_webuntis\locallib::cache_set('session', 'lesson', $lesson);
+            \local_webuntis\locallib::cache_set('session', 'lesson_id', $lesson_id);
         }
         $params = [
             'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
-            'lessonid' => $lesson,
+            'lesson_id' => $lesson_id,
         ];
         if (empty(self::$cacheidentifier)) {
-            self::$cacheidentifier = "lessonmaps_{$params['tenant_id']}_{$params['lessonid']}";
+            self::$cacheidentifier = "lessonmaps_{$params['tenant_id']}_{$params['lesson_id']}";
         }
 
         self::$lessonmaps = \local_webuntis\locallib::cache_get('session', self::$cacheidentifier);
@@ -71,7 +71,7 @@ class lessonmap {
         self::is_loaded();
 
         $editroles = [ 'Administrator' ];
-        if (self::get_lesson() != 'main') {
+        if (self::get_lesson_id() > 0) {
             $editroles[] = 'Teacher';
         }
         return (in_array(\local_webuntis\usermap::get_remoteuserrole(), $editroles));
@@ -86,10 +86,10 @@ class lessonmap {
 
         $dbparams = array(
             'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
-            'lessonid' => self::get_lesson(),
+            'lesson_id' => self::get_lesson_id(),
             'courseid' => $courseid
         );
-        if (empty($dbparams['tenant_id']) || empty($dbparams['lessonid'])) return;
+        if (empty($dbparams['tenant_id']) || empty($dbparams['lesson_id'])) return;
         if ($courseid < 0) {
             // We want to remove it.
             $dbparams['courseid'] = $dbparams['courseid'] * -1;
@@ -116,7 +116,7 @@ class lessonmap {
                 self::$lessonmaps[] = (object) $dbparams;
             }
         }
-        array_values(self::$lessonmaps);
+        self::$lessonmaps = array_values(self::$lessonmaps);
         \local_webuntis\locallib::cache_set('session', self::$cacheidentifier, self::$lessonmaps);
     }
 
@@ -172,9 +172,9 @@ class lessonmap {
     /**
      * Get the lesson information from cache.
      */
-    public static function get_lesson() {
+    public static function get_lesson_id() {
         self::is_loaded();
-        return \local_webuntis\locallib::cache_get('session', 'lesson');
+        return \local_webuntis\locallib::cache_get('session', 'lesson_id');
     }
 
     /**
@@ -226,7 +226,6 @@ class lessonmap {
             } else {
                 \redirect($url);
             }
-
         }
     }
 

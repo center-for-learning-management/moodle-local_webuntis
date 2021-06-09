@@ -51,8 +51,10 @@ if ($fake) {
     \complete_user_login($user);
 
     if (\user_not_fully_set_up($user, true)) {
-        redirect($CFG->wwwroot.'/user/edit.php?id='.$userid.'&course='.SITEID);
+        $url = new \moodle_url('/user/edit.php', array('id' => $userid, 'course' => SITEID));
     } else {
-        redirect($CFG->wwwroot.'/course/view.php?id='.$courseid);
+        $url = new \moodle_url('/course/view.php', array('id' => $courseid));
     }
+    redirect($url);
+    die();
 }

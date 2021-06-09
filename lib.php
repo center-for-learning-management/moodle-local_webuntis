@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die;
  */
 function local_webuntis_extend_navigation($navigation) {
     // Only do something, if we came through webuntis.
-    if (empty(\local_webuntis\usermap::get_id())) return;
+    if (empty(\local_webuntis\tenant::get_tenant_id())) return;
 
     global $USER;
     $nodehome = $navigation->get('actionmenu');
@@ -47,9 +47,9 @@ function local_webuntis_extend_navigation($navigation) {
  */
 function local_webuntis_extend_navigation_course($nav, $course, $context) {
     // Only do something, if we came through webuntis.
-    if (empty(\local_webuntis\usermap::get_id())) return;
+    if (empty(\local_webuntis\tenant::get_tenant_id())) return;
 
-    if (!empty(\local_webuntis\lessonmap::get_lesson())) {
+    if (!empty(\local_webuntis\lessonmap::get_lesson_id())) {
 
     }
 

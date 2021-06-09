@@ -24,7 +24,7 @@
 require_once('../../config.php');
 
 $PAGE->set_context(\context_system::instance());
-$PAGE->set_url('/local/webuntis/landing.php', array());
+$PAGE->set_url('/local/webuntis/landingedit.php', array());
 $PAGE->set_title(get_string('landing:pagetitle', 'local_webuntis'));
 $PAGE->set_heading(get_string('landing:pagetitle', 'local_webuntis'));
 $PAGE->set_pagelayout('standard');
@@ -47,7 +47,7 @@ if (\local_webuntis\lessonmap::can_edit()) {
     ];
     echo $OUTPUT->render_from_template('local_webuntis/landingedit', $params);
 } else {
-    if (!empty($lesson)) {
+    if (!empty(\local_webuntis\lessonmap::get_lesson_id())) {
         echo "Sorry, your teacher has not yet selected a course";
     } else {
         echo "Sorry, your administrator has not yet selected a course";

@@ -26,23 +26,27 @@ require_once('../../config.php');
 // Only used during development for demonstration purposes of Gruber & Petters.
 require_once($CFG->dirroot . '/local/webuntis/fakemode.php');
 
-$debug =true;
+$debug = true;
 
 if ($debug) {
     echo "Received:<br />";
     echo "<pre>" . print_r($_REQUEST, 1) . "</pre>";
 }
 
-$lesson    = optional_param('lesson', 'main', PARAM_ALPHANUM);
+$lesson_id    = optional_param('lesson_id', 'main', PARAM_INT);
 $school    = optional_param('school', '', PARAM_TEXT);
 $tenant_id = optional_param('tenant_id', 0, PARAM_INT);
 
 \local_webuntis\tenant::__load($tenant_id, $school);
-\local_webuntis\lessonmap::__load($lesson);
+\local_webuntis\lessonmap::__load($lesson_id);
 
+echo "Cache_print:<pre>";
+print_r(\local_webuntis\locallib::cache_print());
+echo "</pre>";
+die();
 $PAGE->set_context(\context_system::instance());
 $params = array(
-    'lesson'     => \local_webuntis\lessonmap::get_lesson(),
+    'lesson_id'     => \local_webuntis\lessonmap::get_lesson_id(),
     'school'     => \local_webuntis\tenant::get_school(),
     'tenant_id'  => \local_webuntis\tenant::get_tenant_id(),
 );
@@ -60,13 +64,13 @@ if (\local_webuntis\lessonmap::can_edit()) {
     redirect(\local_webuntis\lessonmap::get_edit_url());
 }
 
-echo $OUTPUT->header();
+//echo $OUTPUT->header();
 
 
 if ($debug) {
-    echo "<pre>";
+    echo "Cache_print:<pre>";
     print_r(\local_webuntis\locallib::cache_print());
     echo "</pre>";
 }
 
-echo $OUTPUT->footer();
+//echo $OUTPUT->footer();

@@ -45,7 +45,7 @@ class local_webuntis_external extends external_api {
         \local_webuntis\lessonmap::change_map($courseid);
 
         $params['canproceed'] = (\local_webuntis\lessonmap::get_count() > 0) ? 1 : 0;
-        $params['lesson'] = \local_webuntis\lessonmap::get_lesson();
+        $params['lesson_id'] = \local_webuntis\lessonmap::get_lesson_id();
         $params['tenant_id'] = \local_webuntis\tenant::get_tenant_id();
 
         return $params;
@@ -58,7 +58,7 @@ class local_webuntis_external extends external_api {
         return new external_single_structure(array(
             'canproceed' => new external_value(PARAM_INT, '1 if user can proceed'),
             'courseid' => new external_value(PARAM_INT, 'courseid or 0 if failed'),
-            'lesson' => new external_value(PARAM_TEXT, 'the lesson identifier'),
+            'lesson_id' => new external_value(PARAM_TEXT, 'the lesson id'),
             'status' => new external_value(PARAM_INT, 'current status'),
             'tenant_id' => new external_value(PARAM_INT, 'the tenant id'),
         ));

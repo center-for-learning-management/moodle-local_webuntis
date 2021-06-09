@@ -29,13 +29,16 @@ $PAGE->set_title(get_string('landing:pagetitle', 'local_webuntis'));
 $PAGE->set_heading(get_string('landing:pagetitle', 'local_webuntis'));
 $PAGE->set_pagelayout('standard');
 
-echo $OUTPUT->header();
-
 $params = [
     'courses' => array_values(\local_webuntis\lessonmap::get_courses()),
     'editurl' => \local_webuntis\lessonmap::get_edit_url(),
     'wwwroot' => $CFG->wwwroot,
 ];
 
+if (count($params['courses']) == 1) {
+    \local_webuntis\lessonmap::redirect();
+}
+
+echo $OUTPUT->header();
 echo $OUTPUT->render_from_template('local_webuntis/landing', $params);
 echo $OUTPUT->footer();

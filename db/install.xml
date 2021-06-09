@@ -8,14 +8,14 @@
         <FIELDS>
           <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="true" COMMENT="id"/>
           <FIELD NAME="tenant_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="tenant_id"/>
-          <FIELD NAME="lessonid" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="the lesson identifier, 'main' for general sourcepoint"/>
+          <FIELD NAME="lesson_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="the lesson identifier, 0 for general sourcepoint"/>
           <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="courseid in moodle"/>
         </FIELDS>
         <KEYS>
           <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         </KEYS>
         <INDEXES>
-          <INDEX NAME="idx_tenant_id_lessonid" UNIQUE="false" FIELDS="tenant_id,lessonid"/>
+          <INDEX NAME="idx_tenant_id_lesson_id" UNIQUE="false" FIELDS="tenant_id,lesson_id"/>
         </INDEXES>
       </TABLE>
     <TABLE NAME="local_webuntis_usermap" COMMENT="Mapping of users">

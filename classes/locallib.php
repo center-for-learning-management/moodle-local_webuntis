@@ -47,7 +47,7 @@ class locallib {
         $preserves = array(
             // lessonmap
             array('type' => 'session', 'identifier' => \local_webuntis\lessonmap::get_cacheidentifier()),
-            array('type' => 'session', 'identifier' => 'lesson'),
+            array('type' => 'session', 'identifier' => 'lesson_id'),
             // tenant
             array('type' => 'application', 'identifier' => 'endpoints-' . \local_webuntis\tenant::get_tenant_id()),
             array('type' => 'session', 'identifier' => 'tenant'),

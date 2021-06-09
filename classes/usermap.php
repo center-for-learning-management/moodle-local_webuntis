@@ -37,7 +37,6 @@ class usermap {
         global $debug; self::$debug = $debug;
         if (!empty($userinfo)) {
             self::$userinfo = $userinfo;
-            \local_webuntis\locallib::cache_set('session', 'userinfo', self::$userinfo);
             self::$token = json_decode(
                 base64_decode(
                     str_replace(
@@ -53,27 +52,24 @@ class usermap {
                 echo "Token:<pre>" . print_r(self::$token, 1) . "</pre>";
             }
 
-            self::$token = $token;
-            \local_webuntis\locallib::cache_set('session', 'token', $token);
-
-            if (!empty($token->sub)) {
-                $params = array('tenant_id' => \local_webuntis\tenant::get_tenant_id(), 'remoteuserid' => $token->sub);
+            if (!empty(self::$token->sub)) {
+                $params = array('tenant_id' => \local_webuntis\tenant::get_tenant_id(), 'remoteuserid' => self::$token->sub);
                 self::$usermap = $DB->get_record('local_webuntis_usermap', $params);
-                if (empty(self::$usermap->id) && !empty($token->sub)) {
+                if (empty(self::$usermap->id) && !empty(self::$token->sub)) {
                     self::$usermap = (object) array(
                         'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
                         'school' => \local_webuntis\tenant::get_school(),
-                        'remoteuserid' => $token->sub,
+                        'remoteuserid' => self::$token->sub,
                         'remoteuserrole' => 'unknown',
                         'timecreated' => time(),
                         'timemodified' => time(),
                         'lastaccess' => time(),
                     );
-                    self::$usermap->id = $DB->insert_record('local_webuntis_usermap', $usermap);
+                    self::$usermap->id = $DB->insert_record('local_webuntis_usermap', self::$usermap);
                 } else {
                     $DB->set_field('local_webuntis_usermap', 'lastaccess', time(), $params);
                 }
-                \local_webuntis\locallib::cache_set('session', 'usermap', self::$usermap);
+
 
                 /*
                 // Try to receive the users role.
@@ -110,10 +106,11 @@ class usermap {
             self::$token = \local_webuntis\locallib::cache_get('session', 'token');
         }
         self::$isloaded = true;
+        self::set_cache();
         // Do the mapping in case it is not yet set.
         if (isloggedin() && !isguestuser() && self::$usermap->userid != $USER->id) {
-            self::$usermap->userid = $USER->id;
-            $DB->set_field('local_webuntis_usermap', 'userid', self::$usermap->userid, array('id' => self::get_id()));
+            $url = new \moodle_url('/local/webuntis/landinguser.php');
+            redirect($url);
         }
         // Ensure the user is logged in.
         if (!empty(self::$usermap->userid)) {
@@ -183,5 +180,28 @@ class usermap {
         global $DB;
         self::$usermap->userid = 0;
         $DB->set_field('local_webuntis_usermap', 'userid', 0, array('id' => self::get_id()));
+    }
+
+    /**
+     * Ensures all data is written to cache.
+     */
+    private static function set_cache($nocheckisloaded = false) {
+        if (!empty($nocheckisloaded)) {
+            self::is_loaded();
+        }
+        \local_webuntis\locallib::cache_set('session', 'token', self::$token);
+        \local_webuntis\locallib::cache_set('session', 'usermap', self::$usermap);
+        \local_webuntis\locallib::cache_set('session', 'userinfo', self::$userinfo);
+    }
+
+    /**
+     * Set the current user in this usermap.
+     */
+    public static function set_userid() {
+        self::is_loaded();
+        global $DB, $USER;
+        self::$usermap->userid = $USER->id;
+        $DB->set_field('local_webuntis_usermap', 'userid', self::$usermap->userid, array('id' => self::get_id()));
+        self::set_cache();
     }
 }

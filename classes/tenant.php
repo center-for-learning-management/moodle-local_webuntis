@@ -84,6 +84,8 @@ class tenant {
         self::is_loaded();
         global $CFG, $PAGE;
         $endpoints = self::get_endpoints();
+        print_r($endpoints);
+        die();
         if (empty($endpoints->authorization_endpoint)) {
             throw new \moodle_exception('endpointmissing', 'local_webuntis', $CFG->wwwroot);
         }
