@@ -29,7 +29,7 @@ $userid = optional_param('userid', 0, PARAM_INT);
 
 if (!empty($userid)) {
     $PAGE->set_context(\context_user::instance($USER->id));
-    $PAGE->set_url('/local/webuntis/disconnect.php', array('userid' => $userid));
+    $PAGE->set_url(new \moodle_url('/local/webuntis/disconnect.php', array('userid' => $userid)));
     $PAGE->set_title(get_string('disconnect:user', 'local_webuntis'));
     $PAGE->set_heading(get_string('disconnect:user', 'local_webuntis'));
     $PAGE->set_pagelayout('standard');
@@ -49,7 +49,9 @@ if (empty($confirmed)) {
 } else {
     if (!empty($userid)) {
         \local_webuntis\usermap::release();
+        \local_webuntis\locallib::cache_preserve(true);
         require_logout();
+        \local_webuntis\locallib::cache_preserve(false);
 
         $url = new \moodle_url('/local/webuntis/disconnected.php');
         redirect($url);

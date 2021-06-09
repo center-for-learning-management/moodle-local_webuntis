@@ -145,6 +145,9 @@ class usermap {
         if (empty(self::$usermap->id)) return;
         return self::$usermap->id;
     }
+    public static function get_map_url() {
+        return new \moodle_url('/local/webuntis/landinguser.php');
+    }
     public static function get_userid() {
         self::is_loaded();
         if (empty(self::$usermap->userid)) return;
@@ -180,6 +183,7 @@ class usermap {
         global $DB;
         self::$usermap->userid = 0;
         $DB->set_field('local_webuntis_usermap', 'userid', 0, array('id' => self::get_id()));
+        self::set_cache();
     }
 
     /**

@@ -52,7 +52,7 @@ class tenant {
         $params = [ 'school' => $school, 'tenant_id' => $tenant_id ];
         self::$tenant = $DB->get_record_sql($sql, $params);
 
-        if (empty(self::$tenant->id) && !empty(self::$tenant->tenant_id)) {
+        if (empty(self::$tenant->id) && !empty($tenant_id)) {
             self::$tenant = (object) $params;
             self::$tenant->client = optional_param('client', '', PARAM_TEXT);
             self::$tenant->consumerkey = optional_param('consumerkey', '', PARAM_TEXT);
@@ -84,8 +84,6 @@ class tenant {
         self::is_loaded();
         global $CFG, $PAGE;
         $endpoints = self::get_endpoints();
-        print_r($endpoints);
-        die();
         if (empty($endpoints->authorization_endpoint)) {
             throw new \moodle_exception('endpointmissing', 'local_webuntis', $CFG->wwwroot);
         }

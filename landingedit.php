@@ -24,7 +24,7 @@
 require_once('../../config.php');
 
 $PAGE->set_context(\context_system::instance());
-$PAGE->set_url('/local/webuntis/landingedit.php', array());
+$PAGE->set_url(new \moodle_url('/local/webuntis/landingedit.php', array()));
 $PAGE->set_title(get_string('landing:pagetitle', 'local_webuntis'));
 $PAGE->set_heading(get_string('landing:pagetitle', 'local_webuntis'));
 $PAGE->set_pagelayout('standard');

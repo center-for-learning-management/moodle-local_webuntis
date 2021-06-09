@@ -23,8 +23,10 @@
 
 require_once('../../config.php');
 
+$confirmed = optional_param('confirmed', 0, PARAM_INT);
+
 $PAGE->set_context(\context_system::instance());
-$PAGE->set_url('/local/webuntis/landinguser.php', array());
+$PAGE->set_url(new \moodle_url('/local/webuntis/landinguser.php', array('confirmed' => $confirmed)));
 $PAGE->set_title(get_string('landing:pagetitle', 'local_webuntis'));
 $PAGE->set_heading(get_string('landing:pagetitle', 'local_webuntis'));
 $PAGE->set_pagelayout('standard');
@@ -33,16 +35,10 @@ $params = [
     'canmapnew' => 0,
     'canmapcurrent' => (isloggedin() && !isguestuser()) ? 1 : 0,
     'canmapother' => 1,
+    'userfullname' => \fullname($USER),
     'wwwroot' => $CFG->wwwroot,
 ];
 $params['count'] = $params['canmapnew'] + $params['canmapcurrent'] + $params['canmapother'];
-
-// In case mapping other user is the only option, redirect automatically.
-if (empty($params['canmapnew']) && empty($params['canmapcurrent']) && !empty($params['canmapother'])) {
-    $url = new \moodle_url('/local/webuntis/landinguser.php', array('confirmed' => 3));
-}
-
-$confirmed = optional_param('confirmed', 0, PARAM_INT);
 
 switch ($confirmed) {
     case 1: // Create new user
@@ -69,10 +65,22 @@ switch ($confirmed) {
             throw new \moodle_exception(get_string('forbidden'));
         }
         // Safely logout.
-        // Redirect to index.php
+        \local_webuntis\usermap::release();
+        \local_webuntis\locallib::cache_preserve(true);
+        require_logout();
+        \local_webuntis\locallib::cache_preserve(false);
+        require_login();
+        die("mapother");
     break;
 }
 
+// In case mapping other user is the only option, redirect automatically.
+if ($params['canmapnew'] == 0 && $params['canmapcurrent'] == 0 && $params['canmapother'] == 1) {
+    $url = new \moodle_url('/local/webuntis/landinguser.php', array('confirmed' => 3));
+    redirect($url);
+}
+
 echo $OUTPUT->header();
+echo "confirmed $confirmed";
 echo $OUTPUT->render_from_template('local_webuntis/landinguser', $params);
 echo $OUTPUT->footer();

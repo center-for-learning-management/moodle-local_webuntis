@@ -47,23 +47,26 @@
 
     {{#canmapnew}}
     <div class="card">
-        <a href="{{wwwroot}}/local/webuntis/landinguser.php?confirmed=1"
-        <i class="fa fa-new"></i><br />
-        {{#str}} landinguser:mapnew, local_webuntis {{/str}}
+        <a href="{{wwwroot}}/local/webuntis/landinguser.php?confirmed=1">
+            <i class="fa fa-new"></i><br />
+            {{#str}} landinguser:mapnew, local_webuntis {{/str}}
+        </a>
     </div>
     {{/canmapnew}}
     {{#canmapcurrent}}
     <div class="card">
-        <a href="{{wwwroot}}/local/webuntis/landinguser.php?confirmed=2"
-        <i class="fa fa-new"></i><br />
-        {{#str}} landinguser:mapcurrent, local_webuntis {{/str}}
+        <a href="{{wwwroot}}/local/webuntis/landinguser.php?confirmed=2">
+            <i class="fa fa-new"></i><br />
+            {{#str}} landinguser:mapcurrent, local_webuntis, { "fullname":  {{#quote}}{{userfullname}}{{/quote}} } {{/str}}
+        </a>
     </div>
     {{/canmapcurrent}}
     {{#canmapother}}
     <div class="card">
-        <a href="{{wwwroot}}/local/webuntis/landinguser.php?confirmed=3"
-        <i class="fa fa-new"></i><br />
-        {{#str}} landinguser:mapother, local_webuntis {{/str}}
+        <a href="{{wwwroot}}/local/webuntis/landinguser.php?confirmed=3">
+            <i class="fa fa-new"></i><br />
+            {{#str}} landinguser:mapother, local_webuntis {{/str}}
+        </a>
     </div>
     {{/canmapother}}
 </div>
