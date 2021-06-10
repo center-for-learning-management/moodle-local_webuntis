@@ -138,25 +138,29 @@ class tenant {
         return $endpoints;
     }
 
-
     public static function get_client() {
         self::is_loaded();
+        if (empty(self::$tenant->client)) return;
         return self::$tenant->client;
     }
     public static function get_consumerkey() {
         self::is_loaded();
+        if (empty(self::$tenant->consumerkey)) return;
         return self::$tenant->consumerkey;
     }
     public static function get_consumersecret() {
         self::is_loaded();
+        if (empty(self::$tenant->consumersecret)) return;
         return self::$tenant->consumersecret;
     }
     public static function get_host() {
         self::is_loaded();
+        if (empty(self::$tenant->host)) return;
         return self::$tenant->host;
     }
     public static function get_id() {
         self::is_loaded();
+        if (empty(self::$tenant->id)) return;
         return self::$tenant->id;
     }
     public static function get_init_url() {
@@ -174,6 +178,7 @@ class tenant {
     }
     public static function get_tenant_id() {
         self::is_loaded();
+        if (empty(self::$tenant->tenant_id)) return;
         return self::$tenant->tenant_id;
     }
     /**
