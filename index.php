@@ -25,7 +25,7 @@ require_once('../../config.php');
 
 // Only used during development for demonstration purposes of Gruber & Petters.
 require_once($CFG->dirroot . '/local/webuntis/fakemode.php');
-$debug = false;
+$debug = true;
 
 if ($debug) {
     echo "Received:<br />";
@@ -56,10 +56,12 @@ $PAGE->set_pagelayout('standard');
 $PAGE->navbar->add(get_string('pluginname', 'local_webuntis'), $PAGE->url);
 
 \local_webuntis\tenant::auth();
-
+//\local_webuntis\locallib::cache_print(true);
+//die();
 if (!empty(\local_webuntis\tenant::get_tenant_id()) && empty(\local_webuntis\usermap::get_userid())) {
-    require_login();
-    redirect(\local_webuntis\usermap::get_map_url());
+    //die("Require login");
+    //require_login();
+    //redirect(\local_webuntis\usermap::get_map_url());
 }
 
 if (\local_webuntis\lessonmap::get_count() > 0) {

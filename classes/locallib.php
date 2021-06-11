@@ -115,16 +115,16 @@ class locallib {
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+
         if(!empty($post) && count($post) > 0) {
             $fields = array();
             foreach($post as $key => $value) {
-                $fields[] = $key . '=' . $value;
+                $fields[] = urlencode($key) . '=' . urlencode($value);
             }
-            $fields_string = implode('&', $fields);
+            $fields = implode('&', $fields);
+
             curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
         }
         if (!empty($headers) && count($headers) > 0) {
             $strheaders = array();
@@ -159,5 +159,12 @@ class locallib {
                 return $imageurl;
             }
         }
+    }
+
+    /**
+     * Determines if eduvidual is installed on this system.
+     */
+    public static function uses_eduvidual() {
+        
     }
 }

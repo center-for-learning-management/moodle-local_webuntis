@@ -72,9 +72,9 @@ class usermap {
                 }
 
                 // ATTENTION: In this section you must not call functions like ::get_id, this will cause a loop.
-                /*
                 // Try to receive the users role.
-                $path = "https://api-integration.webuntis.com/ims/oneroster/v1p1/users"; ///$token->sub";
+                /*
+                $path = "https://api-integration.webuntis.com/ims/oneroster/v1p1/users/" . self::$token->sub;
                 echo "Path $path<br />";
                 $postparams = [ 'access_token' => "$userinfo->token_type $userinfo->access_token" ];
                 //$postparams = [ 'access_token' => "$userinfo->access_token" ];
@@ -89,8 +89,8 @@ class usermap {
                 $getuser = \local_webuntis\locallib::curl($path, $postparams);
                 $getuser = json_decode($getuser);
                 if (self::$debug) echo "<pre>" . print_r($getuser, 1) . "</pre>";
+                die();
                 */
-
                 // For tests we force a specific role.
                 $foundrole = "Administrator";
 
@@ -126,6 +126,7 @@ class usermap {
             $user = \core_user::get_user(self::$usermap->userid);
             \complete_user_login($user);
             \local_webuntis\locallib::cache_preserve(false);
+            redirect(\local_webuntis\tenant::get_init_url());
         } else {
             if (!isloggedin() || isguestuser()) {
                 require_login();
