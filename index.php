@@ -57,12 +57,6 @@ $PAGE->navbar->add(get_string('pluginname', 'local_webuntis'), $PAGE->url);
 
 \local_webuntis\tenant::auth();
 //\local_webuntis\locallib::cache_print(true);
-//die();
-if (!empty(\local_webuntis\tenant::get_tenant_id()) && empty(\local_webuntis\usermap::get_userid())) {
-    //die("Require login");
-    //require_login();
-    //redirect(\local_webuntis\usermap::get_map_url());
-}
 
 if (\local_webuntis\lessonmap::get_count() > 0) {
     \local_webuntis\lessonmap::redirect();

@@ -30,30 +30,44 @@ $PAGE->set_heading(get_string('landing:pagetitle', 'local_webuntis'));
 $PAGE->set_pagelayout('standard');
 
 $PAGE->navbar->add(get_string('landing:pagetitle', 'local_webuntis'), $PAGE->url);
+$PAGE->requires->css('/local/webuntis/style/main.css');
 
 echo $OUTPUT->header();
 
-if (\local_webuntis\lessonmap::can_edit()) {
-    $allcourses = enrol_get_all_users_courses($USER->id, true);
-    $courses = [];
-    foreach ($allcourses as $course) {
-        $ctx = \context_course::instance($course->id);
-        if (has_capability('moodle/course:update', $ctx)) {
-            $course->courseimage = \local_webuntis\locallib::get_courseimage($course->id);
-            $course->is_selected = \local_webuntis\lessonmap::is_selected($course->id);
-            $courses[] = $course;
+if (!\local_webuntis\lessonmap::can_edit()) {
+    throw new \moodle_exception(get_string('nopermissions', error, 'edit webuntis target'));
+}
+
+if (\local_webuntis\locallib::uses_eduvidual()) {
+    if (\local_webuntis\lessonmap::get_lesson_id() == 0 && \local_eduvidual\locallib::get_highest_role() == 'Manager') {
+        $params = [
+            'orgs' => array_values(\local_eduvidual\locallib::get_organisations('Manager', false)),
+        ];
+        foreach ($params['orgs'] as &$org) {
+            $dbparams = array(
+                'orgid' => $org->orgid,
+                'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
+            );
+            $chk = $DB->get_record('local_webuntis_orgmap', $dbparams);
+            $org->isenabled = (!empty($chk->enabled)) ? $chk->enabled : 0;
         }
-    }
-    $params = [
-        'canproceed' => (\local_webuntis\lessonmap::get_count() > 0) ? 1 : 0,
-        'courses' => $courses,
-    ];
-    echo $OUTPUT->render_from_template('local_webuntis/landingedit', $params);
-} else {
-    if (!empty(\local_webuntis\lessonmap::get_lesson_id())) {
-        echo "Sorry, your teacher has not yet selected a course";
-    } else {
-        echo "Sorry, your administrator has not yet selected a course";
+        echo $OUTPUT->render_from_template('local_webuntis/landingeduvidual', $params);
     }
 }
+
+$allcourses = enrol_get_all_users_courses($USER->id, true);
+$courses = [];
+foreach ($allcourses as $course) {
+    $ctx = \context_course::instance($course->id);
+    if (has_capability('moodle/course:update', $ctx)) {
+        $course->courseimage = \local_webuntis\locallib::get_courseimage($course->id);
+        $course->is_selected = \local_webuntis\lessonmap::is_selected($course->id);
+        $courses[] = $course;
+    }
+}
+$params = [
+    'canproceed' => (\local_webuntis\lessonmap::get_count() > 0) ? 1 : 0,
+    'courses' => $courses,
+];
+echo $OUTPUT->render_from_template('local_webuntis/landingedit', $params);
 echo $OUTPUT->footer();

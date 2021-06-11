@@ -29,5 +29,6 @@ function xmldb_local_webuntis_upgrade($oldversion=0) {
     $dbman = $DB->get_manager();
 
 
+
     return true;
 }

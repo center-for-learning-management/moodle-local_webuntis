@@ -26,6 +26,7 @@ $string['cachedef_session'] = 'Cache for local_webunits for user session';
 $string['disconnect:course'] = 'Remove WebUntis-Courselink';
 $string['disconnect:description'] = 'Do you really want to unlink the user accounts of Webuntis and Moodle?';
 $string['disconnect:user'] = 'Disconnect from webuntis';
+$string['eduvidual:autoenrol_in_org'] = 'Automatically enrol users in the following organizsations:';
 $string['endpointmissing'] = 'The oAuth-endpoint of the webuntis instance is unknown.';
 $string['invalidinput'] = 'Invalid input.';
 $string['invalidwebuntisinstance'] = 'The webuntis instance is invalid or has not been configured.';

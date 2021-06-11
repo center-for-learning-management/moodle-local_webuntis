@@ -165,6 +165,7 @@ class locallib {
      * Determines if eduvidual is installed on this system.
      */
     public static function uses_eduvidual() {
-        
+        global $CFG;
+        return file_exists($CFG->dirroot . '/local/eduvidual/version.php');
     }
 }
