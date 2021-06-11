@@ -26,6 +26,40 @@ defined('MOODLE_INTERNAL') || die;
 require_once($CFG->libdir . "/externallib.php");
 
 class local_webuntis_external extends external_api {
+    public static function orgmap_parameters() {
+        return new external_function_parameters(array(
+            'orgid' => new external_value(PARAM_INT, 'the orgid'),
+            'status' => new external_value(PARAM_INT, '1 or 0'),
+        ));
+    }
+
+    /**
+     * Toggle status.
+     */
+    public static function orgmap($orgid, $status) {
+        global $DB, $USER;
+        if (!\local_webuntis\locallib::uses_eduvidual()) {
+            throw new \moodle_exception('not using eduvidual');
+        }
+        $params = self::validate_parameters(self::orgmap_parameters(), array('orgid' => $orgid, 'status' => $status));
+
+        if (\local_webuntis\lessonmap::can_edit() && \local_eduvidual\locallib::get_orgrole($params['orgid'])) {
+
+        }
+        return $params;
+    }
+    /**
+     * Return definition.
+     * @return external_value
+     */
+    public static function orgmap_returns() {
+        return new external_single_structure(array(
+            'orgid' => new external_value(PARAM_INT, 'orgid or 0 if failed'),
+            'status' => new external_value(PARAM_INT, 'current status'),
+        ));
+    }
+
+
     public static function selecttarget_parameters() {
         return new external_function_parameters(array(
             'courseid' => new external_value(PARAM_INT, 'the course id'),
