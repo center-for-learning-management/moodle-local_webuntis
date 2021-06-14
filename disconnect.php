@@ -23,7 +23,9 @@
 
 require_once('../../config.php');
 
-$userid = optional_param('userid', 0, PARAM_INT);
+$userid       = optional_param('userid', 0, PARAM_INT);
+$confirmed    = optional_param('confirmed', 0, PARAM_INT);
+$disconnected = optional_param('disconnected', 0, PARAM_INT);
 
 \local_webuntis\tenant::__load();
 
@@ -32,6 +34,14 @@ $PAGE->set_url(new \moodle_url('/local/webuntis/disconnect.php', array('userid' 
 $PAGE->set_title(get_string('disconnect:user', 'local_webuntis'));
 $PAGE->set_heading(get_string('disconnect:user', 'local_webuntis'));
 $PAGE->set_pagelayout('standard');
+
+if (!empty($disconnected)) {
+    $PAGE->set_pagelayout('popup');
+    echo $OUTPUT->header();
+    echo $OUTPUT->render_from_template('local_webuntis/disconnected', []);
+    echo $OUTPUT->footer();
+}
+
 
 if ($USER->id != $userid) {
     throw new \moodle_exception('invalidinput', 'local_webuntis', $CFG->wwwroot);
@@ -50,9 +60,9 @@ if (empty($confirmed)) {
     echo $OUTPUT->footer();
 } else {
     if (!empty($userid)) {
-        $url = \local_webuntis\tenant::get_init_url();
         \local_webuntis\usermap::release();
         require_logout();
+        $url = new \moodle_url('/local/webuntis/disconnect.php', array('disconnected' => 1));
         redirect($url);
     }
 

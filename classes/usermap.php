@@ -111,6 +111,16 @@ class usermap {
         // Ensure the user is logged in.
         if (!empty(self::$usermap->userid)) {
             self::do_userlogin();
+        } else {
+            if (!isloggedin() || isguestuser()) {
+                global $PAGE;
+                $PAGE->set_url(\local_webuntis\tenant::get_init_url());
+                require_login();
+            }
+            if (isloggedin() && !isguestuser() && $_SERVER['PHP_SELF'] != '/local/webuntis/landinguser.php') {
+                $url = new \moodle_url('/local/webuntis/landinguser.php', array());
+                redirect($url);
+            }
         }
     }
 

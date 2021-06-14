@@ -68,6 +68,7 @@ class locallib {
             case false:
                 foreach (self::$preserved_caches as $type => $identifiers) {
                     foreach ($identifiers as $identifier => $value) {
+                        echo "Setting cache $type $identifier => <b>" . print_r($value, 1) . "</b><br />\n";
                         \local_webuntis\locallib::cache_set($type, $identifier, $value);
                     }
                 }

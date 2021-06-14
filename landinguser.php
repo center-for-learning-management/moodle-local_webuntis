@@ -34,6 +34,10 @@ $PAGE->set_pagelayout('standard');
 $PAGE->navbar->add(get_string('landinguser:pagetitle', 'local_webuntis'), $PAGE->url);
 $PAGE->requires->css('/local/webuntis/style/main.css');
 
+if (\local_webuntis\usermap::get_userid() > 0) {
+    throw new moodle_error('already connected');
+}
+
 $params = [
     'canmapnew' => 0,
     'canmapcurrent' => (isloggedin() && !isguestuser()) ? 1 : 0,

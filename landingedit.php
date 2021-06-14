@@ -32,27 +32,10 @@ $PAGE->set_pagelayout('standard');
 $PAGE->navbar->add(get_string('landing:pagetitle', 'local_webuntis'), $PAGE->url);
 $PAGE->requires->css('/local/webuntis/style/main.css');
 
-echo $OUTPUT->header();
+require_login();
 
 if (!\local_webuntis\lessonmap::can_edit()) {
-    throw new \moodle_exception(get_string('nopermissions', error, 'edit webuntis target'));
-}
-
-if (\local_webuntis\locallib::uses_eduvidual()) {
-    if (\local_webuntis\lessonmap::get_lesson_id() == 0 && \local_eduvidual\locallib::get_highest_role() == 'Manager') {
-        $params = [
-            'orgs' => array_values(\local_eduvidual\locallib::get_organisations('Manager', false)),
-        ];
-        foreach ($params['orgs'] as &$org) {
-            $dbparams = array(
-                'orgid' => $org->orgid,
-                'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
-            );
-            $chk = $DB->get_record('local_webuntis_orgmap', $dbparams);
-            $org->isenabled = (!empty($chk->enabled)) ? $chk->enabled : 0;
-        }
-        echo $OUTPUT->render_from_template('local_webuntis/landingeduvidual', $params);
-    }
+    throw new \moodle_exception(get_string('nopermissions', 'error', 'edit webuntis target'));
 }
 
 $allcourses = enrol_get_all_users_courses($USER->id, true);
@@ -69,5 +52,13 @@ $params = [
     'canproceed' => (\local_webuntis\lessonmap::get_count() > 0) ? 1 : 0,
     'courses' => $courses,
 ];
+
+if (\local_webuntis\locallib::uses_eduvidual() && \local_webuntis\lessonmap::get_lesson_id() == 0 && \local_webuntis\lessonmap::can_edit()) {
+    $orgs = array_values(\local_eduvidual\locallib::get_organisations('Manager', false));
+    if (count($orgs) > 0) {
+        $params['canconfigeduvidual'] = 1;
+    }
+}
+
 echo $OUTPUT->render_from_template('local_webuntis/landingedit', $params);
 echo $OUTPUT->footer();

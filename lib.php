@@ -23,6 +23,12 @@
 
 defined('MOODLE_INTERNAL') || die;
 
+function local_webuntis_before_standard_html_head() {
+    // Only do something, if we came through webuntis.
+    if (empty(\local_webuntis\tenant::get_tenant_id())) return;
+    \local_webuntis\usermap::__load();
+}
+
 /**
  * Extend Moodle Navigation.
  */

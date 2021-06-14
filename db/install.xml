@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/webuntis/db" VERSION="20210611" COMMENT="XMLDB file for Moodle local/webuntis"
+<XMLDB PATH="local/webuntis/db" VERSION="20210614" COMMENT="XMLDB file for Moodle local/webuntis"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -23,11 +23,16 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="tenant_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="orgid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="autoenrol" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Map webuntis role to eduvidual orgrole"/>
+        <FIELD NAME="autocreate" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Allow autocreation of user accounts"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="idx_orgid" UNIQUE="false" FIELDS="orgid"/>
+        <INDEX NAME="idx_tenant_id" UNIQUE="true" FIELDS="tenant_id"/>
+      </INDEXES>
     </TABLE>
     <TABLE NAME="local_webuntis_tenant" COMMENT="List of tenants">
       <FIELDS>

@@ -24,7 +24,13 @@
 $string['disconnect:course'] = 'WebUntis-Kursverknüpfung lösen';
 $string['disconnect:description'] = 'Wollen Sie wirklich die Nutzerkonten von WebUntis und Moodle trennen?';
 $string['disconnect:user'] = 'WebUntis trennen';
-$string['eduvidual:autoenrol_in_org'] = 'Alle Nutzer/innen automatisch an folgenden Schulen einschreiben:';
+$string['disconnected'] = 'Die Verbindung zwischen den Konten wurde getrennt!';
+$string['eduvidual:autocreate'] = 'Erlaube Erstellung neuer Konten';
+$string['eduvidual:autoenrol'] = 'WebUntis-Nutzerrolle automatisch auf Schule übertragen';
+$string['eduvidual:feature'] = 'Funktion';
+$string['eduvidual:features'] = 'eduvidual-Funktionen';
+$string['eduvidual:orgconfig'] = 'Verwaltung eduvidual-spezifischer Funktionen:';
+$string['eduvidual:pagetitle'] = 'eduvidual-Funktionen';
 $string['endpointmissing'] = 'Der oAuth-Endpunkt der Webuntis-Instanz ist unbekannt.';
 $string['invalidinput'] = 'Ungültige Eingabe.';
 $string['invalidwebuntisinstance'] = 'Die Webuntis-Instanz scheint ungültig zu sein oder wurde noch nicht konfiguriert.';

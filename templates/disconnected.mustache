@@ -15,9 +15,9 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template local_webuntis/disconnect
+    @template local_webuntis/disconnected
 
-    User has to confirm that we should disconnect user accounts.
+    Show confirmation that user has been disconnected. No links to anywhere!
 
     Classes required for JS:
     * none
@@ -26,33 +26,17 @@
     * none
 
     Context variables required for this template:
-    * userid
-    * wwwroot
+    * none
 
     Example context (json):
     {
-        "userid": 312,
-        "wwwroot": 'http://www.xy.z',
     }
 }}
 
-<div class="local_webuntis disconnect">
-    <p>
-        {{#str}} disconnect:description, local_webuntis {{/str}}.
+<div class="local_webuntis disconnected">
+    <p style="text-align: center;">
+        <i class="fa fa-unlink" style="font-size: 50px;"></i><br />
+        <br />
+        {{#str}} disconnected, local_webuntis {{/str}}
     </p>
-    <div class="fitem row">
-        <div class="col-md-6">
-            <a href="#" onclick="history.go(-1);" class="btn btn-secondary btn-block">
-                <i class="fa fa-arrow-left"></i>
-                {{#str}} back {{/str}}
-            </a>
-        </div>
-        <div class="col-md-6">
-            <a href="{{wwwroot}}/local/webuntis/disconnect.php?userid={{userid}}&confirmed=1" class="btn btn-primary btn-block">
-                <i class="fa fa-unlink"></i>
-                {{#str}} confirm {{/str}}
-            </a>
-        </div>
-    </div>
-
 </div>

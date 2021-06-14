@@ -26,9 +26,9 @@ defined('MOODLE_INTERNAL') || die;
 // We define the web service functions to install.
 $functions = array(
     'local_webuntis_orgmap' => array(
-        'classname'   => 'local_webuntis_external',
+        'classname'   => 'local_webuntis_external_eduvidual',
         'methodname'  => 'orgmap',
-        'classpath'   => 'local/webuntis/externallib.php',
+        'classpath'   => 'local/webuntis/externallib_eduvidual.php',
         'description' => 'Toggles mapping roles of an org.',
         'type'        => 'write',
         'ajax'        => 1,

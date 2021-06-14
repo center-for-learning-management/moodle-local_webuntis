@@ -26,62 +26,61 @@
     * none
 
     Context variables required for this template:
-    * orgs
+    * actions
+    * wwwroot
 
     Example context (json):
     {
-        "orgs":
+        "actions": [
             [
-                "orgid": 9999991,
-                "name": "testorg 1",
-                [...]
+                "isheader": 1,
+                "label": "eduvidual specific features",
+                "orgs": [
+                    ...
+                ]
             ],
-            [
-                "orgid": 9999992,
-                "name": "testorg 2",
-                [...]
-            ],
+        ]
+        "wwwroot":
     }
 }}
 
 <div class="local_webuntis landingeduvidual">
-    <p>{{#str}} eduvidual:autoenrol_in_org, local_webuntis {{/str}}</p>
-    {{#orgs}}
-    <div id="orgmap_{{uniqid}}_{{orgid}}" class="card">
-        <p class="col-md-12">
-            <a href="#" onclick="require(['local_webuntis/main'], function(M) { M.orgMap('{{uniqid}}', {{orgid}}); }); return false;">
-                <i class="fa fa-toggle-{{#isenabled}}on{{/isenabled}}{{^isenabled}}off{{/isenabled}}"></i>
-                {{name}}
+    <div class="fitem row">
+        <p class="col-md-9">
+            {{#str}} eduvidual:orgconfig, local_webuntis {{/str}}<br />
+        </p>
+        <p class="col-md-3">
+            <a href="{{{wwwroot}}}/local/webuntis/landingedit.php"
+                class="btn btn-primary btn-block">
+                <i class="fa fa-arrow-left"></i>
+                {{#str}} back {{/str}}
             </a>
         </p>
     </div>
-    {{/orgs}}
 
-    <table id="table-{{uniqid}}" class="generaltable">
-    {{#courses}}
-        <tr>
-            <td class="trigger" width="30">
-                <a href="#" id="trigger_{{uniqid}}_{{id}}" onclick="require(['local_webuntis/main'], function(M) { M.selectTarget('{{uniqid}}', {{id}}); }); return false;">
-                {{#is_selected}}
-                    <i class="fa fa-icon fa-toggle-on" style="font-size: 18px;"></i>
-                {{/is_selected}}
-                {{^is_selected}}
-                    <i class="fa fa-icon fa-toggle-off" style="font-size: 18px;"></i>
-                {{/is_selected}}
-                </a>
-            </td>
-            <td width="50"><img src="{{courseimage}}" style="height: 50px;" /></td>
-            <td>{{fullname}}</td>
-        </tr>
-    {{/courses}}
+    <table class="generaltable">
+        {{#actions}}
+            {{#isheader}}
+            <tr>
+                <th>{{label}}</th>
+                {{#orgs}}
+                    <th>{{name}}</th>
+                {{/orgs}}
+            </tr>
+            {{/isheader}}
+            {{^isheader}}
+            <tr>
+                <td>{{label}}</td>
+                {{#orgs}}
+                    <td>
+                        <a href="#" id="feature-{{uniqid}}-{{orgid}}-{{field}}"
+                            onclick="require(['local_webuntis/eduvidual'], function(E) { E.setFeature('{{uniqid}}', {{orgid}}, '{{field}}'); }); return false;">
+                            <i class="fa fa-toggle-{{#enabled}}on{{/enabled}}{{^enabled}}off{{/enabled}}"></i>
+                        </a>
+                    </td>
+                {{/orgs}}
+            </tr>
+            {{/isheader}}
+        {{/actions}}
     </table>
 </div>
-
-{{#js}}
-    $('#filter-{{uniqid}}').on("keyup", function() {
-        var filter = $(this).val().toLowerCase();
-        $('#table-{{uniqid}} tr').filter(function() {
-            $(this).toggle($(this).text().toLowerCase().indexOf(filter) > -1);
-        });
-    });
-{{/js}}
