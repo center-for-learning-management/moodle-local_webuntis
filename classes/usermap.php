@@ -33,8 +33,12 @@ class usermap {
     private static $usermap;
 
     public static function __load($userinfo = "") {
+        if (!empty(\local_webuntis\locallib::cache_get('session', 'fakemode'))) return;
         global $DB, $USER;
         global $debug; self::$debug = $debug;
+        if (!empty($_COOKIE["X-webuntis"])) {
+            self::$debug = true;
+        }
 
         if (!empty($userinfo)) {
             self::$userinfo = $userinfo;

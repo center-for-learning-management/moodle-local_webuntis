@@ -24,6 +24,9 @@
 defined('MOODLE_INTERNAL') || die;
 
 function local_webuntis_before_standard_html_head() {
+    // Only used during development for demonstration purposes of Gruber & Petters.
+    //\local_webuntis\fake::fake(true);
+
     // Only do something, if we came through webuntis.
     if (empty(\local_webuntis\tenant::get_tenant_id())) return;
     \local_webuntis\usermap::__load();
@@ -33,6 +36,7 @@ function local_webuntis_before_standard_html_head() {
  * Extend Moodle Navigation.
  */
 function local_webuntis_extend_navigation($navigation) {
+    if(!empty(\local_webuntis\locallib::cache_get('session', 'fakemode'))) return;
     // Only do something, if we came through webuntis.
     if (empty(\local_webuntis\tenant::get_tenant_id())) return;
 
@@ -54,6 +58,7 @@ function local_webuntis_extend_navigation($navigation) {
  * Extend course settings
  */
 function local_webuntis_extend_navigation_course($nav, $course, $context) {
+    if(!empty(\local_webuntis\locallib::cache_get('session', 'fakemode'))) return;
     // Only do something, if we came through webuntis.
     if (empty(\local_webuntis\tenant::get_tenant_id())) return;
 

@@ -23,9 +23,8 @@
 
 require_once('../../config.php');
 
-// Only used during development for demonstration purposes of Gruber & Petters.
-require_once($CFG->dirroot . '/local/webuntis/fakemode.php');
-$debug = true;
+\local_webuntis\fake::fake();
+$debug = false;
 
 if ($debug) {
     echo "Received:<br />";
