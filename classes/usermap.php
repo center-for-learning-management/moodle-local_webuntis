@@ -73,24 +73,26 @@ class usermap {
 
                 // ATTENTION: In this section you must not call functions like ::get_id, this will cause a loop.
                 // Try to receive the users role.
-                /*
-                $path = "https://api-integration.webuntis.com/ims/oneroster/v1p1/users/" . self::$token->sub;
-                echo "Path $path<br />";
-                $postparams = [ 'access_token' => "$userinfo->token_type $userinfo->access_token" ];
-                //$postparams = [ 'access_token' => "$userinfo->access_token" ];
-                $headerparams = [ 'Authorization' => "$userinfo->token_type $userinfo->access_token" ];
-                //$headerparams = [ 'Authorization' => "$userinfo->access_token" ];
-                if (self::$debug) echo "Getuser (via header):<br /><pre>" . print_r($headerparams, 1) . "</pre>";
-                $getuser = \local_webuntis\locallib::curl($path, [], $headerparams);
-                $getuser = json_decode($getuser);
-                if (self::$debug) echo "<pre>" . print_r($getuser, 1) . "</pre>";
+                if (!empty($_COOKIE["X-webuntis"])) {
+                    $path = "https://api-integration.webuntis.com/ims/oneroster/v1p1/users" ; ///" . self::$token->sub;
+                    echo "Path $path<br />";
+                    //$postparams = [ 'access_token' => "$userinfo->token_type $userinfo->id_token" ];
+                    $postparams = [ 'access_token' => "$userinfo->access_token" ];
+                    $headerparams = [ 'Authorization' => "$userinfo->token_type $userinfo->id_token" ];
+                    //$headerparams = [ 'Authorization' => "$userinfo->access_token" ];
+                    if (self::$debug) echo "Getuser (via header):<br /><pre>" . print_r($headerparams, 1) . "</pre>";
+                    $getuser = \local_webuntis\locallib::curl($path, [], $headerparams);
+                    $getuser = json_decode($getuser);
+                    if (self::$debug) echo "<pre>" . print_r($getuser, 1) . "</pre>";
 
-                if (self::$debug) echo "Getuser (via post):<br /><pre>" . print_r($postparams, 1) . "</pre>";
-                $getuser = \local_webuntis\locallib::curl($path, $postparams);
-                $getuser = json_decode($getuser);
-                if (self::$debug) echo "<pre>" . print_r($getuser, 1) . "</pre>";
-                die();
-                */
+                    if (self::$debug) echo "Getuser (via post):<br /><pre>" . print_r($postparams, 1) . "</pre>";
+                    $getuser = \local_webuntis\locallib::curl($path, $postparams);
+                    $getuser = json_decode($getuser);
+                    if (self::$debug) echo "<pre>" . print_r($getuser, 1) . "</pre>";
+                    die();
+                }
+
+
                 // For tests we force a specific role.
                 $foundrole = "Administrator";
 

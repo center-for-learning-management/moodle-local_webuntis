@@ -32,8 +32,6 @@ $PAGE->set_pagelayout('standard');
 $PAGE->navbar->add(get_string('landing:pagetitle', 'local_webuntis'), $PAGE->url);
 $PAGE->requires->css('/local/webuntis/style/main.css');
 
-require_login();
-
 if (!\local_webuntis\lessonmap::can_edit()) {
     throw new \moodle_exception(get_string('nopermissions', 'error', 'edit webuntis target'));
 }
@@ -60,5 +58,6 @@ if (\local_webuntis\locallib::uses_eduvidual() && \local_webuntis\lessonmap::get
     }
 }
 
+echo $OUTPUT->header();
 echo $OUTPUT->render_from_template('local_webuntis/landingedit', $params);
 echo $OUTPUT->footer();
