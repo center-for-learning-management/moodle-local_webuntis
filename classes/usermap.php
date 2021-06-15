@@ -36,9 +36,6 @@ class usermap {
         if (!empty(\local_webuntis\locallib::cache_get('session', 'fakemode'))) return;
         global $DB, $USER;
         global $debug; self::$debug = $debug;
-        if (!empty($_COOKIE["X-webuntis"])) {
-            self::$debug = true;
-        }
 
         if (!empty($userinfo)) {
             self::$userinfo = $userinfo;
@@ -118,6 +115,12 @@ class usermap {
         if (!empty(self::$usermap->userid)) {
             self::do_userlogin();
         } else {
+            if ($_SERVER['PHP_SELF'] != '/local/webuntis/landinguser.php') {
+                $url = new \moodle_url('/local/webuntis/landinguser.php', array());
+                redirect($url);
+
+            }
+            /*
             if (!isloggedin() || isguestuser()) {
                 global $PAGE;
                 $PAGE->set_url(\local_webuntis\tenant::get_init_url());
@@ -127,6 +130,7 @@ class usermap {
                 $url = new \moodle_url('/local/webuntis/landinguser.php', array());
                 redirect($url);
             }
+            */
         }
     }
 

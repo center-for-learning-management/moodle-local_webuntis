@@ -57,6 +57,7 @@ class tenant {
             self::$tenant->client = optional_param('client', '', PARAM_TEXT);
             self::$tenant->consumerkey = optional_param('consumerkey', '', PARAM_TEXT);
             self::$tenant->consumersecret = optional_param('consumersecret', '', PARAM_TEXT);
+            self::$tenant->autocreate = 0;
             self::$tenant->id = $DB->insert_record('local_webuntis_tenant', self::$tenant);
         }
         if (!empty(self::$tenant->id) && !empty($school) && self::$tenant->school != $school) {
@@ -122,22 +123,12 @@ class tenant {
         }
     }
 
-    private static function get_endpoints() {
-        self::is_loaded();
-        $endpoints = \local_webuntis\locallib::cache_get('application', 'endpoints-' . self::get_tenant_id());
-        if (empty($endpoints) || empty($endpoints->authorization_endpoint)) {
-            $host = self::get_host();
-            $school = self::get_school(true);
-            if (empty($host) || empty($school)) {
-                throw new \moodle_exception('invalid_webuntis_instance', 'local_webuntis', $CFG->wwwroot);
-            }
-            $path = "https://$host.webuntis.com/WebUntis/api/sso/$school/.well-known/openid-configuration";
-            $endpoints = json_decode(\local_webuntis\locallib::curl($path));
-            \local_webuntis\locallib::cache_set('application', 'endpoints-' . self::get_tenant_id(), $endpoints);
-        }
-        return $endpoints;
-    }
 
+    public static function get_autocreate() {
+        self::is_loaded();
+        if (empty(self::$tenant->autocreate)) return;
+        return self::$tenant->autocreate;
+    }
     public static function get_client() {
         self::is_loaded();
         if (empty(self::$tenant->client)) return;
@@ -153,6 +144,21 @@ class tenant {
         if (empty(self::$tenant->consumersecret)) return;
         return self::$tenant->consumersecret;
     }
+    private static function get_endpoints() {
+        self::is_loaded();
+        $endpoints = \local_webuntis\locallib::cache_get('application', 'endpoints-' . self::get_tenant_id());
+        if (empty($endpoints) || empty($endpoints->authorization_endpoint)) {
+            $host = self::get_host();
+            $school = self::get_school(true);
+            if (empty($host) || empty($school)) {
+                throw new \moodle_exception('invalid_webuntis_instance', 'local_webuntis', $CFG->wwwroot);
+            }
+            $path = "https://$host.webuntis.com/WebUntis/api/sso/$school/.well-known/openid-configuration";
+            $endpoints = json_decode(\local_webuntis\locallib::curl($path));
+            \local_webuntis\locallib::cache_set('application', 'endpoints-' . self::get_tenant_id(), $endpoints);
+        }
+        return $endpoints;
+    }
     public static function get_host() {
         self::is_loaded();
         if (empty(self::$tenant->host)) return;
@@ -164,12 +170,14 @@ class tenant {
         return self::$tenant->id;
     }
     public static function get_init_url() {
+        self::is_loaded();
         $params = [
             'tenant_id' => self::get_tenant_id(),
             'school' => self::get_school(),
             'lesson_id' => \local_webuntis\lessonmap::get_lesson_id(),
         ];
         return new \moodle_url('/local/webuntis/index.php', $params);
+        //return $_SESSION['webuntis_init_url'];
     }
     public static function get_school($lcase = false) {
         self::is_loaded();
@@ -193,12 +201,36 @@ class tenant {
         if (!self::$isloaded) self::__load();
     }
 
+    public static function set_autocreate($to) {
+        self::is_loaded();
+        global $DB;
+        if (empty(self::get_tenant_id())) return;
+
+        if (!\local_webuntis\usermap::is_administrator()) {
+            throw new \moodle_error('nopermission');
+        }
+        self::$tenant->autocreate = $to;
+        $DB->set_field('local_webuntis_tenant', 'autocreate', $to, [ 'tenant_id' => self::get_tenant_id() ]);
+        \local_webuntis\locallib::cache_set('session', 'tenant', self::$tenant);
+        return $to;
+    }
+
+    public static function set_init_url() {
+        $params = [
+            'tenant_id' => self::get_tenant_id(),
+            'school' => self::get_school(),
+            'lesson_id' => \local_webuntis\lessonmap::get_lesson_id(),
+        ];
+        $_SESSION['webuntis_init_url'] = new \moodle_url('/local/webuntis/index.php', $params);
+    }
+
     public static function set_oauth_keys($consumerkey, $consumersecret) {
         self::is_loaded();
         global $DB;
         self::$tenant->consumerkey = $consumerkey;
         self::$tenant->consumersecret = $consumersecret;
         $DB->update_record('local_webuntis_tenant', self::$tenant);
+        \local_webuntis\locallib::cache_set('session', 'tenant', self::$tenant);
     }
     /**
      * Set the webuntis uuid for this session.

@@ -71,4 +71,32 @@ class local_webuntis_external extends external_api {
             'tenant_id' => new external_value(PARAM_INT, 'the tenant id'),
         ));
     }
+
+    public static function autocreate_parameters() {
+        return new external_function_parameters(array(
+            'status' => new external_value(PARAM_INT, '1 or 0'),
+        ));
+    }
+
+    /**
+     * Toggle status.
+     */
+    public static function autocreate($status) {
+        global $DB;
+        if (!\local_webuntis\usermap::is_administrator()) {
+            throw new \moodle_error('nopermission');
+        }
+        $params = self::validate_parameters(self::autocreate_parameters(), array('status' => $status));
+        $params['status'] = \local_webuntis\tenant::set_autocreate($params['status']);
+        return $params;
+    }
+    /**
+     * Return definition.
+     * @return external_value
+     */
+    public static function autocreate_returns() {
+        return new external_single_structure(array(
+            'status' => new external_value(PARAM_INT, 'current status'),
+        ));
+    }
 }

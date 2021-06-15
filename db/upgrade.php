@@ -28,38 +28,28 @@ function xmldb_local_webuntis_upgrade($oldversion=0) {
     global $DB;
     $dbman = $DB->get_manager();
 
-    if ($oldversion < 2021061400) {
+    if ($oldversion < 2021061502) {
 
-        // Rename field autoenrol on table local_webuntis_orgmap to NEWNAMEGOESHERE.
-        $table = new xmldb_table('local_webuntis_orgmap');
-        $field = new xmldb_field('enabled', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'orgid');
-
-        // Launch rename field autoenrol.
-        $dbman->rename_field($table, $field, 'autoenrol');
-
-        $field = new xmldb_field('autocreate', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'autoenrol');
+        // Define field autocreate to be added to local_webuntis_tenant.
+        $table = new xmldb_table('local_webuntis_tenant');
+        $field = new xmldb_field('autocreate', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'consumersecret');
 
         // Conditionally launch add field autocreate.
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-        $index = new xmldb_index('idx_orgid', XMLDB_INDEX_NOTUNIQUE, ['orgid']);
+        $table = new xmldb_table('local_webuntis_orgmap');
+        $field = new xmldb_field('autocreate');
 
-        // Conditionally launch add index idx_orgid.
-        if (!$dbman->index_exists($table, $index)) {
-            $dbman->add_index($table, $index);
+        // Conditionally launch drop field autocreate.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
         }
-        $index = new xmldb_index('idx_tenant_id', XMLDB_INDEX_UNIQUE, ['tenant_id']);
-
-        // Conditionally launch add index idx_tenant_id.
-        if (!$dbman->index_exists($table, $index)) {
-            $dbman->add_index($table, $index);
-        }
-
 
         // Webuntis savepoint reached.
-        upgrade_plugin_savepoint(true, 2021061400, 'local', 'webuntis');
+        upgrade_plugin_savepoint(true, 2021061502, 'local', 'webuntis');
     }
+
 
     return true;
 }

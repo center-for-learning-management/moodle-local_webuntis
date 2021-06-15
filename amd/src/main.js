@@ -38,5 +38,33 @@ define(
                 fail: NOTIFICATION.exception
             }]);
         },
+        setAutoCreate: function(uniqid) {
+            var MAIN = this;
+            if (MAIN.debug) console.log('local_webuntis/eduvidual:setAutoCreate(uniqid)', uniqid);
+
+            var a = $('#autocreate-' + uniqid);
+            var trigger = $(a).find('i.fa');
+            $(trigger).css('filter', 'blur(4px)');
+
+            var setto = ($(trigger).hasClass('fa-toggle-on')) ? 0 : 1;
+            if (MAIN.debug) console.log('setto', setto);
+            AJAX.call([{
+                methodname: 'local_webuntis_autocreate',
+                args: { 'status': setto },
+                done: function(result) {
+                    $(trigger).css('filter', 'unset');
+                    if (MAIN.debug) console.log('=> Result for ' + uniqid, result);
+                    if (typeof result.status !== 'undefined') {
+                        if (MAIN.debug) console.log('===> status', result.status);
+                        if (result.status == 1) {
+                            $(trigger).removeClass('fa-toggle-off').addClass('fa-toggle-on');
+                        } else {
+                            $(trigger).removeClass('fa-toggle-on').addClass('fa-toggle-off');
+                        }
+                    }
+                },
+                fail: NOTIFICATION.exception
+            }]);
+        },
     };
 });

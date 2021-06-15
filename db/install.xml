@@ -24,7 +24,6 @@
         <FIELD NAME="tenant_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="orgid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="autoenrol" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Map webuntis role to eduvidual orgrole"/>
-        <FIELD NAME="autocreate" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Allow autocreation of user accounts"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -43,6 +42,7 @@
         <FIELD NAME="client" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="the oauth client name"/>
         <FIELD NAME="consumerkey" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" COMMENT="the oauth consumerkey"/>
         <FIELD NAME="consumersecret" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" COMMENT="the oauth consumer secret"/>
+        <FIELD NAME="autocreate" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Allow autocreation of user accounts"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

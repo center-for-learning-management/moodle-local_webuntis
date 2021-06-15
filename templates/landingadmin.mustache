@@ -1,0 +1,63 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_webuntis/landingadmin
+
+    Manage admin settings for this tenant.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * autocreate
+
+    Example context (json):
+    {
+        "autocreate": 1,
+    }
+}}
+
+<div class="local_webuntis landingadmin">
+    <h3>{{#str}} tenant:settings, local_webuntis {{/str}}</h3>
+    <table class="generaltable">
+        <tr>
+            <th>&nbsp;</th>
+            <th>{{#str}} enable {{/str}}</th>
+        </tr>
+        <tr>
+            <td>
+                {{#str}} admin:autocreate, local_webuntis {{/str}}<br />
+                <i>{{#str}} admin:autocreate:description, local_webuntis {{/str}}</i>
+                {{^sysenabledautocreate}}
+                    <br/>
+                    <span style="color: darkred; font-weight: bold;">
+                        {{#str}} admin:autocreate:syswarning, local_webuntis {{/str}}
+                    </span>
+                {{/sysenabledautocreate}}
+            </td>
+            <td width="150" style="text-align: center;">
+                <a href="#" id="autocreate-{{uniqid}}"
+                    onclick="require(['local_webuntis/main'], function(M) { M.setAutoCreate('{{uniqid}}'); }); return false;">
+                    <i class="fa fa-toggle-{{#autocreate}}on{{/autocreate}}{{^autocreate}}off{{/autocreate}}"></i>
+                </a>
+            </td>
+        </tr>
+    </table>
+</div>

@@ -39,7 +39,7 @@ if (\local_webuntis\usermap::get_userid() > 0) {
 }
 
 $params = [
-    'canmapnew' => 0,
+    'canmapnew' => get_config('local_webuntis', 'autocreate') && \local_webuntis\tenant::get_autocreate(),
     'canmapcurrent' => (isloggedin() && !isguestuser()) ? 1 : 0,
     'canmapother' => 1,
     'userfullname' => \fullname($USER),
@@ -55,13 +55,13 @@ $params['count'] = $params['canmapnew'] + $params['canmapcurrent'] + $params['ca
 switch ($confirmed) {
     case 1: // Create new user
         if (empty($params['canmapnew'])) {
-            throw new \moodle_exception(get_string('forbidden'));
+            throw new \moodle_exception('forbidden');
         }
         throw new \moodle_exception('not yet implemented');
     break;
     case 2: // Use current user
         if (empty($params['canmapcurrent'])) {
-            throw new \moodle_exception(get_string('forbidden'));
+            throw new \moodle_exception('forbidden');
         }
         if (isloggedin() && !isguestuser()) {
             \local_webuntis\usermap::set_userid();
@@ -77,16 +77,18 @@ switch ($confirmed) {
     break;
     case 3: // Use other users
         if (empty($params['canmapother'])) {
-            throw new \moodle_exception(get_string('forbidden'));
+            throw new \moodle_exception('forbidden');
         }
         // Safely logout.
         $url = \local_webuntis\tenant::get_init_url();
         \local_webuntis\usermap::release();
-        //\local_webuntis\locallib::cache_preserve(true);
         require_logout();
-        //\local_webuntis\locallib::cache_preserve(false);
-        //require_login();
-        redirect($url);
+        redirect(new \moodle_url('/local/webuntis/landinguser.php', array('confirmed' => 4, 'initurl' => $url->out(false))));
+    break;
+    case 4:
+        $initurl = required_param('initurl', PARAM_URL);
+        $SESSION->wantsurl = $initurl;
+        redirect(get_login_url());
     break;
 }
 

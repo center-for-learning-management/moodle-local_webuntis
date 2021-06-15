@@ -25,6 +25,14 @@ defined('MOODLE_INTERNAL') || die;
 
 // We define the web service functions to install.
 $functions = array(
+    'local_webuntis_autocreate' => array(
+        'classname'   => 'local_webuntis_external',
+        'methodname'  => 'autocreate',
+        'classpath'   => 'local/webuntis/externallib.php',
+        'description' => 'Toggles autocreate of user accounts per tenant.',
+        'type'        => 'write',
+        'ajax'        => 1,
+    ),
     'local_webuntis_orgmap' => array(
         'classname'   => 'local_webuntis_external_eduvidual',
         'methodname'  => 'orgmap',

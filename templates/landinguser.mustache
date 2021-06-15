@@ -45,28 +45,30 @@
         {{#str}} landinguser:select_option, local_webuntis {{/str}}:<br />
     </p>
 
-    {{#canmapnew}}
-    <div class="card">
-        <a href="{{wwwroot}}/local/webuntis/landinguser.php?confirmed=1">
-            <i class="fa fa-user-plus"></i><br />
-            {{#str}} landinguser:mapnew, local_webuntis {{/str}}
-        </a>
+    <div style="display: flex";>
+        {{#canmapnew}}
+        <div class="card">
+            <a href="{{wwwroot}}/local/webuntis/landinguser.php?confirmed=1">
+                <i class="fa fa-user-plus"></i><br />
+                {{#str}} landinguser:mapnew, local_webuntis {{/str}}
+            </a>
+        </div>
+        {{/canmapnew}}
+        {{#canmapcurrent}}
+        <div class="card">
+            <a href="{{wwwroot}}/local/webuntis/landinguser.php?confirmed=2">
+                <i class="fa fa-user-circle"></i><br />
+                {{#str}} landinguser:mapcurrent, local_webuntis, { "fullname":  {{#quote}}{{userfullname}}{{/quote}} } {{/str}}
+            </a>
+        </div>
+        {{/canmapcurrent}}
+        {{#canmapother}}
+        <div class="card">
+            <a href="{{wwwroot}}/local/webuntis/landinguser.php?confirmed=3">
+                <i class="fa fa-users"></i><br />
+                {{#str}} landinguser:mapother, local_webuntis {{/str}}
+            </a>
+        </div>
+        {{/canmapother}}
     </div>
-    {{/canmapnew}}
-    {{#canmapcurrent}}
-    <div class="card">
-        <a href="{{wwwroot}}/local/webuntis/landinguser.php?confirmed=2">
-            <i class="fa fa-user-circle"></i><br />
-            {{#str}} landinguser:mapcurrent, local_webuntis, { "fullname":  {{#quote}}{{userfullname}}{{/quote}} } {{/str}}
-        </a>
-    </div>
-    {{/canmapcurrent}}
-    {{#canmapother}}
-    <div class="card">
-        <a href="{{wwwroot}}/local/webuntis/landinguser.php?confirmed=3">
-            <i class="fa fa-users"></i><br />
-            {{#str}} landinguser:mapother, local_webuntis {{/str}}
-        </a>
-    </div>
-    {{/canmapother}}
 </div>

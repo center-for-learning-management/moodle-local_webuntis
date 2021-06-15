@@ -21,6 +21,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['admin:autocreate'] = 'Allow user creation';
+$string['admin:autocreate:description'] = 'Allow creation of user accounts based on WebUntis user data.';
+$string['admin:autocreate:syswarning'] = 'Attention: auto createn of user accounts is disabled by in the Moodle Website-Administration.';
 $string['cachedef_application'] = 'Cache for local_webunits for whole application';
 $string['cachedef_session'] = 'Cache for local_webunits for user session';
 $string['disconnect:course'] = 'Remove WebUntis-Courselink';
@@ -32,7 +35,7 @@ $string['eduvidual:autoenrol'] = 'Automatically map webuntis user role to eduvid
 $string['eduvidual:feature'] = 'Feature';
 $string['eduvidual:features'] = 'eduvidual-Features';
 $string['eduvidual:orgconfig'] = 'Enable eduvidual-specific features:';
-$string['eduvidual:pagetitle'] = 'eduvidual-Features';
+$string['eduvidual:settings'] = 'Settings regarding organisations';
 $string['endpointmissing'] = 'The oAuth-endpoint of the webuntis instance is unknown.';
 $string['invalidinput'] = 'Invalid input.';
 $string['invalidwebuntisinstance'] = 'The webuntis instance is invalid or has not been configured.';
@@ -40,7 +43,7 @@ $string['landing:pagetitle'] = 'Select course';
 $string['landing:select_target'] = 'Please select from the following courses';
 $string['landingmissing:description'] = 'Sorry, no courses have been linked yet.';
 $string['landinguser:mapcurrent'] = 'Map <i>{$a->fullname}</i>';
-$string['landinguser:mapother'] = 'Map another user account';
+$string['landinguser:mapother'] = 'Map existing user account';
 $string['landinguser:mapnew'] = 'Create user account';
 $string['landinguser:pagetitle'] = 'Map user accounts';
 $string['landinguser:select_option'] = 'Please select one of the following options';
@@ -49,5 +52,6 @@ $string['privacy:metadata'] = 'This plugin does not store any personal data';
 $string['proceed'] = 'Proceed';
 $string['redirect_edit_landingpage'] = 'You have been automatically redirected to this course. If you want to change the target of this link, you can edit it <a href="{$a->editurl}">here</a>.';
 $string['selectcourse_for_target'] = 'Select course for this target';
+$string['tenant:settings'] = 'Settings regarding Webuntis Tenant';
 $string['usermap:failed'] = 'Moodle-User could not be linked to Webuntis-User.';
 $string['usermap:success'] = 'Moodle-User successfully linked to Webuntis-User.';

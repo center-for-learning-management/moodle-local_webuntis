@@ -33,7 +33,6 @@
 
     Example context (json):
     {
-        "canconfigeduvidual": 1,
         "canproceed": 1,
         "courses": [
             {
@@ -56,13 +55,11 @@
             <input type="text" id="filter-{{uniqid}}" placeholder="{{#str}} search {{/str}}" />
         </p>
         <p class="col-md-3">
-            {{#canconfigeduvidual}}
-            <a href="{{wwwroot}}/local/webuntis/landingeduvidual.php"
+            <a href="{{wwwroot}}/local/webuntis/landingadmin.php"
                 class="btn btn-primary btn-block">
                 <i class="fa fa-gears"></i>
-                {{#str}} eduvidual:features, local_webuntis {{/str}}
+                {{#str}} settings {{/str}}
             </a>
-            {{/canconfigeduvidual}}
         </p>
         <p class="col-md-3">
             <a href="{{wwwroot}}/local/webuntis/landing.php"

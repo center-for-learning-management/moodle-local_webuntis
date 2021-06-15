@@ -24,7 +24,11 @@
 require_once('../../config.php');
 
 \local_webuntis\fake::fake();
-$debug = false;
+$debug = true;
+
+if (!empty($_COOKIE["X-webuntis"])) {
+    $debug = true;
+}
 
 if ($debug) {
     echo "Received:<br />";
@@ -52,7 +56,11 @@ $PAGE->set_url(\local_webuntis\tenant::get_init_url());
 $PAGE->set_title(get_string('pluginname', 'local_webuntis'));
 $PAGE->set_heading(get_string('pluginname', 'local_webuntis'));
 $PAGE->set_pagelayout('standard');
+
 $PAGE->navbar->add(get_string('pluginname', 'local_webuntis'), $PAGE->url);
+
+//\local_webuntis\locallib::cache_print(true);
+
 
 \local_webuntis\tenant::auth();
 

@@ -45,19 +45,7 @@
 }}
 
 <div class="local_webuntis landingeduvidual">
-    <div class="fitem row">
-        <p class="col-md-9">
-            {{#str}} eduvidual:orgconfig, local_webuntis {{/str}}<br />
-        </p>
-        <p class="col-md-3">
-            <a href="{{{wwwroot}}}/local/webuntis/landingedit.php"
-                class="btn btn-primary btn-block">
-                <i class="fa fa-arrow-left"></i>
-                {{#str}} back {{/str}}
-            </a>
-        </p>
-    </div>
-
+    <h3>{{#str}} eduvidual:settings, local_webuntis {{/str}}</h3>
     <table class="generaltable">
         {{#actions}}
             {{#isheader}}
@@ -72,7 +60,7 @@
             <tr>
                 <td>{{label}}</td>
                 {{#orgs}}
-                    <td>
+                    <td width="150" style="text-align: center;">
                         <a href="#" id="feature-{{uniqid}}-{{orgid}}-{{field}}"
                             onclick="require(['local_webuntis/eduvidual'], function(E) { E.setFeature('{{uniqid}}', {{orgid}}, '{{field}}'); }); return false;">
                             <i class="fa fa-toggle-{{#enabled}}on{{/enabled}}{{^enabled}}off{{/enabled}}"></i>
