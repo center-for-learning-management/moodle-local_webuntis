@@ -24,7 +24,7 @@
 require_once('../../config.php');
 
 \local_webuntis\fake::fake();
-$debug = true;
+$debug = false;
 
 if (!empty($_COOKIE["X-webuntis"])) {
     $debug = true;
@@ -59,10 +59,9 @@ $PAGE->set_pagelayout('standard');
 
 $PAGE->navbar->add(get_string('pluginname', 'local_webuntis'), $PAGE->url);
 
-//\local_webuntis\locallib::cache_print(true);
-
-
 \local_webuntis\tenant::auth();
+
+//\local_webuntis\locallib::cache_print(true);
 
 if (\local_webuntis\lessonmap::get_count() > 0) {
     \local_webuntis\lessonmap::redirect();

@@ -111,13 +111,15 @@ class tenant {
                     \local_webuntis\usermap::__load($userinfo);
                 }
             } else {
-                $path = $endpoints->authorization_endpoint;
-                $path .= '/?response_type=code';
-                $path .= '&scope=openid';
-                $path .= '&client_id=' . self::get_client();
-                $path .= '&school=' . self::get_school(true);
-                $path .= '&redirect_uri=' . urlencode($CFG->wwwroot . '/local/webuntis/index.php');
-                redirect($path);
+                $url = new \moodle_url($endpoints->authorization_endpoint, [
+                    'response_type' => 'code',
+                    'scope' => 'openid roster-core.readonly',
+                    'client_id' => self::get_client(),
+                    'school' => self::get_school(true),
+                    'redirect_uri' => $CFG->wwwroot . '/local/webuntis/index.php',
+
+                ]);
+                redirect($url);
             }
 
         }
