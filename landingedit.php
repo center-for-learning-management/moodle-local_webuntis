@@ -51,11 +51,8 @@ $params = [
     'courses' => $courses,
 ];
 
-if (\local_webuntis\locallib::uses_eduvidual() && \local_webuntis\lessonmap::get_lesson_id() == 0 && \local_webuntis\lessonmap::can_edit()) {
-    $orgs = array_values(\local_eduvidual\locallib::get_organisations('Manager', false));
-    if (count($orgs) > 0) {
-        $params['canconfigeduvidual'] = 1;
-    }
+if (\local_webuntis\lessonmap::get_lesson_id() == 0 && \local_webuntis\lessonmap::can_edit()) {
+    $params['canconfig'] = 1;
 }
 
 echo $OUTPUT->header();

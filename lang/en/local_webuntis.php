@@ -24,6 +24,7 @@
 $string['admin:autocreate'] = 'Allow user creation';
 $string['admin:autocreate:description'] = 'Allow creation of user accounts based on WebUntis user data.';
 $string['admin:autocreate:syswarning'] = 'Attention: auto createn of user accounts is disabled by in the Moodle Website-Administration.';
+$string['admin:usermaps:pagetitle'] = 'Usermapping';
 $string['cachedef_application'] = 'Cache for local_webunits for whole application';
 $string['cachedef_session'] = 'Cache for local_webunits for user session';
 $string['disconnect:course'] = 'Remove WebUntis-Courselink';

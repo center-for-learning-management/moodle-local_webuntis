@@ -50,10 +50,11 @@ class locallib {
             array('type' => 'session', 'identifier' => 'lesson_id'),
             // tenant
             array('type' => 'application', 'identifier' => 'endpoints-' . \local_webuntis\tenant::get_tenant_id()),
+            array('type' => 'session', 'identifier' => 'code'),
             array('type' => 'session', 'identifier' => 'tenant'),
             array('type' => 'session', 'identifier' => 'uuid'),
             // usermap
-            array('type' => 'session', 'identifier' => 'token'),
+            //array('type' => 'session', 'identifier' => 'token'),
             array('type' => 'session', 'identifier' => 'userinfo'),
             array('type' => 'session', 'identifier' => 'usermap'),
         );

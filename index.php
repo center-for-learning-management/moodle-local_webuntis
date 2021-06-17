@@ -24,10 +24,12 @@
 require_once('../../config.php');
 
 \local_webuntis\fake::fake();
+
+//$_COOKIE["X-webuntis"] = 1;
 $debug = false;
 
 if (!empty($_COOKIE["X-webuntis"])) {
-    $debug = true;
+    $debug =  true;
 }
 
 if ($debug) {
@@ -75,4 +77,7 @@ $params = [
     'urltodashboard' =>  new \moodle_url('/my'),
 ];
 echo $OUTPUT->render_from_template('local_webuntis/landingmissing', $params);
+echo "<details><summary>Show debug information</summary><pre>";
+\local_webuntis\locallib::cache_print();
+echo "</pre>";
 echo $OUTPUT->footer();

@@ -28,28 +28,5 @@ function xmldb_local_webuntis_upgrade($oldversion=0) {
     global $DB;
     $dbman = $DB->get_manager();
 
-    if ($oldversion < 2021061502) {
-
-        // Define field autocreate to be added to local_webuntis_tenant.
-        $table = new xmldb_table('local_webuntis_tenant');
-        $field = new xmldb_field('autocreate', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'consumersecret');
-
-        // Conditionally launch add field autocreate.
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-        $table = new xmldb_table('local_webuntis_orgmap');
-        $field = new xmldb_field('autocreate');
-
-        // Conditionally launch drop field autocreate.
-        if ($dbman->field_exists($table, $field)) {
-            $dbman->drop_field($table, $field);
-        }
-
-        // Webuntis savepoint reached.
-        upgrade_plugin_savepoint(true, 2021061502, 'local', 'webuntis');
-    }
-
-
     return true;
 }

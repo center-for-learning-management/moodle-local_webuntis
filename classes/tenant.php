@@ -93,23 +93,8 @@ class tenant {
         if (empty($uuid)) {
             $code = optional_param('code', '', PARAM_TEXT);
             if (!empty($code)) {
-                $path = $endpoints->token_endpoint;
-                $params = [
-                    'grant_type' => 'authorization_code',
-                    'client_id' => self::get_client(),
-                    'client_secret' => self::get_consumerkey(),
-                    'code' => $code,
-                    'redirect_uri' => $CFG->wwwroot . '/local/webuntis/index.php',
-                ];
-                if (self::$debug) echo "calling $path using the following params<br />";
-                if (self::$debug) echo "<pre>" . print_r($params, 1) . "</pre>";
-
-                $userinfo = \local_webuntis\locallib::curl($path, $params);
-
-                if (!empty($userinfo)) {
-                    $userinfo = json_decode($userinfo);
-                    \local_webuntis\usermap::__load($userinfo);
-                }
+                \local_webuntis\locallib::cache_set('session', 'code', $code);
+                self::auth_token();
             } else {
                 $url = new \moodle_url($endpoints->authorization_endpoint, [
                     'response_type' => 'code',
@@ -117,11 +102,33 @@ class tenant {
                     'client_id' => self::get_client(),
                     'school' => self::get_school(true),
                     'redirect_uri' => $CFG->wwwroot . '/local/webuntis/index.php',
-
                 ]);
                 redirect($url);
             }
 
+        }
+    }
+
+    public static function auth_token() {
+        global $CFG;
+        $code = \local_webuntis\locallib::cache_get('session', 'code');
+        $endpoints = self::get_endpoints();
+        $path = $endpoints->token_endpoint;
+        $params = [
+            'grant_type' => 'authorization_code',
+            'client_id' => self::get_client(),
+            'client_secret' => self::get_consumerkey(),
+            'code' => $code,
+            'redirect_uri' => $CFG->wwwroot . '/local/webuntis/index.php',
+        ];
+        if (self::$debug) echo "calling $path using the following params<br />";
+        if (self::$debug) echo "<pre>" . print_r($params, 1) . "</pre>";
+
+        $userinfo = \local_webuntis\locallib::curl($path, $params);
+
+        if (!empty($userinfo)) {
+            $userinfo = json_decode($userinfo);
+            \local_webuntis\usermap::__load($userinfo);
         }
     }
 

@@ -26,13 +26,14 @@
     * none
 
     Context variables required for this template:
-    * canconfigeduvidual
+    * canconfig
     * canproceed
     * courses
     * wwwroot
 
     Example context (json):
     {
+        "canconfig": 1,
         "canproceed": 1,
         "courses": [
             {
@@ -54,14 +55,25 @@
             <i class="fa fa-filter"></i>
             <input type="text" id="filter-{{uniqid}}" placeholder="{{#str}} search {{/str}}" />
         </p>
-        <p class="col-md-3">
+        <p class="col-md-2">
+            {{#canconfig}}
+            <a href="{{wwwroot}}/local/webuntis/landingusermaps.php"
+                class="btn btn-primary btn-block">
+                <i class="fa fa-users"></i>
+                {{#str}} admin:usermaps:pagetitle, local_webuntis {{/str}}
+            </a>
+            {{/canconfig}}
+        </p>
+        <p class="col-md-2">
+            {{#canconfig}}
             <a href="{{wwwroot}}/local/webuntis/landingadmin.php"
                 class="btn btn-primary btn-block">
                 <i class="fa fa-gears"></i>
                 {{#str}} settings {{/str}}
             </a>
+            {{/canconfig}}
         </p>
-        <p class="col-md-3">
+        <p class="col-md-2">
             <a href="{{wwwroot}}/local/webuntis/landing.php"
                 id="proceed-{{uniqid}}" class="btn btn-primary btn-block {{^canproceed}} disabled {{/canproceed}}">
                 <i class="fa fa-check"></i>

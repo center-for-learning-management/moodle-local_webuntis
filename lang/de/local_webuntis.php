@@ -24,6 +24,7 @@
 $string['admin:autocreate'] = 'Erlaube Kontenerstellung';
 $string['admin:autocreate:description'] = 'Erlaube die Erstellung von Nutzerkonten auf Basis von WebUntis-Kontodaten.';
 $string['admin:autocreate:syswarning'] = 'Achtung: Die Erstellung von Nutzerkonten wurde durch die Moodle Website-Administration deaktiviert.';
+$string['admin:usermaps:pagetitle'] = 'Nutzerzuordnung';
 $string['disconnect:course'] = 'WebUntis-Kursverknüpfung lösen';
 $string['disconnect:description'] = 'Wollen Sie wirklich die Nutzerkonten von WebUntis und Moodle trennen?';
 $string['disconnect:user'] = 'WebUntis trennen';

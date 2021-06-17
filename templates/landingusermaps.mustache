@@ -1,0 +1,84 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_webuntis/landingusermaps
+
+    List user maps of this tenant.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * usermaps
+    * wwwroot
+
+    Example context (json):
+    {
+        "usermaps": [
+            {
+                "firstname": "demo",
+                "lastname": "demo",
+                ...
+            }
+        ],
+        "wwwroot": 'https://x.yz.com'
+    }
+}}
+
+<div class="local_webuntis landingusermaps">
+    <h3>{{#str}} admin:usermaps:pagetitle, local_webuntis {{/str}}</h3>
+    <table class="generaltable">
+        <thead>
+            <tr>
+                <th colspan="5">WebUntis</th>
+                <th>Moodle</th>
+            </tr>
+            <tr>
+                <th>{{#str}} username {{/str}}</th>
+                <th>{{#str}} firstname {{/str}}</th>
+                <th>{{#str}} lastname {{/str}}</th>
+                <th>{{#str}} email {{/str}}</th>
+                <th>{{#str}} role {{/str}}</th>
+                <th>{{#str}} user {{/str}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#usermaps}}
+                <tr>
+                    <td>{{username}}</td>
+                    <td>{{firstname}}</td>
+                    <td>{{lastname}}</td>
+                    <td>{{email}}</td>
+                    <td>{{remoteuserrole}}</td>
+                    {{#moodleuser}}
+                        <td>
+                            <a href="{{{wwwroot}}}/user/profile.php?id={{id}}">
+                                {{fullname}}
+                            </a>
+                        </td>
+                    {{/moodleuser}}
+                    {{^moodleuser}}
+                        <td>-</td>
+                    {{/moodleuser}}
+                </tr>
+            {{/usermaps}}
+        </tbody>
+    </table>
+</div>
