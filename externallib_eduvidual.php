@@ -54,21 +54,8 @@ class local_webuntis_external_eduvidual extends external_api {
             'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
         ];
         $orgmap = $DB->get_record('local_webuntis_orgmap', $dbparams);
-        if (empty($orgmap->id)) {
-            $orgmap = (object) array_merge($dbparams, [
-                'autoenrol' => 0,
-                'autocreate' => 0,
-            ]);
-            $orgmap->{$params['field']} = $params['status'];
-            $orgmap->id = $DB->insert_record('local_webuntis_orgmap', $orgmap);
-            if (!empty($orgmap->id)) {
-                return $params;
-            }
-            throw new \moodle_exception('generalerror');
-        } else {
-            $DB->set_field('local_webuntis_orgmap', $params['field'], $params['status'], $dbparams);
-            return $params;
-        }
+        $DB->set_field('local_webuntis_orgmap', $params['field'], $params['status'], $dbparams);
+        return $params;
     }
     /**
      * Return definition.

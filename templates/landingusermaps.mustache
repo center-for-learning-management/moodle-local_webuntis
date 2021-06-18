@@ -47,7 +47,7 @@
     <table class="generaltable">
         <thead>
             <tr>
-                <th colspan="5">WebUntis</th>
+                <th colspan="5" style="border-right: 1px solid lightgray;">WebUntis</th>
                 <th>Moodle</th>
             </tr>
             <tr>
@@ -55,7 +55,7 @@
                 <th>{{#str}} firstname {{/str}}</th>
                 <th>{{#str}} lastname {{/str}}</th>
                 <th>{{#str}} email {{/str}}</th>
-                <th>{{#str}} role {{/str}}</th>
+                <th style="border-right: 1px solid lightgray;">{{#str}} role {{/str}}</th>
                 <th>{{#str}} user {{/str}}</th>
             </tr>
         </thead>
@@ -66,7 +66,7 @@
                     <td>{{firstname}}</td>
                     <td>{{lastname}}</td>
                     <td>{{email}}</td>
-                    <td>{{remoteuserrole}}</td>
+                    <td style="border-right: 1px solid lightgray;">{{remoteuserrole}}</td>
                     {{#moodleuser}}
                         <td>
                             <a href="{{{wwwroot}}}/user/profile.php?id={{id}}">

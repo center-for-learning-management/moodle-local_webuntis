@@ -36,7 +36,6 @@ $PAGE->requires->css('/local/webuntis/style/main.css');
 
 \local_webuntis\usermap::sync();
 
-
 echo $OUTPUT->header();
 $usermaps = array_values($DB->get_records('local_webuntis_usermap', array('tenant_id' => \local_webuntis\tenant::get_tenant_id()), 'lastname ASC,firstname ASC'));
 foreach ($usermaps as $usermap) {

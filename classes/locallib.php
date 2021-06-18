@@ -44,12 +44,15 @@ class locallib {
      * @param read if true store contents in local variable, if false restore cache.
      */
     public static function cache_preserve($read) {
+        // Only session caches need to be preserved.
         $preserves = array(
             // lessonmap
             array('type' => 'session', 'identifier' => \local_webuntis\lessonmap::get_cacheidentifier()),
             array('type' => 'session', 'identifier' => 'lesson_id'),
+            // orgmap
+            //array('type' => 'application', 'identifier' => 'orgmaps-' . \local_webuntis\tenant::get_tenant_id()),
             // tenant
-            array('type' => 'application', 'identifier' => 'endpoints-' . \local_webuntis\tenant::get_tenant_id()),
+            //array('type' => 'application', 'identifier' => 'endpoints-' . \local_webuntis\tenant::get_tenant_id()),
             array('type' => 'session', 'identifier' => 'code'),
             array('type' => 'session', 'identifier' => 'tenant'),
             array('type' => 'session', 'identifier' => 'uuid'),

@@ -39,6 +39,7 @@ class usermap {
 
         if (!empty($userinfo)) {
             self::$userinfo = $userinfo;
+            if (empty(self::$userinfo->id_token)) redirect(\local_webuntis\tenant::get_init_url());
             self::$token = self::extract_token(self::$userinfo->id_token);
 
             if (self::$debug) {
@@ -71,26 +72,23 @@ class usermap {
 
                 // ATTENTION: In this section you must not call functions like ::get_id, this will cause a loop.
                 // Try to receive the users role.
-                if (!empty($_COOKIE["X-webuntis"])) {
-                    $path = "https://api-integration.webuntis.com/ims/oneroster/v1p1/users/" . self::$token->sub;
-                    echo "Path $path<br />";
-                    //$postparams = [ 'access_token' => "$userinfo->token_type $userinfo->id_token" ];
-                    $postparams = [ 'access_token' => "$userinfo->access_token" ];
-                    $headerparams = [ 'Authorization' => "$userinfo->token_type $userinfo->id_token" ];
-                    //$headerparams = [ 'Authorization' => "$userinfo->access_token" ];
-                    if (self::$debug) echo "Getuser (via header):<br /><pre>" . print_r($headerparams, 1) . "</pre>";
-                    $getuser = \local_webuntis\locallib::curl($path, [], $headerparams);
-                    $getuser = json_decode($getuser);
-                    if (self::$debug) echo "<pre>" . print_r($getuser, 1) . "</pre>";
+                $path = "https://api-integration.webuntis.com/ims/oneroster/v1p1/users/" . self::$token->sub;
+                if (self::$debug) echo "Path $path<br />";
+                //$postparams = [ 'access_token' => "$userinfo->token_type $userinfo->id_token" ];
+                $postparams = [ 'access_token' => "$userinfo->access_token" ];
+                $headerparams = [ 'Authorization' => "$userinfo->token_type $userinfo->id_token" ];
+                //$headerparams = [ 'Authorization' => "$userinfo->access_token" ];
+                if (self::$debug) echo "Getuser (via header):<br /><pre>" . print_r($headerparams, 1) . "</pre>";
+                $getuser = \local_webuntis\locallib::curl($path, [], $headerparams);
+                $getuser = json_decode($getuser);
+                if (self::$debug) echo "<pre>" . print_r($getuser, 1) . "</pre>";
 
-                    die();
+                if (!empty($getuser->identifier)) {
+                    self::save_user($getuser);
                 }
 
+                $foundrole = !empty($getuser->role) ? $getuser->role : 'student';
 
-                // For tests we force a specific role.
-                $foundrole = "Administrator";
-
-                if (empty(self::$usermap)) self::$usermap = (object) array('remoteuserrole' => '');
                 if (self::$usermap->remoteuserrole != $foundrole) {
                     self::$usermap->remoteuserrole = $foundrole;
                     global $DB;
@@ -111,26 +109,26 @@ class usermap {
         // Ensure the user is logged in.
         if (!empty(self::$usermap->userid)) {
             self::do_userlogin();
+            if (\local_webuntis\usermap::is_administrator()) {
+                \local_webuntis\orgmaps::load_from_eduvidual();
+            }
         } else {
             if ($_SERVER['PHP_SELF'] != '/local/webuntis/landinguser.php') {
                 $url = new \moodle_url('/local/webuntis/landinguser.php', array());
                 redirect($url);
-
             }
-            /*
-            if (!isloggedin() || isguestuser()) {
-                global $PAGE;
-                $PAGE->set_url(\local_webuntis\tenant::get_init_url());
-                require_login();
-            }
-            if (isloggedin() && !isguestuser() && $_SERVER['PHP_SELF'] != '/local/webuntis/landinguser.php') {
-                $url = new \moodle_url('/local/webuntis/landinguser.php', array());
-                redirect($url);
-            }
-            */
         }
     }
-
+    /**
+     * Checks if enough profile data is present from webuntis for
+     * creation of a user account.
+     */
+    public static function check_data_prior_usercreate() {
+        self::is_loaded();
+        if (empty(self::get_firstname())) return false;
+        if (empty(self::get_lastname())) return false;
+        return true;
+    }
     /**
      * Do the user login based on the "sub"-value.
      * @param sub user-identificator in webuntis.
@@ -164,10 +162,25 @@ class usermap {
             )
         );
     }
+    public static function get_email() {
+        self::is_loaded();
+        if (empty(self::$usermap->email)) return;
+        return self::$usermap->email;
+    }
+    public static function get_firstname() {
+        self::is_loaded();
+        if (empty(self::$usermap->firstname)) return;
+        return self::$usermap->firstname;
+    }
     public static function get_id() {
         self::is_loaded();
         if (empty(self::$usermap->id)) return;
         return self::$usermap->id;
+    }
+    public static function get_lastname() {
+        self::is_loaded();
+        if (empty(self::$usermap->lastname)) return;
+        return self::$usermap->lastname;
     }
     public static function get_map_url() {
         return new \moodle_url('/local/webuntis/landinguser.php');
@@ -181,6 +194,11 @@ class usermap {
         self::is_loaded();
         if (empty(self::$userinfo)) return;
         return self::$userinfo;
+    }
+    public static function get_username() {
+        self::is_loaded();
+        if (empty(self::$usermap->username)) return;
+        return self::$usermap->username;
     }
     public static function get_remoteuserrole() {
         self::is_loaded();
@@ -221,6 +239,47 @@ class usermap {
     }
 
     /**
+     * Store a webuntis user to our database.
+     * @param user object.
+     */
+    private static function save_user($user) {
+        if (empty($user->identifier)) return;
+        global $DB;
+
+        $dbparams = [
+            'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
+            'remoteuserid' => $user->identifier,
+        ];
+        $usermap = $DB->get_record('local_webuntis_usermap', $dbparams);
+
+        if (empty($usermap->id)) {
+            $usermap = (object) [
+                'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
+                'school' => \local_webuntis\tenant::get_school(),
+                'remoteuserid' => $user->identifier,
+                'timecreated' => time(),
+            ];
+            $usermap->id = $DB->insert_record('local_webuntis_usermap', $usermap);
+        }
+        $webuntisfields = [ 'role', 'username', 'givenName', 'familyName', 'email' ];
+        $usermapfields = [ 'remoteuserrole', 'username', 'firstname', 'lastname', 'email' ];
+
+        $changed = false;
+        for ($a = 0; $a < count($webuntisfields); $a++) {
+            if (!empty($user->{$webuntisfields[$a]}) && $user->{$webuntisfields[$a]} != $usermap->{$usermapfields[$a]}) {
+                $usermap->{$usermapfields[$a]} = $user->{$webuntisfields[$a]};
+                $changed = true;
+            }
+        }
+        if ($changed) {
+            $DB->update_record('local_webuntis_usermap', $usermap);
+        }
+
+        // Map user role.
+        \local_webuntis\orgmaps::map_role($user);
+    }
+
+    /**
      * Ensures all data is written to cache.
      */
     private static function set_cache() {
@@ -241,7 +300,6 @@ class usermap {
     }
 
     public static function sync($chance = 1) {
-        global $DB;
         $userinfo = self::get_userinfo();
         $token = self::get_token();
         $path = "https://api-integration.webuntis.com/ims/oneroster/v1p1/users";
@@ -256,27 +314,7 @@ class usermap {
 
         if (!empty($getuser->users)) {
             foreach ($getuser->users as $user) {
-                $sql = "INSERT INTO {local_webuntis_usermap}
-                            (tenant_id,school,remoteuserid,remoteuserrole,timecreated,username,firstname,lastname,email) VALUES
-                            (?,?,?,?,?,?,?,?,?)
-                            ON DUPLICATE KEY UPDATE remoteuserrole = ?, username = ?, firstname = ?, lastname = ?, email = ?";
-                $params = [
-                    \local_webuntis\tenant::get_tenant_id(),
-                    \local_webuntis\tenant::get_school(),
-                    $user->identifier,
-                    @$user->role,
-                    time(),
-                    $user->username,
-                    $user->givenName,
-                    $user->familyName,
-                    $user->email,
-                    @$user->role,
-                    $user->username,
-                    $user->givenName,
-                    $user->familyName,
-                    $user->email,
-                ];
-                $DB->execute($sql, $params);
+                self::save_user($user);
             }
         } else {
             if (!empty($getuser[0]) && !empty($getuser[0]->errorCode)) {
@@ -288,7 +326,6 @@ class usermap {
                             if (self::$debug) echo "SECOND CHANCE\n";
                             self::sync(2);
                         }
-
                     break;
                 }
             }

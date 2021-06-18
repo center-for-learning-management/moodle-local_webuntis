@@ -38,8 +38,11 @@ if (\local_webuntis\usermap::get_userid() > 0) {
     throw new moodle_error('already connected');
 }
 
+$canmapnew = get_config('local_webuntis', 'autocreate') &&
+             \local_webuntis\tenant::get_autocreate() &&
+             \local_webuntis\usermap::check_data_prior_usercreate();
 $params = [
-    'canmapnew' => get_config('local_webuntis', 'autocreate') && \local_webuntis\tenant::get_autocreate(),
+    'canmapnew' => $canmapnew,
     'canmapcurrent' => (isloggedin() && !isguestuser()) ? 1 : 0,
     'canmapother' => 1,
     'userfullname' => \fullname($USER),
