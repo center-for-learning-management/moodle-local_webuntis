@@ -127,6 +127,7 @@ class usermap {
         self::is_loaded();
         if (empty(self::get_firstname())) return false;
         if (empty(self::get_lastname())) return false;
+        if (!\local_webuntis\locallib::uses_eduvidual() && empty(self::get_email())) return false;
         return true;
     }
     /**
