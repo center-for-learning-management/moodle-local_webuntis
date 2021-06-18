@@ -29,6 +29,9 @@
     * cancreatenew
     * canmapcurrent
     * canuseother
+    * enoughdata
+    * userfullname
+    * usermap
     * wwwroot
 
     Example context (json):
@@ -36,6 +39,15 @@
         "cancreatenew": 0,
         "canmapcurrent": 1,
         "canuseother": 1,
+        "enoughdata": 0,
+        "userfullname": 'Demo User',
+        "usermap": {
+            "tenant_id": 1300,
+            "school": 'School',
+            "remoteuserid": 'asdf-jklö-1234',
+            "userid": 0,
+            ...
+        }
         "wwwroot": 'http://www.xy.z',
     }
 }}
@@ -47,12 +59,22 @@
 
     <div style="display: flex;">
         {{#canmapnew}}
-        <div class="card">
-            <a href="{{wwwroot}}/local/webuntis/landinguser.php?confirmed=1">
-                <i class="fa fa-user-plus"></i><br />
-                {{#str}} landinguser:mapnew, local_webuntis {{/str}}
-            </a>
-        </div>
+            {{#enoughdata}}
+            <div class="card">
+                <a href="{{wwwroot}}/local/webuntis/landinguser.php?confirmed=1">
+                    <i class="fa fa-user-plus"></i><br />
+                    {{#str}} landinguser:mapnew, local_webuntis {{/str}}
+                </a>
+            </div>
+            {{/enoughdata}}
+            {{^enoughdata}}
+            <div class="card disabled" style="opacity: 0.5;">
+                <a>
+                    <i class="fa fa-user-plus"></i><br />
+                    {{#str}} landinguser:mapnew, local_webuntis {{/str}}
+                </a>
+            </div>
+            {{/enoughdata}}
         {{/canmapnew}}
         {{#canmapcurrent}}
         <div class="card">
@@ -71,4 +93,36 @@
         </div>
         {{/canmapother}}
     </div>
+    {{#canmapnew}}{{^enoughdata}}
+    <br />
+    <div class="alert alert-danger">
+        {{#str}} landinguser:mapnew:notenoughdata:text, local_webuntis {{/str}}<br />
+        <details>
+            <summary>
+                {{#str}} landinguser:mapnew:notenoughdata:showdetails, local_webuntis {{/str}}<br />
+            </summary>
+            {{#usermap}}
+            <table class="generaltable" style="width: auto; min-width: 500px;">
+                <tr>
+                    <th width="200">{{#str}} username {{/str}}</th>
+                    <td>{{username}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} firstname {{/str}}</th>
+                    <td>{{firstname}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} lastname {{/str}}</th>
+                    <td>{{lastname}}</td>
+                </tr>
+                <tr>
+                    <th>{{#str}} email {{/str}}</th>
+                    <td>{{email}}</td>
+                </tr>
+
+            </table>
+            {{/usermap}}
+        </details>
+    </div>
+    {{/enoughdata}}{{/canmapnew}}
 </div>

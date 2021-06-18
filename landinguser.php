@@ -38,14 +38,16 @@ if (\local_webuntis\usermap::get_userid() > 0) {
     throw new moodle_error('already connected');
 }
 
+$enoughdata = \local_webuntis\usermap::check_data_prior_usercreate();
 $canmapnew = get_config('local_webuntis', 'autocreate') &&
-             \local_webuntis\tenant::get_autocreate() &&
-             \local_webuntis\usermap::check_data_prior_usercreate();
+             \local_webuntis\tenant::get_autocreate();
 $params = [
     'canmapnew' => $canmapnew,
     'canmapcurrent' => (isloggedin() && !isguestuser()) ? 1 : 0,
     'canmapother' => 1,
+    'enoughdata' => $enoughdata,
     'userfullname' => \fullname($USER),
+    'usermap' => \local_webuntis\usermap::get_usermap(),
     'wwwroot' => $CFG->wwwroot,
 ];
 
@@ -76,6 +78,7 @@ switch ($confirmed) {
                 $compiler = new local_eduvidual_lib_import_compiler_user();
                 $u = $compiler->compile($u);
             }
+            $u->username = $u->email;
         }
         echo "Creating user: <pre>";
         print_r($u);

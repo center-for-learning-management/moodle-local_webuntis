@@ -199,6 +199,11 @@ class usermap {
         if (empty(self::$userinfo)) return;
         return self::$userinfo;
     }
+    public static function get_usermap() {
+        self::is_loaded();
+        if (empty(self::$usermap)) return;
+        return self::$usermap;
+    }
     public static function get_username() {
         self::is_loaded();
         if (empty(self::$usermap->username)) return;
