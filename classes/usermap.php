@@ -197,19 +197,19 @@ class usermap {
     }
     public static function is_parent() {
         self::is_loaded();
-        return (self::get_remoteuserrole() == 'Parent');
+        return (self::get_remoteuserrole() == 'parent');
     }
     public static function is_student() {
         self::is_loaded();
-        return (self::get_remoteuserrole() == 'Student');
+        return (self::get_remoteuserrole() == 'student');
     }
     public static function is_teacher() {
         self::is_loaded();
-        return (self::get_remoteuserrole() == 'Teacher');
+        return (self::get_remoteuserrole() == 'teacher');
     }
     public static function is_administrator() {
         self::is_loaded();
-        return (self::get_remoteuserrole() == 'Administrator');
+        return (self::get_remoteuserrole() == 'administrator');
     }
 
     public static function release() {

@@ -71,9 +71,9 @@ class lessonmap {
     public static function can_edit() {
         self::is_loaded();
 
-        $editroles = [ 'Administrator' ];
+        $editroles = [ 'administrator' ];
         if (self::get_lesson_id() > 0) {
-            $editroles[] = 'Teacher';
+            $editroles[] = 'teacher';
         }
         return (in_array(\local_webuntis\usermap::get_remoteuserrole(), $editroles));
     }
