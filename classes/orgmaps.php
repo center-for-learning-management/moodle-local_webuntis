@@ -42,6 +42,19 @@ class orgmaps {
         }
     }
 
+    /**
+     * Convert webuntis role to eduvidual-role.
+     * @param webuntisrole
+     */
+    public static function convert_role($webuntisrole) {
+        $roles = [ 'student', 'parent', 'teacher', 'administrator' ];
+        $role = $webuntisrole;
+        if (!in_array($role, $roles)) $role = 'student';
+        if ($role == 'administrator') $role = 'Manager';
+        else $role = ucfirst($role);
+        return $role;
+    }
+
     public static function get_orgmaps() {
         self::is_loaded();
         return self::$orgmaps;
@@ -102,12 +115,17 @@ class orgmaps {
         $usermap = $DB->get_record('local_webuntis_usermap', $params);
         if (empty($usermap->userid)) return;
 
-        $roles = [ 'student', 'parent', 'teacher', 'administrator' ];
-        $role = $user->role;
-        if (!in_array($role, $roles)) $role = 'student';
-        if ($role == 'administrator') $role = 'Manager';
-        else $role = ucfirst($role);
-
+        self::map_role_usermap($usermap);
+    }
+    /**
+     * Map role based on usermap.
+     * @param usermap
+     */
+    public static function map_role_usermap($usermap) {
+        if (!\local_webuntis\locallib::uses_eduvidual()) return;
+        if (empty(\local_webuntis\tenant::get_tenant_id())) return;
+        if (empty($usermap->role)) return;
+        $role = self::convert_role($usermap->role);
         foreach (self::get_orgmaps() as $orgmap) {
             if (!empty($orgmap->autoenrol)) {
                 \local_eduvidual\lib_enrol::role_set($usermap->userid, $orgmap->orgid, $role);

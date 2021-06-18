@@ -205,7 +205,7 @@ class lessonmap {
      * Redirect user to appropriate target.
      */
     public static function redirect() {
-        global $USER;
+        global $DB, $USER;
         if (!self::$isloaded) self::__load();
         $lessonmaps = self::$lessonmaps;
 
@@ -213,7 +213,46 @@ class lessonmap {
             return;
         }
 
-        // @todo check enrolment of user in all mapped lessons.
+        // We only enrol users once a session.
+        $synced = \local_webuntis\locallib::cache_get('session', 'synced_lessonmap-' . self::get_lesson_id());
+        if (empty($synced)) {
+            // @todo check enrolment of user in all mapped lessons.
+            // @todo better implement own enrol-plugin.
+            $moodlerole = \local_webuntis\usermap::get_moodlerole();
+            if (!empty($moodlerole)) {
+                $enrol = enrol_get_plugin('manual');
+                if (empty($enrol)) {
+                    throw new \moodle_exception('manualpluginnotinstalled', 'enrol_manual');
+                }
+                foreach ($lessonmaps as $lessonmap) {
+                    $ctx = \context_course::instance($lessonmap->courseid, IGNORE_MISSING);
+                    if (!empty($ctx->id)) {
+                        $enrolinstances = enrol_get_instances($lessonmap->courseid, false);
+                        $instance = 0;
+                        foreach ($enrolinstances as $enrolinstance) {
+                            if ($enrolinstance->enrol == "manual") {
+                                if ($enrolinstance->status == 1) {
+                                    // It is inactive - we have to activate it!
+                                    $data = (object)array('status' => 0);
+                                    $enrol->update_instance($enrolinstance, $data);
+                                }
+                                $instance = $enrolinstance;
+                            }
+                        }
+                        if (empty($instance->id)) {
+                            //$course = \core_course::instance($lessonmap->courseid);
+                            $instanceid = $enrol->add_default_instance((object)['id' => $lessonmap->courseid]);
+                            $instance = $DB->get_record('enrol', [ 'id' => $instanceid ]);
+                        }
+                        if (!empty($instance->id)) {
+                            $enrol->enrol_user($instance, $USER->id, $moodlerole, time(), 0, ENROL_USER_ACTIVE);
+                        }
+                        role_assign($moodlerole, $USER->id, $ctx);
+                    }
+                }
+            }
+            \local_webuntis\locallib::cache_set('session', 'synced_lessonmap-' . self::get_lesson_id(), true);
+        }
 
         if (!empty($lessonmaps) && count($lessonmaps) > 1) {
             // Redirect to selection list.

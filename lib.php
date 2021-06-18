@@ -40,7 +40,7 @@ function local_webuntis_extend_navigation($navigation) {
     // Only do something, if we came through webuntis.
     if (empty(\local_webuntis\tenant::get_tenant_id())) return;
 
-    if (\local_webuntis\usermap::get_userid() > 0) {
+    if (\local_webuntis\usermap::get_userid() > 0 && \local_webuntis\usermap::can_disconnect()) {
         global $USER;
         $nodehome = $navigation->get('actionmenu');
         if (empty($nodehome)){

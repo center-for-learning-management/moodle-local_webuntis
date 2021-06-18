@@ -119,6 +119,11 @@ class usermap {
             }
         }
     }
+    public static function can_disconnect() {
+        self::is_loaded();
+        if (empty(self::$usermap->candisconnect)) return;
+        return self::$usermap->candisconnect;
+    }
     /**
      * Checks if enough profile data is present from webuntis for
      * creation of a user account.
@@ -188,6 +193,21 @@ class usermap {
     }
     public static function get_map_url() {
         return new \moodle_url('/local/webuntis/landinguser.php');
+    }
+    /**
+     * Return webuntis role as Moodle-roleid.
+     * @param webuntisrole if empty use remoteuserrole of usermap.
+     */
+    public static function get_moodlerole($webuntisrole = 0) {
+        if (empty($webuntisrole)) $webuntisrole = self::get_remoteuserrole();
+        // @todo configure prefereed roles in settings.php
+        $webuntisroles = [ 'student', 'parent', 'teacher', 'administrator' ];
+        $moodleroles = [ 5, 5, 3, 3];
+        for ($a = 0; $a < count($webuntisroles); $a++) {
+            if ($webuntisroles[$a] == $webuntisrole)
+                return $moodleroles[$a];
+        }
+        return 0;
     }
     public static function get_userid() {
         self::is_loaded();
@@ -299,11 +319,13 @@ class usermap {
 
     /**
      * Set the current user in this usermap.
+     * @param userid if empty use $USER
      */
-    public static function set_userid() {
+    public static function set_userid($userid = 0) {
         self::is_loaded();
         global $DB, $USER;
-        self::$usermap->userid = $USER->id;
+        if (empty($userid)) $userid = $USER->id;
+        self::$usermap->userid = $userid;
         $DB->set_field('local_webuntis_usermap', 'userid', self::$usermap->userid, array('id' => self::get_id()));
         self::set_cache();
     }

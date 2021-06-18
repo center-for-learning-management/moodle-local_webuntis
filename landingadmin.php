@@ -36,8 +36,7 @@ $PAGE->requires->css('/local/webuntis/style/main.css');
 
 echo $OUTPUT->header();
 
-$orgs = array_values(\local_eduvidual\locallib::get_organisations('Manager', false));
-if (count($orgs) == 0 || !\local_webuntis\lessonmap::can_edit()) {
+if (!\local_webuntis\lessonmap::can_edit()) {
     throw new \moodle_exception(get_string('missing_permission', 'local_eduvidual'));
 }
 
@@ -48,47 +47,50 @@ $params = [
 echo $OUTPUT->render_from_template('local_webuntis/landingadmin', $params);
 
 if (\local_webuntis\locallib::uses_eduvidual()) {
-    $actions = [
-        [
-            'isheader' => 1,
-            'label' => '', //get_string('eduvidual:feature', 'local_webuntis'),
-            'orgs' => [],
-        ],
-        [
-            'field' => 'autoenrol',
-            'label' => get_string('eduvidual:autoenrol', 'local_webuntis'),
-            'orgs' => [],
-        ],
-    ];
+    $orgs = array_values(\local_eduvidual\locallib::get_organisations('Manager', false));
+    if (count($orgs) > 0) {
+        $actions = [
+            [
+                'isheader' => 1,
+                'label' => '', //get_string('eduvidual:feature', 'local_webuntis'),
+                'orgs' => [],
+            ],
+            [
+                'field' => 'autoenrol',
+                'label' => get_string('eduvidual:autoenrol', 'local_webuntis'),
+                'orgs' => [],
+            ],
+        ];
 
-    for ($a = 0; $a < count($orgs); $a++) {
-        $org = $orgs[$a];
-        $dbparams = array(
-            'orgid' => $org->orgid,
-            'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
-        );
-        $orgmap = $DB->get_record('local_webuntis_orgmap', $dbparams);
-        for ($b = 0; $b < count($actions); $b++) {
-            if ($b == 0) {
-                $actions[$b]['orgs'][] = (object) [
-                    'orgid' => $org->orgid,
-                    'name' => $org->name,
-                ];
-            } else {
-                $actions[$b]['orgs'][] = (object) [
-                    'enabled' => $orgmap->{$actions[$b]['field']},
-                    'orgid' => $org->orgid,
-                    'name' => $org->name,
-                ];
+        for ($a = 0; $a < count($orgs); $a++) {
+            $org = $orgs[$a];
+            $dbparams = array(
+                'orgid' => $org->orgid,
+                'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
+            );
+            $orgmap = $DB->get_record('local_webuntis_orgmap', $dbparams);
+            for ($b = 0; $b < count($actions); $b++) {
+                if ($b == 0) {
+                    $actions[$b]['orgs'][] = (object) [
+                        'orgid' => $org->orgid,
+                        'name' => $org->name,
+                    ];
+                } else {
+                    $actions[$b]['orgs'][] = (object) [
+                        'enabled' => $orgmap->{$actions[$b]['field']},
+                        'orgid' => $org->orgid,
+                        'name' => $org->name,
+                    ];
+                }
             }
         }
+
+        $params = [
+            'actions' => $actions,
+            'wwwroot' => $CFG->wwwroot,
+        ];
+
+        echo $OUTPUT->render_from_template('local_webuntis/landingeduvidual', $params);
     }
-
-    $params = [
-        'actions' => $actions,
-        'wwwroot' => $CFG->wwwroot,
-    ];
-
-    echo $OUTPUT->render_from_template('local_webuntis/landingeduvidual', $params);
 }
 echo $OUTPUT->footer();

@@ -65,12 +65,15 @@ switch ($confirmed) {
         // Create new user and store id
         $u = (object) [
             'confirmed' => 1,
+            'deleted' => 0,
             'mnethostid' => 1,
             'username' => \local_webuntis\usermap::get_username(),
             'firstname' => \local_webuntis\usermap::get_firstname(),
             'lastname' => \local_webuntis\usermap::get_lastname(),
             'email' => \local_webuntis\usermap::get_email(),
+            'role' => \local_webuntis\orgmaps::convert_role(\local_webuntis\usermap::get_remoteuserrole()),
             'auth' => 'manual',
+            'policyagreed' => 0,
         ];
         if (\local_webuntis\locallib::uses_eduvidual()) {
             if (empty($u->email)) {
@@ -80,27 +83,30 @@ switch ($confirmed) {
             }
             $u->username = $u->email;
         }
-        echo "Creating user: <pre>";
-        print_r($u);
-        echo "</pre>";
-        die();
 
-        $u->id = user_create_user($u, false, false);
+        require_once("$CFG->dirroot/user/lib.php");
+        $u->id = \user_create_user($u, false, true);
+        if (empty($u->id)) {
+            throw new \moodle_exception('could not create user');
+        }
         $u->idnumber = $u->id;
         $DB->set_field('user', 'idnumber', $u->idnumber, array('id' => $u->id));
-        $user->secret = \local_eduvidual\locallib::get_user_secret($u->id);
-        if (empty($user->password)) {
-            $user->password = $user->secret;
-        }
-        update_internal_user_password($u, $user->password, false);
-        set_user_preference('auth_forcepasswordchange', true, $u->id);
+        $DB->set_field('user', 'firstaccess', time(), array('id' => $u->id));
+        $DB->set_field('user', 'lastaccess', time(), array('id' => $u->id));
+        $DB->set_field('user', 'currentlogin', time(), array('id' => $u->id));
+        $DB->set_field('user', 'lastlogin', time(), array('id' => $u->id));
+        $u->secret = \local_eduvidual\locallib::get_user_secret($u->id);
+        \update_internal_user_password($u, $u->secret, false);
 
-        $user->id = $u->id;
+        \local_eduvidual\lib_enrol::choose_background($u->id);
+        \core\event\user_created::create_from_userid($u->id)->trigger();
 
-        \local_eduvidual\lib_enrol::choose_background($user->id);
-        // Trigger event.
-        \core\event\user_created::create_from_userid($user->id)->trigger();
-
+        \local_webuntis\usermap::set_userid($u->id);
+        // Ensure we are enrolled in all eduvidual-organisations.
+        \local_webuntis\orgmaps::map_role_usermap(\local_webuntis\usermap::get_usermap());
+        $DB->set_field('local_webuntis_usermap', 'candisconnect', 0, array('id' => \local_webuntis\usermap::get_id()));
+        $url = \local_webuntis\tenant::get_init_url();
+        redirect($url);
     break;
     case 2: // Use current user
         if (empty($params['canmapcurrent'])) {
