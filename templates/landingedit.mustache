@@ -85,7 +85,7 @@
     <div style="height: 500px; overflow-x: auto;">
         <table id="table-{{uniqid}}" class="generaltable">
         {{#courses}}
-            <tr>
+            <tr height="50">
                 <td class="trigger" width="30">
                     <a href="#" id="trigger_{{uniqid}}_{{id}}" onclick="require(['local_webuntis/main'], function(M) { M.selectTarget('{{uniqid}}', {{id}}); }); return false;">
                     {{#is_selected}}
@@ -96,8 +96,7 @@
                     {{/is_selected}}
                     </a>
                 </td>
-                <td width="50">
-                    <img src="{{courseimage}}" style="height: 50px;" />
+                <td width="50" class="courseimage" style="background: url({{{courseimage}}});">
                 </td>
                 <td>
                     {{{fullname}}}

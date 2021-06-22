@@ -26,13 +26,44 @@ defined('MOODLE_INTERNAL') || die;
 require_once($CFG->libdir . "/externallib.php");
 
 class local_webuntis_external extends external_api {
+    /**
+     * Define parameters.
+     */
+    public static function autocreate_parameters() {
+        return new external_function_parameters(array(
+            'status' => new external_value(PARAM_INT, '1 or 0'),
+        ));
+    }
+    /**
+     * Toggle status.
+     */
+    public static function autocreate($status) {
+        global $DB;
+        if (!\local_webuntis\usermap::is_administrator()) {
+            throw new \moodle_error('nopermission');
+        }
+        $params = self::validate_parameters(self::autocreate_parameters(), array('status' => $status));
+        $params['status'] = \local_webuntis\tenant::set_autocreate($params['status']);
+        return $params;
+    }
+    /**
+     * Return definition.
+     * @return external_value
+     */
+    public static function autocreate_returns() {
+        return new external_single_structure(array(
+            'status' => new external_value(PARAM_INT, 'current status'),
+        ));
+    }
+    /**
+     * Define parameters.
+     */
     public static function selecttarget_parameters() {
         return new external_function_parameters(array(
             'courseid' => new external_value(PARAM_INT, 'the course id'),
             'status' => new external_value(PARAM_INT, '1 or 0'),
         ));
     }
-
     /**
      * Toggle status.
      */
@@ -71,32 +102,44 @@ class local_webuntis_external extends external_api {
             'tenant_id' => new external_value(PARAM_INT, 'the tenant id'),
         ));
     }
-
-    public static function autocreate_parameters() {
+    /**
+     * Define parameters.
+     */
+    public static function tenantdata_parameters() {
         return new external_function_parameters(array(
-            'status' => new external_value(PARAM_INT, '1 or 0'),
+            'tenant_id' => new external_value(PARAM_INT, 'the tenant_id'),
+            'field' => new external_value(PARAM_TEXT, 'name of field'),
+            'value' => new external_value(PARAM_TEXT, 'value of field'),
         ));
     }
-
     /**
      * Toggle status.
      */
-    public static function autocreate($status) {
+    public static function tenantdata($tenant_id, $field, $value) {
         global $DB;
-        if (!\local_webuntis\usermap::is_administrator()) {
-            throw new \moodle_error('nopermission');
+        $params = self::validate_parameters(self::tenantdata_parameters(), array('tenant_id' => $tenant_id, 'field' => $field, 'value' => $value));
+
+        if (!is_siteadmin()) {
+            throw new \moodle_exception('permission denied');
         }
-        $params = self::validate_parameters(self::autocreate_parameters(), array('status' => $status));
-        $params['status'] = \local_webuntis\tenant::set_autocreate($params['status']);
-        return $params;
+
+        $fields = [ 'client', 'consumerkey', 'consumersecret' ];
+        if (!in_array($params['field'], $fields)) {
+            throw new \moodle_exception('invalid field');
+        }
+
+        $status = $DB->set_field('local_webuntis_tenant', $params['field'], $params['value'], [ 'tenant_id' => $params['tenant_id']]);
+
+        return [ 'status' => $status ];
     }
     /**
      * Return definition.
      * @return external_value
      */
-    public static function autocreate_returns() {
+    public static function tenantdata_returns() {
         return new external_single_structure(array(
             'status' => new external_value(PARAM_INT, 'current status'),
         ));
     }
+
 }

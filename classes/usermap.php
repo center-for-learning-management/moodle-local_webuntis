@@ -74,10 +74,7 @@ class usermap {
                 // Try to receive the users role.
                 $path = "https://api-integration.webuntis.com/ims/oneroster/v1p1/users/" . self::$token->sub;
                 if (self::$debug) echo "Path $path<br />";
-                //$postparams = [ 'access_token' => "$userinfo->token_type $userinfo->id_token" ];
-                $postparams = [ 'access_token' => "$userinfo->access_token" ];
                 $headerparams = [ 'Authorization' => "$userinfo->token_type $userinfo->id_token" ];
-                //$headerparams = [ 'Authorization' => "$userinfo->access_token" ];
                 if (self::$debug) echo "Getuser (via header):<br /><pre>" . print_r($headerparams, 1) . "</pre>";
                 $getuser = \local_webuntis\locallib::curl($path, [], $headerparams);
                 $getuser = json_decode($getuser);

@@ -40,7 +40,7 @@ define(
         },
         setAutoCreate: function(uniqid) {
             var MAIN = this;
-            if (MAIN.debug) console.log('local_webuntis/eduvidual:setAutoCreate(uniqid)', uniqid);
+            if (MAIN.debug) console.log('local_webuntis/main:setAutoCreate(uniqid)', uniqid);
 
             var a = $('#autocreate-' + uniqid);
             var trigger = $(a).find('i.fa');
@@ -66,5 +66,37 @@ define(
                 fail: NOTIFICATION.exception
             }]);
         },
+        tenantData: function(tenant_id, sender) {
+            var MAIN = this;
+            if (MAIN.debug) console.log('local_webuntis/main:tenantData(tenant_id, sender)', tenant_id, sender);
+            //var tr = $(sender).closest('tr');
+            //var tenant_id = $(tr).attr('data-tenant_id');
+            var field = $(sender).attr('data-field');
+            var value = $(sender).val();
+
+            $(sender).css('filter', 'blur(4px)');
+
+            var data = { 'tenant_id': tenant_id, 'field': field, 'value': value };
+            if (MAIN.debug) console.log('Sending', data);
+            AJAX.call([{
+                methodname: 'local_webuntis_tenantdata',
+                args: data,
+                done: function(result) {
+                    $(sender).css('filter', 'unset');
+                    if (MAIN.debug) console.log('=> Result', result);
+
+                    if (result.status != 1) {
+                        $(sender).addClass('alert-danger');
+                    } else {
+                        $(sender).addClass('alert-success');
+                        setTimeout(function() {
+                            $(sender).removeClass('alert-success');
+                        }, 1000);
+                        $(sender).removeClass('alert-danger');
+                    }
+                },
+                fail: NOTIFICATION.exception
+            }]);
+        }
     };
 });

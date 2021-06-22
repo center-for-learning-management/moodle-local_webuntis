@@ -31,6 +31,14 @@ if ($hassiteconfig) {
             get_string('pluginname', 'local_webuntis')
         )
     );
+    $ADMIN->add(
+        'local_webuntis',
+        new admin_externalpage(
+            'local_webuntis/tenants',
+            get_string('tenants', 'local_webuntis'),
+            new \moodle_url('/local/webuntis/tenants.php', [])
+        )
+    );
     // We ommit the label, so that it does not show the heading.
     $settings = new admin_settingpage( 'local_webuntis_settings', '');
 

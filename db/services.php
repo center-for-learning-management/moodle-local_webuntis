@@ -49,4 +49,12 @@ $functions = array(
         'type'        => 'write',
         'ajax'        => 1,
     ),
+    'local_webuntis_tenantdata' => array(
+        'classname'   => 'local_webuntis_external',
+        'methodname'  => 'tenantdata',
+        'classpath'   => 'local/webuntis/externallib.php',
+        'description' => 'Edit data of a tenant.',
+        'type'        => 'write',
+        'ajax'        => 1,
+    ),
 );

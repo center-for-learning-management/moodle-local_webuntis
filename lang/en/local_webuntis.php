@@ -56,5 +56,6 @@ $string['proceed'] = 'Proceed';
 $string['redirect_edit_landingpage'] = 'You have been automatically redirected to this course. If you want to change the target of this link, you can edit it <a href="{$a->editurl}">here</a>.';
 $string['selectcourse_for_target'] = 'Select course for this target';
 $string['tenant:settings'] = 'Settings regarding Webuntis Tenant';
+$string['tenants'] = 'Tenants';
 $string['usermap:failed'] = 'Moodle-User could not be linked to Webuntis-User.';
 $string['usermap:success'] = 'Moodle-User successfully linked to Webuntis-User.';

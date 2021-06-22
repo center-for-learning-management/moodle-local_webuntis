@@ -1,0 +1,87 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_webuntis/tenants
+
+    Manage known tenants.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * tenants
+
+    Example context (json):
+    {
+        "tenants": [
+            {
+                "tenant_id": 1300,
+                "school": 'xyz',
+                ...
+            },
+            ...
+        ],
+    }
+}}
+
+<div class="local_webuntis tenants">
+    <table class="generaltable" id="tab-{{uniqid}}">
+        <thead>
+            <tr>
+                <td>tenant_id</td>
+                <td>school</td>
+                <td>host</td>
+                <td>client</td>
+                <td>consumerkey</td>
+                <td>consumersecret</td>
+                <td>autocreate</td>
+            </tr>
+        </thead>
+        <tbody>
+            {{#tenants}}
+            <tr data-tenant_id="{{tenant_id}}">
+                <td>{{tenant_id}}</td>
+                <td>{{school}}</td>
+                <td>{{host}}</td>
+                <td>
+                    <input data-field="client" value="{{client}}" type="text"
+                        onblur="var inp = this; require(['local_webuntis/main'], function(M) { M.tenantData({{tenant_id}}, inp); });">
+                </td>
+                <td>
+                    <input data-field="consumerkey" value="{{consumerkey}}" type="text"
+                        onblur="var inp = this; require(['local_webuntis/main'], function(M) { M.tenantData({{tenant_id}}, inp); });">
+                </td>
+                <td>
+                    <input data-field="consumersecret" value="{{consumersecret}}" type="text"
+                        onblur="var inp = this; require(['local_webuntis/main'], function(M) { M.tenantData({{tenant_id}}, inp); });">
+                </td>
+                <td>
+                    {{#autocreate}}
+                        {{#str}} enabled, admin {{/str}}
+                    {{/autocreate}}
+                    {{^autocreate}}
+                        {{#str}} disabled, admin {{/str}}
+                    {{/autocreate}}
+                </td>
+            </tr>
+            {{/tenants}}
+        </tbody>
+    </table>
+</div>

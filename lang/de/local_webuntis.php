@@ -53,5 +53,6 @@ $string['proceed'] = 'Weiter';
 $string['redirect_edit_landingpage'] = 'Sie wurden automatisch in diesen Kurs weitergeleitet. Falls Sie das Ziel dieses Links ändern möchten, klicken Sie bitte <a href="{$a->editurl}">hier</a>.';
 $string['selectcourse_for_target'] = 'Wählen Sie einen Kurs für dieses Ziel';
 $string['tenant:settings'] = 'Einstellungen zum Webuntis Tenant';
+$string['tenants'] = 'Tenants';
 $string['usermap:failed'] = 'Moodle-Konto konnte nicht mit WebUntis-Konto verknüpft werden.';
 $string['usermap:success'] = 'Moodle-Konto wurde erfolgreich mit WebUntis-Konto verknüpft.';

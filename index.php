@@ -23,14 +23,9 @@
 
 require_once('../../config.php');
 
-\local_webuntis\fake::fake();
+// \local_webuntis\fake::fake();
 
-//$_COOKIE["X-webuntis"] = 1;
 $debug = false;
-
-if (!empty($_COOKIE["X-webuntis"])) {
-    $debug =  true;
-}
 
 if ($debug) {
     echo "Received:<br />";
