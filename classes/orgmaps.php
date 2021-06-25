@@ -89,7 +89,7 @@ class orgmaps {
         global $DB;
         $orgs = \local_eduvidual\locallib::get_organisations('Manager', false);
         foreach ($orgs as $org) {
-            $orgmap = $DB->get_record('local_webuntis_orgmap', [ 'orgid' => $org->orgid ]);
+            $orgmap = $DB->get_record('local_webuntis_orgmap', [ 'orgid' => $org->orgid, 'tenant_id' => \local_webuntis\tenant::get_tenant_id()]);
             if (empty($orgmap->id)) {
                 $orgmap = (object)[
                     'autoenrol' => 1,
