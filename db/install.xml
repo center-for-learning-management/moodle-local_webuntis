@@ -30,7 +30,7 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="idx_orgid" UNIQUE="false" FIELDS="orgid"/>
-        <INDEX NAME="idx_tenant_id" UNIQUE="true" FIELDS="tenant_id"/>
+        <INDEX NAME="idx_tenant_id" UNIQUE="false" FIELDS="tenant_id"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="local_webuntis_tenant" COMMENT="List of tenants">
