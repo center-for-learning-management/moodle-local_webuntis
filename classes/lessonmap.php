@@ -144,15 +144,20 @@ class lessonmap {
         $courses = array();
         for ($a = 0; $a < count(self::$lessonmaps); $a++) {
             $courseid = self::$lessonmaps[$a]->courseid;
-
-            $course = \get_course($courseid);
-            $course = new \core_course_list_element($course);
-            $courses[$course->fullname] = (object) array(
-                'courseimage' => \local_webuntis\locallib::get_courseimage($courseid),
-                'fullname' => $course->fullname,
-                'id' => $courseid,
-                'shortname' => $course->shortname,
-            );
+            $context = \context_course::instance($courseid, IGNORE_MISSING);
+            if (empty($context->id)) {
+                // Course does not exist anymore.
+                self::change_map($courseid*-1);
+            } else {
+                $course = \get_course($courseid);
+                $course = new \core_course_list_element($course);
+                $courses[$course->fullname] = (object) array(
+                    'courseimage' => \local_webuntis\locallib::get_courseimage($courseid),
+                    'fullname' => $course->fullname,
+                    'id' => $courseid,
+                    'shortname' => $course->shortname,
+                );
+            }
         }
         ksort($courses);
 
