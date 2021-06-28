@@ -64,6 +64,16 @@ if (\local_webuntis\lessonmap::get_count() > 0) {
     \local_webuntis\lessonmap::redirect();
 }
 if (\local_webuntis\lessonmap::can_edit()) {
+    // If no lesson map was found, we are on eduvidual and manager, and lesson_id is 0,
+    // create default map.
+    if (empty(\local_webuntis\lessonmap::get_count()) && \local_webuntis\lessonmap::get_lesson_id() == 0 && \local_webuntis\locallib::uses_eduvidual() && \local_eduvidual\locallib::get_highest_role() == 'Manager') {
+        $orgs = \local_eduvidual\locallib::get_organisations('Manager', false);
+        foreach ($orgs as $org) {
+            if (!empty($org->courseid)) \local_webuntis\lessonmap::change_map($org->courseid);
+            if (!empty($org->supportcourseid)) \local_webuntis\lessonmap::change_map($org->supportcourseid);
+        }
+
+    }
     redirect(\local_webuntis\lessonmap::get_edit_url());
 }
 
