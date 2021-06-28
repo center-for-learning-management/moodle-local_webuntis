@@ -55,29 +55,25 @@
             <i class="fa fa-filter"></i>
             <input type="text" id="filter-{{uniqid}}" placeholder="{{#str}} search {{/str}}" />
         </p>
-        <p class="col-md-2">
+        <p class="col-md-6 fitem row">
             {{#canconfig}}
             <a href="{{wwwroot}}/local/webuntis/landingusermaps.php"
-                class="btn btn-primary btn-block">
-                <i class="fa fa-users"></i>
-                {{#str}} admin:usermaps:pagetitle, local_webuntis {{/str}}
+                class="btn btn-primary col-md-4">
+                <i class="fa fa-users"></i><br />
+                <span class="caption">{{#str}} admin:usermaps:pagetitle, local_webuntis {{/str}}</span>
             </a>
             {{/canconfig}}
-        </p>
-        <p class="col-md-2">
             {{#canconfig}}
             <a href="{{wwwroot}}/local/webuntis/landingadmin.php"
-                class="btn btn-primary btn-block">
-                <i class="fa fa-gears"></i>
-                {{#str}} settings {{/str}}
+                class="btn btn-primary col-md-4">
+                <i class="fa fa-gears"></i><br />
+                <span class="caption">{{#str}} settings {{/str}}</span>
             </a>
             {{/canconfig}}
-        </p>
-        <p class="col-md-2">
             <a href="{{wwwroot}}/local/webuntis/landing.php"
-                id="proceed-{{uniqid}}" class="btn btn-primary btn-block {{^canproceed}} disabled {{/canproceed}}">
-                <i class="fa fa-check"></i>
-                {{#str}} proceed, local_webuntis {{/str}}
+                id="proceed-{{uniqid}}" class="btn btn-primary col-md-4 {{^canproceed}} disabled {{/canproceed}}">
+                <i class="fa fa-check"></i><br />
+                <span class="caption">{{#str}} proceed, local_webuntis {{/str}}</span>
             </a>
         </p>
     </div>
