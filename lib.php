@@ -24,11 +24,15 @@
 defined('MOODLE_INTERNAL') || die;
 
 function local_webuntis_after_config() {
+    \local_webuntis\locallib::cache_print(true);
     if (empty(\local_webuntis\tenant::get_tenant_id())) {
+        die("TENANT IS EMPTY " . \local_webuntis\tenant::get_tenant_id());
         return;
     }
+    die("TENANT IS NOT EMPTY");
     global $PAGE;
     $PAGE->add_body_class('webuntis-loading-check');
+    \local_webuntis\locallib::cache_print(true);
 }
 
 function local_webuntis_before_standard_html_head() {
