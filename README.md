@@ -1,7 +1,7 @@
 # moodle-local_webuntis
 
 ## About this plugin
-This plugin allows an integration of Moodle into WebUntis. The core features are:
+This plugin allows an integration of Moodle with WebUntis. The core features are:
 - User mapping
 - User creation based on WebUntis profile data *)
 - Mapping of courses for particular links inside WebUntis (main menu and lesson pages)
