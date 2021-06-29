@@ -73,7 +73,9 @@ class local_webuntis_external extends external_api {
 
         if (\local_webuntis\lessonmap::can_edit()) {
             $courseid = $params['courseid'];
-            if ($params['status'] == 0) $courseid = $courseid*-1;
+            if ($params['status'] == 0) {
+                $courseid = $courseid * -1;
+            }
             \local_webuntis\lessonmap::change_map($courseid);
 
             $params['canproceed'] = (\local_webuntis\lessonmap::get_count() > 0) ? 1 : 0;
@@ -84,9 +86,6 @@ class local_webuntis_external extends external_api {
             $params['lesson_id'] = 0;
             $params['tenant_id'] = 0;
         }
-
-
-
         return $params;
     }
     /**
@@ -117,8 +116,14 @@ class local_webuntis_external extends external_api {
      */
     public static function tenantdata($tenant_id, $field, $value) {
         global $DB;
-        $params = self::validate_parameters(self::tenantdata_parameters(), array('tenant_id' => $tenant_id, 'field' => $field, 'value' => $value));
-
+        $params = self::validate_parameters(
+            self::tenantdata_parameters(),
+            array(
+                'tenant_id' => $tenant_id,
+                'field' => $field,
+                'value' => $value
+            )
+        );
         if (!is_siteadmin()) {
             throw new \moodle_exception('permission denied');
         }
@@ -128,7 +133,8 @@ class local_webuntis_external extends external_api {
             throw new \moodle_exception('invalid field');
         }
 
-        $status = $DB->set_field('local_webuntis_tenant', $params['field'], $params['value'], [ 'tenant_id' => $params['tenant_id']]);
+        $dbparams = [ 'tenant_id' => $params['tenant_id']];
+        $status = $DB->set_field('local_webuntis_tenant', $params['field'], $params['value'], $dbparams);
 
         return [ 'status' => $status ];
     }

@@ -32,14 +32,18 @@ class usermap {
     private static $userinfo;
     private static $usermap;
 
-    public static function __load($userinfo = "") {
-        if (!empty(\local_webuntis\locallib::cache_get('session', 'fakemode'))) return;
+    public static function load($userinfo = "") {
+        if (!empty(\local_webuntis\locallib::cache_get('session', 'fakemode'))) {
+            return;
+        }
         global $DB, $USER;
         global $debug; self::$debug = $debug;
 
         if (!empty($userinfo)) {
             self::$userinfo = $userinfo;
-            if (empty(self::$userinfo->id_token)) redirect(\local_webuntis\tenant::get_init_url());
+            if (empty(self::$userinfo->id_token)) {
+                redirect(\local_webuntis\tenant::get_init_url());
+            }
             self::$token = self::extract_token(self::$userinfo->id_token);
 
             if (self::$debug) {
@@ -73,12 +77,18 @@ class usermap {
                 // ATTENTION: In this section you must not call functions like ::get_id, this will cause a loop.
                 // Try to receive the users role.
                 $path = "https://api-integration.webuntis.com/ims/oneroster/v1p1/users/" . self::$token->sub;
-                if (self::$debug) echo "Path $path<br />";
+                if (self::$debug) {
+                    echo "Path $path<br />";
+                }
                 $headerparams = [ 'Authorization' => "$userinfo->token_type $userinfo->id_token" ];
-                if (self::$debug) echo "Getuser (via header):<br /><pre>" . print_r($headerparams, 1) . "</pre>";
+                if (self::$debug) {
+                    echo "Getuser (via header):<br /><pre>" . print_r($headerparams, 1) . "</pre>";
+                }
                 $getuser = \local_webuntis\locallib::curl($path, [], $headerparams);
                 $getuser = json_decode($getuser);
-                if (self::$debug) echo "<pre>" . print_r($getuser, 1) . "</pre>";
+                if (self::$debug) {
+                    echo "<pre>" . print_r($getuser, 1) . "</pre>";
+                }
 
                 if (!empty($getuser->identifier)) {
                     self::save_user($getuser);
@@ -106,7 +116,7 @@ class usermap {
         // Ensure the user is logged in.
         if (!empty(self::$usermap->userid)) {
             self::do_userlogin();
-            if (\local_webuntis\usermap::is_administrator()) {
+            if (self::is_administrator()) {
                 \local_webuntis\orgmaps::load_from_eduvidual();
             }
         } else {
@@ -118,7 +128,9 @@ class usermap {
     }
     public static function can_disconnect() {
         self::is_loaded();
-        if (empty(self::$usermap->candisconnect)) return;
+        if (empty(self::$usermap->candisconnect)) {
+            return false;
+        }
         return self::$usermap->candisconnect;
     }
     /**
@@ -127,11 +139,19 @@ class usermap {
      */
     public static function check_data_prior_usercreate() {
         self::is_loaded();
-        if (empty(self::get_firstname())) return false;
-        if (empty(self::get_lastname())) return false;
+        if (empty(self::get_firstname())) {
+            return false;
+        }
+        if (empty(self::get_lastname())) {
+            return false;
+        }
         if (!\local_webuntis\locallib::uses_eduvidual()) {
-            if (empty(self::get_email())) return false;
-            if (empty(self::get_username())) return false;
+            if (empty(self::get_email())) {
+                return false;
+            }
+            if (empty(self::get_username())) {
+                return false;
+            }
         }
         return true;
     }
@@ -162,7 +182,7 @@ class usermap {
             base64_decode(
                 str_replace(
                     '_', '/', str_replace(
-                        '-','+', explode('.', $strtoken)[1]
+                        '-', '+', explode('.', $strtoken)[1]
                     )
                 )
             )
@@ -170,22 +190,30 @@ class usermap {
     }
     public static function get_email() {
         self::is_loaded();
-        if (empty(self::$usermap->email)) return;
+        if (empty(self::$usermap->email)) {
+            return;
+        }
         return self::$usermap->email;
     }
     public static function get_firstname() {
         self::is_loaded();
-        if (empty(self::$usermap->firstname)) return;
+        if (empty(self::$usermap->firstname)) {
+            return;
+        }
         return self::$usermap->firstname;
     }
     public static function get_id() {
         self::is_loaded();
-        if (empty(self::$usermap->id)) return;
+        if (empty(self::$usermap->id)) {
+            return;
+        }
         return self::$usermap->id;
     }
     public static function get_lastname() {
         self::is_loaded();
-        if (empty(self::$usermap->lastname)) return;
+        if (empty(self::$usermap->lastname)) {
+            return;
+        }
         return self::$usermap->lastname;
     }
     public static function get_map_url() {
@@ -196,48 +224,65 @@ class usermap {
      * @param webuntisrole if empty use remoteuserrole of usermap.
      */
     public static function get_moodlerole($webuntisrole = 0) {
-        if (empty($webuntisrole)) $webuntisrole = self::get_remoteuserrole();
-        // @todo configure prefereed roles in settings.php
+        if (empty($webuntisrole)) {
+            $webuntisrole = self::get_remoteuserrole();
+        }
+        // @Todo configure prefereed roles in settings.php
         $webuntisroles = [ 'student', 'parent', 'teacher', 'administrator' ];
         $moodleroles = [ 5, 5, 3, 3];
         for ($a = 0; $a < count($webuntisroles); $a++) {
-            if ($webuntisroles[$a] == $webuntisrole)
+            if ($webuntisroles[$a] == $webuntisrole) {
                 return $moodleroles[$a];
+            }
         }
         return 0;
     }
     public static function get_userid() {
         self::is_loaded();
-        if (empty(self::$usermap->userid)) return;
+        if (empty(self::$usermap->userid)) {
+            return;
+        }
         return self::$usermap->userid;
     }
     public static function get_userinfo() {
         self::is_loaded();
-        if (empty(self::$userinfo)) return;
+        if (empty(self::$userinfo)) {
+            return;
+        }
         return self::$userinfo;
     }
     public static function get_usermap() {
         self::is_loaded();
-        if (empty(self::$usermap)) return;
+        if (empty(self::$usermap)) {
+            return;
+        }
         return self::$usermap;
     }
     public static function get_username() {
         self::is_loaded();
-        if (empty(self::$usermap->username)) return;
+        if (empty(self::$usermap->username)) {
+            return;
+        }
         return self::$usermap->username;
     }
     public static function get_remoteuserrole() {
         self::is_loaded();
-        if (empty(self::$usermap->remoteuserrole)) return;
+        if (empty(self::$usermap->remoteuserrole)) {
+            return;
+        }
         return self::$usermap->remoteuserrole;
     }
     public static function get_token() {
         self::is_loaded();
-        if (empty(self::$token)) return;
+        if (empty(self::$token)) {
+            return;
+        }
         return self::$token;
     }
     public static function is_loaded() {
-        if (!self::$isloaded) self::__load();
+        if (!self::$isloaded) {
+            self::load();
+        }
     }
     public static function is_parent() {
         self::is_loaded();
@@ -269,7 +314,9 @@ class usermap {
      * @param user object.
      */
     private static function save_user($user) {
-        if (empty($user->identifier)) return;
+        if (empty($user->identifier)) {
+            return;
+        }
         global $DB;
 
         $dbparams = [
@@ -321,7 +368,9 @@ class usermap {
     public static function set_userid($userid = 0) {
         self::is_loaded();
         global $DB, $USER;
-        if (empty($userid)) $userid = $USER->id;
+        if (empty($userid)) {
+            $userid = $USER->id;
+        }
         self::$usermap->userid = $userid;
         $DB->set_field('local_webuntis_usermap', 'userid', self::$usermap->userid, array('id' => self::get_id()));
         self::set_cache();
@@ -331,14 +380,20 @@ class usermap {
         $userinfo = self::get_userinfo();
         $token = self::get_token();
         $path = "https://api-integration.webuntis.com/ims/oneroster/v1p1/users";
-        if (self::$debug) echo "Path $path<br />";
+        if (self::$debug) {
+            echo "Path $path<br />";
+        }
         $headerparams = [
             'Authorization' => "$userinfo->token_type $userinfo->id_token",
         ];
-        if (self::$debug) echo "<pre>" . print_r($headerparams, 1) . "</pre>";
+        if (self::$debug) {
+            echo "<pre>" . print_r($headerparams, 1) . "</pre>";
+        }
         $getuser = \local_webuntis\locallib::curl($path, [], $headerparams);
         $getuser = json_decode($getuser);
-        if (self::$debug) echo "<pre>" . print_r($getuser, 1) . "</pre>";
+        if (self::$debug) {
+            echo "<pre>" . print_r($getuser, 1) . "</pre>";
+        }
 
         if (!empty($getuser->users)) {
             foreach ($getuser->users as $user) {
@@ -348,10 +403,8 @@ class usermap {
             if (!empty($getuser[0]) && !empty($getuser[0]->errorCode)) {
                 switch ($getuser[0]->errorCode) {
                     case 401: // token expired.
-                        if (self::$debug) echo "TOKEN IS EXPIRED\n";
                         \local_webuntis\tenant::auth_token();
                         if ($chance == 1) {
-                            if (self::$debug) echo "SECOND CHANCE\n";
                             self::sync(2);
                         }
                     break;

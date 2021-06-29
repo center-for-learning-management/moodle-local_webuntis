@@ -22,6 +22,7 @@
  */
 
 require_once('../../config.php');
+require_login();
 
 $confirmed = optional_param('confirmed', 0, PARAM_INT);
 
@@ -58,11 +59,11 @@ if (strlen($params['userfullname']) > 20) {
 $params['count'] = $params['canmapnew'] + $params['canmapcurrent'] + $params['canmapother'];
 
 switch ($confirmed) {
-    case 1: // Create new user
+    case 1: // Create new user.
         if (empty($params['canmapnew'])) {
             throw new \moodle_exception('forbidden');
         }
-        // Create new user and store id
+        // Create new user and store id.
         $u = (object) [
             'confirmed' => 1,
             'deleted' => 0,
@@ -108,7 +109,7 @@ switch ($confirmed) {
         $url = \local_webuntis\tenant::get_init_url();
         redirect($url);
     break;
-    case 2: // Use current user
+    case 2: // Use current user.
         if (empty($params['canmapcurrent'])) {
             throw new \moodle_exception('forbidden');
         }
@@ -124,7 +125,7 @@ switch ($confirmed) {
             throw new \moodle_exception(get_string('usermap:failed', 'local_webuntis'));
         }
     break;
-    case 3: // Use other users
+    case 3: // Use other users.
         if (empty($params['canmapother'])) {
             throw new \moodle_exception('forbidden');
         }

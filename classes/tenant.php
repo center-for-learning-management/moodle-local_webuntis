@@ -31,7 +31,7 @@ class tenant {
     private static $tenant;
     private static $usermap;
 
-    public static function __load($tenant_id = 0, $school = "") {
+    public static function load($tenant_id = 0, $school = "") {
         global $debug; self::$debug = $debug;
         $tenant = \local_webuntis\locallib::cache_get('session', 'tenant');
         if (!empty($tenant->tenant_id)) {
@@ -121,36 +121,46 @@ class tenant {
             'code' => $code,
             'redirect_uri' => $CFG->wwwroot . '/local/webuntis/index.php',
         ];
-        if (self::$debug) echo "calling $path using the following params<br />";
-        if (self::$debug) echo "<pre>" . print_r($params, 1) . "</pre>";
+        if (self::$debug) {
+            echo "calling $path using the following params<br />";
+            echo "<pre>" . print_r($params, 1) . "</pre>";
+        }
 
         $userinfo = \local_webuntis\locallib::curl($path, $params);
 
         if (!empty($userinfo)) {
             $userinfo = json_decode($userinfo);
-            \local_webuntis\usermap::__load($userinfo);
+            \local_webuntis\usermap::load($userinfo);
         }
     }
 
 
     public static function get_autocreate() {
         self::is_loaded();
-        if (empty(self::$tenant->autocreate)) return;
+        if (empty(self::$tenant->autocreate)) {
+            return;
+        }
         return self::$tenant->autocreate;
     }
     public static function get_client() {
         self::is_loaded();
-        if (empty(self::$tenant->client)) return;
+        if (empty(self::$tenant->client)) {
+            return;
+        }
         return self::$tenant->client;
     }
     public static function get_consumerkey() {
         self::is_loaded();
-        if (empty(self::$tenant->consumerkey)) return;
+        if (empty(self::$tenant->consumerkey)) {
+            return;
+        }
         return self::$tenant->consumerkey;
     }
     public static function get_consumersecret() {
         self::is_loaded();
-        if (empty(self::$tenant->consumersecret)) return;
+        if (empty(self::$tenant->consumersecret)) {
+            return;
+        }
         return self::$tenant->consumersecret;
     }
     private static function get_endpoints() {
@@ -170,12 +180,16 @@ class tenant {
     }
     public static function get_host() {
         self::is_loaded();
-        if (empty(self::$tenant->host)) return;
+        if (empty(self::$tenant->host)) {
+            return;
+        }
         return self::$tenant->host;
     }
     public static function get_id() {
         self::is_loaded();
-        if (empty(self::$tenant->id)) return;
+        if (empty(self::$tenant->id)) {
+            return;
+        }
         return self::$tenant->id;
     }
     public static function get_init_url() {
@@ -186,16 +200,20 @@ class tenant {
             'lesson_id' => \local_webuntis\lessonmap::get_lesson_id(),
         ];
         return new \moodle_url('/local/webuntis/index.php', $params);
-        //return $_SESSION['webuntis_init_url'];
     }
     public static function get_school($lcase = false) {
         self::is_loaded();
-        if ($lcase) return strtolower(self::$tenant->school);
-        else return self::$tenant->school;
+        if ($lcase) {
+            return strtolower(self::$tenant->school);
+        } else {
+            return self::$tenant->school;
+        }
     }
     public static function get_tenant_id() {
         self::is_loaded();
-        if (empty(self::$tenant->tenant_id)) return;
+        if (empty(self::$tenant->tenant_id)) {
+            return;
+        }
         return self::$tenant->tenant_id;
     }
     /**
@@ -207,13 +225,17 @@ class tenant {
     }
 
     public static function is_loaded() {
-        if (!self::$isloaded) self::__load();
+        if (!self::$isloaded) {
+            return;
+        }
     }
 
     public static function set_autocreate($to) {
         self::is_loaded();
         global $DB;
-        if (empty(self::get_tenant_id())) return;
+        if (empty(self::get_tenant_id())) {
+            return;
+        }
 
         if (!\local_webuntis\usermap::is_administrator()) {
             throw new \moodle_error('nopermission');

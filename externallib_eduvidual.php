@@ -42,7 +42,14 @@ class local_webuntis_external_eduvidual extends external_api {
         if (!\local_webuntis\locallib::uses_eduvidual()) {
             throw new \moodle_exception('not using eduvidual');
         }
-        $params = self::validate_parameters(self::orgmap_parameters(), array('orgid' => $orgid, 'field' => $field, 'status' => $status));
+        $params = self::validate_parameters(
+            self::orgmap_parameters(),
+            array(
+                'orgid' => $orgid,
+                'field' => $field,
+                'status' => $status
+            )
+        );
 
         $orgrole = \local_eduvidual\locallib::get_orgrole($params['orgid']);
         if ($orgrole != 'Manager' && !is_siteadmin() || !\local_webuntis\lessonmap::can_edit()) {

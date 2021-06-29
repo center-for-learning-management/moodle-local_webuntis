@@ -91,7 +91,7 @@ class provider implements
         $mappings = $DB->get_records('local_webuntis_usermap', [ 'userid' => $userid ]);
         foreach ($mappings as $mapping) {
             writer::with_context($context)
-                ->export_data([get_string('pluginname', 'local_webuntis'),get_string('usermapping','local_webuntis')], $mapping);
+                ->export_data([get_string('pluginname', 'local_webuntis'), get_string('usermapping', 'local_webuntis')], $mapping);
         }
     }
     /**

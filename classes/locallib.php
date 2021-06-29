@@ -35,7 +35,9 @@ class locallib {
      * @return whatever is in the cache.
      */
     public static function cache_get($cache, $key) {
-        if (!in_array($cache, [ 'application', 'session'])) return;
+        if (!in_array($cache, [ 'application', 'session'])){
+            return;
+        }
         $cache = \cache::make('local_webuntis', $cache);
         return $cache->get($key);
     }
@@ -51,14 +53,14 @@ class locallib {
             array('type' => 'session', 'identifier' => 'synced_lessonmap-' . \local_webuntis\lessonmap::get_lesson_id()),
             array('type' => 'session', 'identifier' => 'lesson_id'),
             // orgmap
-            //array('type' => 'application', 'identifier' => 'orgmaps-' . \local_webuntis\tenant::get_tenant_id()),
+            // array('type' => 'application', 'identifier' => 'orgmaps-' . \local_webuntis\tenant::get_tenant_id()),
             // tenant
-            //array('type' => 'application', 'identifier' => 'endpoints-' . \local_webuntis\tenant::get_tenant_id()),
+            // array('type' => 'application', 'identifier' => 'endpoints-' . \local_webuntis\tenant::get_tenant_id()),
             array('type' => 'session', 'identifier' => 'code'),
             array('type' => 'session', 'identifier' => 'tenant'),
             array('type' => 'session', 'identifier' => 'uuid'),
             // usermap
-            //array('type' => 'session', 'identifier' => 'token'),
+            // array('type' => 'session', 'identifier' => 'token'),
             array('type' => 'session', 'identifier' => 'userinfo'),
             array('type' => 'session', 'identifier' => 'usermap'),
         );
@@ -67,14 +69,13 @@ class locallib {
                 self::$preserved_caches = array();
                 foreach ($preserves as $preserve) {
                     self::$preserved_caches[$preserve['type']][$preserve['identifier']] =
-                        \local_webuntis\locallib::cache_get($preserve['type'], $preserve['identifier']);
+                        self::cache_get($preserve['type'], $preserve['identifier']);
                 }
             break;
             case false:
                 foreach (self::$preserved_caches as $type => $identifiers) {
                     foreach ($identifiers as $identifier => $value) {
-                        echo "Setting cache $type $identifier => <b>" . print_r($value, 1) . "</b><br />\n";
-                        \local_webuntis\locallib::cache_set($type, $identifier, $value);
+                        self::cache_set($type, $identifier, $value);
                     }
                 }
             break;
@@ -101,7 +102,9 @@ class locallib {
      * @param delete whether or not the key should be removed from cache.
      */
     public static function cache_set($cache, $key, $value, $delete = false) {
-        if (!in_array($cache, [ 'application', 'session'])) return;
+        if (!in_array($cache, [ 'application', 'session'])) {
+            return;
+        }
         $cache = \cache::make('local_webuntis', $cache);
         if ($delete) {
             $cache->delete($key);
@@ -122,9 +125,9 @@ class locallib {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 
-        if(!empty($post) && count($post) > 0) {
+        if (!empty($post) && count($post) > 0) {
             $fields = array();
-            foreach($post as $key => $value) {
+            foreach ($post as $key => $value) {
                 $fields[] = urlencode($key) . '=' . urlencode($value);
             }
             $fields = implode('&', $fields);
@@ -150,7 +153,6 @@ class locallib {
      */
     public static function get_courseimage($courseid) {
         global $CFG;
-        //require_once($CFG->libdir . '/coursecatlib.php');
         $course = \get_course($courseid);
         $course = new \core_course_list_element($course);
 

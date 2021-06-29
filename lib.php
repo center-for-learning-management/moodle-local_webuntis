@@ -24,29 +24,37 @@
 defined('MOODLE_INTERNAL') || die;
 
 function local_webuntis_after_config() {
-    if (empty(\local_webuntis\tenant::get_tenant_id())) return;
+    if (empty(\local_webuntis\tenant::get_tenant_id())) {
+        return;
+    }
     global $PAGE;
     $PAGE->add_body_class('webuntis-loading-check');
 }
 
 function local_webuntis_before_standard_html_head() {
     // Only do something, if we came through webuntis.
-    if (empty(\local_webuntis\tenant::get_tenant_id())) return;
-    \local_webuntis\usermap::__load();
+    if (empty(\local_webuntis\tenant::get_tenant_id())) {
+        return;
+    }
+    \local_webuntis\usermap::load();
 }
 
 /**
  * Extend Moodle Navigation.
  */
 function local_webuntis_extend_navigation($navigation) {
-    if(!empty(\local_webuntis\locallib::cache_get('session', 'fakemode'))) return;
+    if(!empty(\local_webuntis\locallib::cache_get('session', 'fakemode'))) {
+        return;
+    }
     // Only do something, if we came through webuntis.
-    if (empty(\local_webuntis\tenant::get_tenant_id())) return;
+    if (empty(\local_webuntis\tenant::get_tenant_id())) {
+        return;
+    }
 
     if (\local_webuntis\usermap::get_userid() > 0 && \local_webuntis\usermap::can_disconnect()) {
         global $USER;
         $nodehome = $navigation->get('actionmenu');
-        if (empty($nodehome)){
+        if (empty($nodehome)) {
             $nodehome = $navigation;
         }
         $label = get_string('disconnect:user', 'local_webuntis');
@@ -62,11 +70,8 @@ function local_webuntis_extend_navigation($navigation) {
  */
 function local_webuntis_extend_navigation_course($nav, $course, $context) {
     // Only do something, if we came through webuntis.
-    if (empty(\local_webuntis\tenant::get_tenant_id())) return;
-
-    if (!empty(\local_webuntis\lessonmap::get_lesson_id())) {
-        // Maybe we want to move the "edit"-button for the link here
-        // instead of showing an alert-info after redirect.
+    if (empty(\local_webuntis\tenant::get_tenant_id())) {
+        return;
     }
 
     $coursecontext = \context_course::instance($course->id);

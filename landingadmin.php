@@ -22,6 +22,7 @@
  */
 
 require_once('../../config.php');
+require_login();
 
 $PAGE->set_context(\context_system::instance());
 $PAGE->set_url(new \moodle_url('/local/webuntis/landingadmin.php', array()));
@@ -52,7 +53,7 @@ if (\local_webuntis\locallib::uses_eduvidual()) {
         $actions = [
             [
                 'isheader' => 1,
-                'label' => '', //get_string('eduvidual:feature', 'local_webuntis'),
+                'label' => '',
                 'orgs' => [],
             ],
             [

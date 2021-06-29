@@ -35,7 +35,9 @@ $school       = optional_param('school', '', PARAM_TEXT);
 $tenant_id    = optional_param('tenant_id', 0, PARAM_INT);
 
 // For some reason, webuntis provides an empty tenant_id...
-if (empty($tenant_id)) $tenant_id = 1300;
+if (empty($tenant_id)) {
+    $tenant_id = 1300;
+}
 
 // If tenant_id and school are given, but not lesson_id, this is link
 // from the main menu in Webuntis.
@@ -43,8 +45,8 @@ if ($lesson_id == -1 && !empty($tenant_id) && !empty($school)) {
     $lesson_id = 0;
 }
 
-\local_webuntis\tenant::__load($tenant_id, $school);
-\local_webuntis\lessonmap::__load($lesson_id);
+\local_webuntis\tenant::load($tenant_id, $school);
+\local_webuntis\lessonmap::load($lesson_id);
 
 $PAGE->set_context(\context_system::instance());
 $PAGE->set_url(\local_webuntis\tenant::get_init_url());
@@ -56,19 +58,24 @@ $PAGE->navbar->add(get_string('pluginname', 'local_webuntis'), $PAGE->url);
 
 \local_webuntis\tenant::auth();
 
-//\local_webuntis\locallib::cache_print(true);
-
 if (\local_webuntis\lessonmap::get_count() > 0) {
     \local_webuntis\lessonmap::redirect();
 }
 if (\local_webuntis\lessonmap::can_edit()) {
     // If no lesson map was found, we are on eduvidual and manager, and lesson_id is 0,
     // create default map.
-    if (empty(\local_webuntis\lessonmap::get_count()) && \local_webuntis\lessonmap::get_lesson_id() == 0 && \local_webuntis\locallib::uses_eduvidual() && \local_eduvidual\locallib::get_highest_role() == 'Manager') {
+    if (empty(\local_webuntis\lessonmap::get_count()) &&
+            \local_webuntis\lessonmap::get_lesson_id() == 0 &&
+            \local_webuntis\locallib::uses_eduvidual() &&
+            \local_eduvidual\locallib::get_highest_role() == 'Manager') {
         $orgs = \local_eduvidual\locallib::get_organisations('Manager', false);
         foreach ($orgs as $org) {
-            if (!empty($org->courseid)) \local_webuntis\lessonmap::change_map($org->courseid);
-            if (!empty($org->supportcourseid)) \local_webuntis\lessonmap::change_map($org->supportcourseid);
+            if (!empty($org->courseid)) {
+                \local_webuntis\lessonmap::change_map($org->courseid);
+            }
+            if (!empty($org->supportcourseid)) {
+                \local_webuntis\lessonmap::change_map($org->supportcourseid);
+            }
         }
 
     }
@@ -77,7 +84,7 @@ if (\local_webuntis\lessonmap::can_edit()) {
 
 echo $OUTPUT->header();
 $params = [
-    'urltodashboard' =>  new \moodle_url('/my'),
+    'urltodashboard' => new \moodle_url('/my'),
 ];
 echo $OUTPUT->render_from_template('local_webuntis/landingmissing', $params);
 echo "<details><summary>Show debug information</summary><pre>";

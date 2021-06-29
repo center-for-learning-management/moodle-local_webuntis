@@ -30,11 +30,13 @@ class orgmaps {
     private static $isloaded = false;
     private static $orgmaps;
 
-    public static function __load() {
+    public static function load() {
         global $DB;
         global $debug; self::$debug = $debug;
 
-        if (empty(\local_webuntis\tenant::get_tenant_id())) return;
+        if (empty(\local_webuntis\tenant::get_tenant_id())) {
+            return;
+        }
 
         self::$orgmaps = \local_webuntis\locallib::cache_get('application', 'orgmaps-' . \local_webuntis\tenant::get_tenant_id());
         if (empty(self::$orgmaps) || count(self::$orgmaps) == 0) {
@@ -49,9 +51,14 @@ class orgmaps {
     public static function convert_role($webuntisrole) {
         $roles = [ 'student', 'parent', 'teacher', 'administrator' ];
         $role = $webuntisrole;
-        if (!in_array($role, $roles)) $role = 'student';
-        if ($role == 'administrator') $role = 'Manager';
-        else $role = ucfirst($role);
+        if (!in_array($role, $roles)) {
+            $role = 'student';
+        }
+        if ($role == 'administrator') {
+            $role = 'Manager';
+        } else {
+            $role = ucfirst($role);
+        }
         return $role;
     }
 
@@ -65,13 +72,17 @@ class orgmaps {
      */
     public static function has_autoenrol() {
         foreach (self::get_orgmaps() as $orgmap) {
-            if (!empty($orgmap->autoenrol)) return true;
+            if (!empty($orgmap->autoenrol)) {
+                return true;
+            }
         }
         return false;
     }
 
     private static function is_loaded() {
-        if (!self::$isloaded) self::__load();
+        if (!self::$isloaded) {
+            self::load();
+        }
     }
 
     private static function load_from_db() {
@@ -84,12 +95,17 @@ class orgmaps {
     }
 
     public static function load_from_eduvidual() {
-        if (!\local_webuntis\locallib::uses_eduvidual()) return;
-        if (empty(\local_webuntis\tenant::get_tenant_id())) return;
+        if (!\local_webuntis\locallib::uses_eduvidual()) {
+            return;
+        }
+        if (empty(\local_webuntis\tenant::get_tenant_id())) {
+            return;
+        }
         global $DB;
         $orgs = \local_eduvidual\locallib::get_organisations('Manager', false);
         foreach ($orgs as $org) {
-            $orgmap = $DB->get_record('local_webuntis_orgmap', [ 'orgid' => $org->orgid, 'tenant_id' => \local_webuntis\tenant::get_tenant_id()]);
+            $params = [ 'orgid' => $org->orgid, 'tenant_id' => \local_webuntis\tenant::get_tenant_id()];
+            $orgmap = $DB->get_record('local_webuntis_orgmap', $params);
             if (empty($orgmap->id)) {
                 $orgmap = (object)[
                     'autoenrol' => 1,
@@ -103,9 +119,15 @@ class orgmaps {
     }
 
     public static function map_role($user) {
-        if (!\local_webuntis\locallib::uses_eduvidual()) return;
-        if (empty(\local_webuntis\tenant::get_tenant_id())) return;
-        if (empty($user->identifier)) return;
+        if (!\local_webuntis\locallib::uses_eduvidual()) {
+            return;
+        }
+        if (empty(\local_webuntis\tenant::get_tenant_id())) {
+            return;
+        }
+        if (empty($user->identifier)) {
+            return;
+        }
 
         global $DB;
         $params = [
@@ -113,7 +135,9 @@ class orgmaps {
             'remoteuserid' => $user->identifier,
         ];
         $usermap = $DB->get_record('local_webuntis_usermap', $params);
-        if (empty($usermap->userid)) return;
+        if (empty($usermap->userid)) {
+            return;
+        }
 
         self::map_role_usermap($usermap);
     }
@@ -122,9 +146,15 @@ class orgmaps {
      * @param usermap
      */
     public static function map_role_usermap($usermap) {
-        if (!\local_webuntis\locallib::uses_eduvidual()) return;
-        if (empty(\local_webuntis\tenant::get_tenant_id())) return;
-        if (empty($usermap->role)) return;
+        if (!\local_webuntis\locallib::uses_eduvidual()) {
+            return;
+        }
+        if (empty(\local_webuntis\tenant::get_tenant_id())) {
+            return;
+        }
+        if (empty($usermap->role)) {
+            return;
+        }
         $role = self::convert_role($usermap->role);
         foreach (self::get_orgmaps() as $orgmap) {
             if (!empty($orgmap->autoenrol)) {

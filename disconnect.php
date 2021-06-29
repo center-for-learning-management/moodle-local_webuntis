@@ -22,12 +22,13 @@
  */
 
 require_once('../../config.php');
+require_login();
 
 $userid       = optional_param('userid', 0, PARAM_INT);
 $confirmed    = optional_param('confirmed', 0, PARAM_INT);
 $disconnected = optional_param('disconnected', 0, PARAM_INT);
 
-\local_webuntis\tenant::__load();
+\local_webuntis\tenant::load();
 
 $PAGE->set_context(\context_system::instance());
 $PAGE->set_url(new \moodle_url('/local/webuntis/disconnect.php', array('userid' => $userid)));
@@ -47,7 +48,7 @@ if ($USER->id != $userid) {
     throw new \moodle_exception('invalidinput', 'local_webuntis', $CFG->wwwroot);
 }
 
-// @todo show confirmation dialog prior to action.
+// @Todo show confirmation dialog prior to action.
 $confirmed = optional_param('confirmed', 0, PARAM_INT);
 
 if (empty($confirmed)) {

@@ -35,7 +35,7 @@ class lessonmap {
      * Load a lessonmap.
      * @param lesson the lesson identifier. -1 loads from cache.
      */
-    public static function __load($lesson_id = -1) {
+    public static function load($lesson_id = -1) {
         global $debug; self::$debug = $debug;
         global $DB;
 
@@ -91,13 +91,15 @@ class lessonmap {
             'courseid' => $courseid
         );
 
-        if (!self::can_edit()) return;
+        if (!self::can_edit()) {
+            return;
+        }
 
         if ($courseid < 0) {
             // We want to remove it.
             $dbparams['courseid'] = $dbparams['courseid'] * -1;
             $DB->delete_records('local_webuntis_coursemap', $dbparams);
-            for ($a = count(self::$lessonmaps) -1; $a >= 0; $a--) {
+            for ($a = count(self::$lessonmaps) - 1; $a >= 0; $a--) {
                 if (self::$lessonmaps[$a]->courseid == $dbparams['courseid']) {
                     unset(self::$lessonmaps[$a]);
                 }
@@ -110,7 +112,7 @@ class lessonmap {
                 $dbparams['id'] = $chk->id;
             }
             $found = false;
-            for ($a = count(self::$lessonmaps) -1; $a >= 0; $a--) {
+            for ($a = count(self::$lessonmaps) - 1; $a >= 0; $a--) {
                 if (self::$lessonmaps[$a]->courseid == $dbparams['courseid']) {
                     $found = true;
                 }
@@ -147,7 +149,7 @@ class lessonmap {
             $context = \context_course::instance($courseid, IGNORE_MISSING);
             if (empty($context->id)) {
                 // Course does not exist anymore.
-                self::change_map($courseid*-1);
+                self::change_map($courseid * -1);
             } else {
                 $course = \get_course($courseid);
                 $course = new \core_course_list_element($course);
@@ -166,12 +168,7 @@ class lessonmap {
 
     public static function get_edit_url() {
         if (self::can_edit()) {
-            $params = [
-                //'lesson'     => self::get_lesson(),
-                //'noredirect' => 1,
-                //'tenant_id'  => \local_webuntis\tenant::get_tenant_id(),
-            ];
-            $editurl = new \moodle_url('/local/webuntis/landingedit.php', $params);
+            $editurl = new \moodle_url('/local/webuntis/landingedit.php', []);
             return $editurl;
         }
         return '';
@@ -189,7 +186,9 @@ class lessonmap {
      * Ensure object was loaded.
      */
     public static function is_loaded() {
-        if (!self::$isloaded) self::__load();
+        if (!self::$isloaded) {
+            self::load();
+        }
     }
 
     /**
@@ -211,7 +210,7 @@ class lessonmap {
      */
     public static function redirect() {
         global $DB, $USER;
-        if (!self::$isloaded) self::__load();
+        if (!self::$isloaded) self::load();
         $lessonmaps = self::$lessonmaps;
 
         if (\local_webuntis\usermap::get_userid() != $USER->id || isguestuser() || !isloggedin()) {
@@ -221,7 +220,6 @@ class lessonmap {
         // We only enrol users once a session.
         $synced = \local_webuntis\locallib::cache_get('session', 'synced_lessonmap-' . self::get_lesson_id());
         if (empty($synced)) {
-            // @todo check enrolment of user in all mapped lessons.
             // @todo better implement own enrol-plugin.
             $moodlerole = \local_webuntis\usermap::get_moodlerole();
             if (!empty($moodlerole)) {
@@ -245,7 +243,6 @@ class lessonmap {
                             }
                         }
                         if (empty($instance->id)) {
-                            //$course = \core_course::instance($lessonmap->courseid);
                             $instanceid = $enrol->add_default_instance((object)['id' => $lessonmap->courseid]);
                             $instance = $DB->get_record('enrol', [ 'id' => $instanceid ]);
                         }
@@ -266,8 +263,8 @@ class lessonmap {
         }
         if (!empty($lessonmaps) && !empty($lessonmaps[0]->courseid)) {
             $url = new \moodle_url('/course/view.php', array('id' => $lessonmaps[0]->courseid));
-            if (\local_webuntis\lessonmap::can_edit()) {
-                $editurl = \local_webuntis\lessonmap::get_edit_url();
+            if (self::can_edit()) {
+                $editurl = self::get_edit_url();
                 $strparams = array('editurl' => $editurl->__toString());
                 \redirect($url, get_string('redirect_edit_landingpage', 'local_webuntis', $strparams), 0, \core\output\notification::NOTIFY_INFO);
             } else {
@@ -275,6 +272,4 @@ class lessonmap {
             }
         }
     }
-
-
 }

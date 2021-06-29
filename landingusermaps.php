@@ -22,6 +22,7 @@
  */
 
 require_once('../../config.php');
+require_login();
 
 $PAGE->set_context(\context_system::instance());
 $PAGE->set_url(new \moodle_url('/local/webuntis/landingusermaps.php', array()));
@@ -37,7 +38,8 @@ $PAGE->requires->css('/local/webuntis/style/main.css');
 \local_webuntis\usermap::sync();
 
 echo $OUTPUT->header();
-$usermaps = array_values($DB->get_records('local_webuntis_usermap', array('tenant_id' => \local_webuntis\tenant::get_tenant_id()), 'lastname ASC,firstname ASC'));
+$dbparams = array('tenant_id' => \local_webuntis\tenant::get_tenant_id());
+$usermaps = array_values($DB->get_records('local_webuntis_usermap', $dbparams, 'lastname ASC,firstname ASC'));
 foreach ($usermaps as $usermap) {
     if (!empty($usermap->userid)) {
         $user = \core_user::get_user($usermap->userid);
