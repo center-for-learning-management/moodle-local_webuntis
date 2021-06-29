@@ -23,8 +23,6 @@
 
 require_once('../../config.php');
 
-// \local_webuntis\fake::fake();
-
 $debug = false;
 
 if ($debug) {
