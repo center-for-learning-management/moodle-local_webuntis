@@ -226,7 +226,7 @@ class tenant {
 
     public static function is_loaded() {
         if (!self::$isloaded) {
-            return;
+            self::load();
         }
     }
 
