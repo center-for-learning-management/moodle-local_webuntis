@@ -23,6 +23,12 @@
 
 defined('MOODLE_INTERNAL') || die;
 
+function local_webuntis_after_config() {
+    if (empty(\local_webuntis\tenant::get_tenant_id())) return;
+    global $PAGE;
+    $PAGE->add_body_class('webuntis-loading-check');
+}
+
 function local_webuntis_before_standard_html_head() {
     // Only do something, if we came through webuntis.
     if (empty(\local_webuntis\tenant::get_tenant_id())) return;
