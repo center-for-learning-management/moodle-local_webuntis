@@ -59,8 +59,7 @@
             {{#canconfig}}
             <a href="{{wwwroot}}/local/webuntis/landingusermaps.php"
                 class="btn btn-primary btn-block">
-                <i class="fa fa-users"></i><br />
-                <span class="caption">{{#str}} admin:usermaps:pagetitle, local_webuntis {{/str}}</span>
+                <i class="fa fa-users"> {{#str}} admin:usermaps:pagetitle, local_webuntis {{/str}}</i>
             </a>
             {{/canconfig}}
         </p>
@@ -68,16 +67,14 @@
             {{#canconfig}}
             <a href="{{wwwroot}}/local/webuntis/landingadmin.php"
                 class="btn btn-primary btn-block">
-                <i class="fa fa-gears"></i><br />
-                <span class="caption">{{#str}} settings {{/str}}</span>
+                <i class="fa fa-gears"> {{#str}} settings {{/str}}</i>
             </a>
             {{/canconfig}}
         </p>
         <p class="col-md-2">
             <a href="{{wwwroot}}/local/webuntis/landing.php"
                 id="proceed-{{uniqid}}" class="btn btn-primary btn-block {{^canproceed}} disabled {{/canproceed}}">
-                <i class="fa fa-check"></i><br />
-                <span class="caption">{{#str}} proceed, local_webuntis {{/str}}</span>
+                <i class="fa fa-check"> {{#str}} proceed, local_webuntis {{/str}}</i>
             </a>
         </p>
     </div>
