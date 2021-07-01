@@ -37,6 +37,7 @@ function local_webuntis_before_standard_html_head() {
         return;
     }
     \local_webuntis\usermap::load();
+    \local_webuntis\locallib::cache_print();
 }
 
 /**

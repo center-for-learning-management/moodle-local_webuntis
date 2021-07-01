@@ -22,7 +22,6 @@
  */
 
 require_once('../../config.php');
-require_login();
 
 $confirmed = optional_param('confirmed', 0, PARAM_INT);
 
