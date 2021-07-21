@@ -22,7 +22,7 @@
  */
 
 namespace local_webuntis\privacy;
-use core_privacy\local\metadata\collection;
+use \core_privacy\local\metadata\collection;
 use \core_privacy\local\request\writer;
 
 defined('MOODLE_INTERNAL') || die;
@@ -32,7 +32,7 @@ class provider implements
                     \core_privacy\local\request\core_userlist_provider,
                     \core_privacy\local\request\plugin\provider {
 
-    public static function get_metadata(collection $collection) : collection {
+    public static function get_metadata(\core_privacy\local\metadata\collection $collection) : \core_privacy\local\metadata\collection {
         $collection->add_database_table(
             'local_webuntis_usermap',
             [
@@ -59,7 +59,7 @@ class provider implements
      *
      * @param   approved_userlist       $userlist The approved context and user information to delete information for.
      */
-    public static function delete_data_for_users(approved_userlist $userlist) {
+    public static function delete_data_for_users(\core_privacy\local\request\approved_contextlist $userlist) {
         global $DB;
         $userids = $userlist->get_userids();
         list($userinsql, $userinparams) = $DB->get_in_or_equal($userlist->get_userids(), SQL_PARAMS_NAMED);
@@ -74,7 +74,7 @@ class provider implements
     public static function delete_data_for_all_users_in_context(\context $context) {
         // Data is only stored in global context.
     }
-    public static function delete_data_for_user(approved_contextlist $contextlist) {
+    public static function delete_data_for_user(\core_privacy\local\request\approved_contextlist $contextlist) {
         global $DB;
         $userid = $contextlist->get_user()->id;
         $DB->delete_records('local_webuntis_usermap', [ 'userid' => $userid ]);
@@ -84,7 +84,7 @@ class provider implements
      *
      * @param   approved_contextlist    $contextlist    The approved contexts to export information for.
      */
-    public static function export_user_data(approved_contextlist $contextlist) {
+    public static function export_user_data(\core_privacy\local\request\approved_contextlist $contextlist) {
         global $DB;
         $userid = $contextlist->get_user()->id;
         $context = \context_system::instance();
@@ -100,7 +100,7 @@ class provider implements
      * @param   int           $userid       The user to search.
      * @return  contextlist   $contextlist  The list of contexts used in this plugin.
      */
-    public static function get_contexts_for_userid(int $userid) : contextlist {
+    public static function get_contexts_for_userid(int $userid) : \core_privacy\local\request\contextlist {
         // Data is only stored in global context.
         $contextlist = new \core_privacy\local\request\contextlist();
         return $contextlist;
@@ -110,7 +110,7 @@ class provider implements
      *
      * @param   userlist    $userlist   The userlist containing the list of users who have data in this context/plugin combination.
      */
-    public static function get_users_in_context(userlist $userlist) {
+    public static function get_users_in_context(\core_privacy\local\request\userlist $userlist) : \core_privacy\local\request\userlist {
         // Data is only stored in global context.
         $context = $userlist->get_context();
 
