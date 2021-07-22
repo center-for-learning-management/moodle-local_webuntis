@@ -53,7 +53,6 @@ class provider implements
         );
         return $collection;
     }
-
     /**
      * Delete multiple users within a single context.
      *
@@ -110,7 +109,7 @@ class provider implements
      *
      * @param   userlist    $userlist   The userlist containing the list of users who have data in this context/plugin combination.
      */
-    public static function get_users_in_context(\core_privacy\local\request\userlist $userlist) : \core_privacy\local\request\userlist {
+    public static function get_users_in_context(\core_privacy\local\request\userlist $userlist) {
         // Data is only stored in global context.
         $context = $userlist->get_context();
 
@@ -120,7 +119,4 @@ class provider implements
         $sql = "SELECT userid FROM {local_webuntis_usermap}";
         $userlist->add_from_sql('userid', $sql, []);
     }
-
-
-
 }
