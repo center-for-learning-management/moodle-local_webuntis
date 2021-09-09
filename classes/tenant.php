@@ -48,7 +48,10 @@ class tenant {
         $sql = "SELECT *
             FROM {local_webuntis_tenant}
             WHERE tenant_id = :tenant_id
-                OR school LIKE :school";
+                OR (
+                    school LIKE :school
+                    AND school <> ''
+                )";
         $params = [ 'school' => $school, 'tenant_id' => $tenant_id ];
         self::$tenant = $DB->get_record_sql($sql, $params);
 
