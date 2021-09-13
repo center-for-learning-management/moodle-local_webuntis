@@ -24,6 +24,10 @@
 $string['admin:autocreate'] = 'Erlaube Kontenerstellung';
 $string['admin:autocreate:description'] = 'Erlaube die Erstellung von Nutzerkonten auf Basis von WebUntis-Kontodaten.';
 $string['admin:autocreate:syswarning'] = 'Achtung: Die Erstellung von Nutzerkonten wurde durch die Moodle Website-Administration deaktiviert.';
+$string['admin:pubkey:integration'] = 'Public Key / Integration';
+$string['admin:pubkey:integration:description'] = 'Der öffentliche Schlüssel von Untis GmbH, um oAuth-Zugangsdaten für Tenants der Integrationsumgebung zu übermitteln.';
+$string['admin:pubkey:production'] = 'Public Key / Produktion';
+$string['admin:pubkey:production:description'] = 'Der öffentliche Schlüssel von Untis GmbH, um oAuth-Zugangsdaten für Tenants einer Produktionsumgebung zu übermitteln.';
 $string['admin:usermaps:pagetitle'] = 'Nutzer';
 $string['disconnect:course'] = 'WebUntis-Kursverknüpfung lösen';
 $string['disconnect:description'] = 'Wollen Sie wirklich die Nutzerkonten von WebUntis und Moodle trennen?';

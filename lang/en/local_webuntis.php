@@ -24,6 +24,10 @@
 $string['admin:autocreate'] = 'Allow user creation';
 $string['admin:autocreate:description'] = 'Allow creation of user accounts based on WebUntis user data.';
 $string['admin:autocreate:syswarning'] = 'Attention: auto createn of user accounts is disabled by in the Moodle Website-Administration.';
+$string['admin:pubkey:integration'] = 'Public Key / Integration';
+$string['admin:pubkey:integration:description'] = 'The public key of Untis GmbH to transmit the oAuth credentials of tenants in the integration environment.';
+$string['admin:pubkey:production'] = 'Public Key / Production';
+$string['admin:pubkey:production:description'] = 'The public key of Untis GmbH to transmit the oAuth credentials of tenants in any production environment.';
 $string['admin:usermaps:pagetitle'] = 'Usermapping';
 $string['cachedef_application'] = 'Cache for local_webunits for whole application';
 $string['cachedef_session'] = 'Cache for local_webunits for user session';
