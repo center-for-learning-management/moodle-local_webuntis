@@ -34,11 +34,6 @@ $lesson_id    = optional_param('lesson_id', -1, PARAM_INT);
 $school       = optional_param('school', '', PARAM_TEXT);
 $tenant_id    = optional_param('tenant_id', 0, PARAM_INT);
 
-// For some reason, webuntis provides an empty tenant_id...
-if (empty($tenant_id)) {
-    $tenant_id = 1300;
-}
-
 // If tenant_id and school are given, but not lesson_id, this is link
 // from the main menu in Webuntis.
 if ($lesson_id == -1 && !empty($tenant_id) && !empty($school)) {
