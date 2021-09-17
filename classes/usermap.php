@@ -76,7 +76,8 @@ class usermap {
 
                 // ATTENTION: In this section you must not call functions like ::get_id, this will cause a loop.
                 // Try to receive the users role.
-                $path = "https://api-integration.webuntis.com/ims/oneroster/v1p1/users/" . self::$token->sub;
+                $integration = (\local_webuntis\tenant::get_host() == 'integration') ? '-integration' : '';
+                $path = "https://api$integration.webuntis.com/ims/oneroster/v1p1/users/" . self::$token->sub;
                 if (self::$debug) {
                     echo "Path $path<br />";
                 }
