@@ -108,7 +108,7 @@ class orgmaps {
             $orgmap = $DB->get_record('local_webuntis_orgmap', $params);
             if (empty($orgmap->id)) {
                 $orgmap = (object)[
-                    'autoenrol' => 1,
+                    'autoenrol' => 0,
                     'orgid' => $org->orgid,
                     'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
                 ];
