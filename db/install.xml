@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/webuntis/db" VERSION="20210618" COMMENT="XMLDB file for Moodle local/webuntis"
+<XMLDB PATH="local/webuntis/db" VERSION="20210924" COMMENT="XMLDB file for Moodle local/webuntis"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -44,6 +44,8 @@
         <FIELD NAME="consumerkey" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" COMMENT="the oauth consumerkey"/>
         <FIELD NAME="consumersecret" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" COMMENT="the oauth consumer secret"/>
         <FIELD NAME="autocreate" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Allow autocreation of user accounts"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

@@ -27,6 +27,17 @@ defined('MOODLE_INTERNAL') || die;
 function xmldb_local_webuntis_upgrade($oldversion=0) {
     global $DB;
     $dbman = $DB->get_manager();
-
+    if ($oldversion < 2021092400) {
+        $table = new xmldb_table('local_webuntis_tenant');
+        $field = new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'autocreate');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $field = new xmldb_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'timecreated');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2021092400, 'local', 'webuntis');
+    }
     return true;
 }

@@ -26,10 +26,9 @@ namespace local_webuntis;
 defined('MOODLE_INTERNAL') || die;
 
 class lessonmap {
-    private static $cacheidentifier;
     private static $debug;
     private static $isloaded = false;
-    private static $lessonmaps;
+    private static $lessonmaps; // stores all lessonmaps of this tenant in cache.
 
     /**
      * Load a lessonmap.
@@ -45,19 +44,9 @@ class lessonmap {
         } else {
             \local_webuntis\locallib::cache_set('session', 'lesson_id', $lesson_id);
         }
-        $params = [
-            'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
-            'lesson_id' => $lesson_id,
-        ];
-        if (empty(self::$cacheidentifier)) {
-            self::$cacheidentifier = "lessonmaps_{$params['tenant_id']}_{$params['lesson_id']}";
-        }
 
-        self::$lessonmaps = \local_webuntis\locallib::cache_get('session', self::$cacheidentifier);
-        if (empty(self::$lessonmaps) || count(self::$lessonmaps) == 0 || $lesson_id != $old_lesson_id) {
-            self::$lessonmaps = array_values($DB->get_records('local_webuntis_coursemap', $params));
-            \local_webuntis\locallib::cache_set('session', self::$cacheidentifier, self::$lessonmaps);
-        }
+        self::get_lesson_maps();
+
         if (self::$debug) {
             echo "Found lessonmap\n";
             echo "<pre>" . print_r(self::$lessonmaps, 1) . "</pre>\n";
@@ -99,38 +88,13 @@ class lessonmap {
             // We want to remove it.
             $dbparams['courseid'] = $dbparams['courseid'] * -1;
             $DB->delete_records('local_webuntis_coursemap', $dbparams);
-            for ($a = count(self::$lessonmaps) - 1; $a >= 0; $a--) {
-                if (self::$lessonmaps[$a]->courseid == $dbparams['courseid']) {
-                    unset(self::$lessonmaps[$a]);
-                }
-            }
         } else {
-            $chk = $DB->get_record('local_webuntis_coursemap', $dbparams);
-            if (empty($chk->id)) {
+            if (!$DB->record_exists('local_webuntis_coursemap', $dbparams)) {
                 $dbparams['id'] = $DB->insert_record('local_webuntis_coursemap', $dbparams);
-            } else {
-                $dbparams['id'] = $chk->id;
-            }
-            $found = false;
-            for ($a = count(self::$lessonmaps) - 1; $a >= 0; $a--) {
-                if (self::$lessonmaps[$a]->courseid == $dbparams['courseid']) {
-                    $found = true;
-                }
-            }
-            if (!$found) {
-                self::$lessonmaps[] = (object) $dbparams;
             }
         }
-        self::$lessonmaps = array_values(self::$lessonmaps);
-        \local_webuntis\locallib::cache_set('session', self::$cacheidentifier, self::$lessonmaps);
-    }
-
-    /**
-     * Get the cacheidentifier.
-     */
-    public static function get_cacheidentifier() {
-        self::is_loaded();
-        return self::$cacheidentifier;
+        self::get_lesson_maps(true);
+        \local_webuntis\tenant::touch();
     }
 
     /**
@@ -138,13 +102,13 @@ class lessonmap {
      */
     public static function get_count() {
         self::is_loaded();
-        return count(self::$lessonmaps);
+        return count(self::$lessonmaps[self::get_lesson_id()]);
     }
 
     public static function get_courses() {
         self::is_loaded();
         $courses = array();
-        for ($a = 0; $a < count(self::$lessonmaps); $a++) {
+        for ($a = 0; $a < count(self::$lessonmaps[self::get_lesson_id()]); $a++) {
             $courseid = self::$lessonmaps[$a]->courseid;
             $context = \context_course::instance($courseid, IGNORE_MISSING);
             if (empty($context->id)) {
@@ -183,6 +147,30 @@ class lessonmap {
     }
 
     /**
+     * Get the lesson map for all lessons on this tenant.
+     * Only the mapping for the current lesson are loaded and added to a session-cache-object.
+     * @param reload from database.
+     */
+    public static function get_lesson_maps($reload = false) {
+        self::$lessonmaps = \local_webuntis\locallib::cache_get('session', 'lessonmaps');
+        if ($reload || empty(self::$lessonmaps[self::get_lesson_id()])) {
+            self::$lessonmaps = [];
+            self::$lessonmaps[self::get_lesson_id()] = array_values(
+                $DB->get_records(
+                    'local_webuntis_coursemap',
+                    [
+                        'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
+                        'lesson_id' => self::get_lesson_id(),
+                    ]
+                )
+            );
+            \local_webuntis\locallib::cache_set('session', 'lessonmaps', self::$lessonmaps);
+        }
+
+        return self::$lessonmaps;
+    }
+
+    /**
      * Ensure object was loaded.
      */
     public static function is_loaded() {
@@ -197,7 +185,7 @@ class lessonmap {
      */
     public static function is_selected($courseid) {
         self::is_loaded();
-        foreach (self::$lessonmaps as $lessonmap) {
+        foreach (self::$lessonmaps[self::get_lesson_id()] as $lessonmap) {
             if ($lessonmap->courseid == $courseid) {
                 return true;
             }
@@ -227,7 +215,7 @@ class lessonmap {
                 if (empty($enrol)) {
                     throw new \moodle_exception('manualpluginnotinstalled', 'enrol_manual');
                 }
-                foreach ($lessonmaps as $lessonmap) {
+                foreach ($lessonmaps[self::get_lesson_id()] as $lessonmap) {
                     $ctx = \context_course::instance($lessonmap->courseid, IGNORE_MISSING);
                     if (!empty($ctx->id)) {
                         $enrolinstances = enrol_get_instances($lessonmap->courseid, false);
@@ -256,13 +244,8 @@ class lessonmap {
             \local_webuntis\locallib::cache_set('session', 'synced_lessonmap-' . self::get_lesson_id(), true);
         }
 
-        if (!empty($lessonmaps) && count($lessonmaps) > 1) {
-            // Redirect to selection list.
-            $url = new \moodle_url('/local/webuntis/landing.php', array());
-            \redirect($url);
-        }
-        if (!empty($lessonmaps) && !empty($lessonmaps[0]->courseid)) {
-            $url = new \moodle_url('/course/view.php', array('id' => $lessonmaps[0]->courseid));
+        if (count(self::$lessonmaps[self::get_lesson_id()]) == 1) {
+            $url = new \moodle_url('/course/view.php', array('id' => $courseids[0]));
             if (self::can_edit()) {
                 $editurl = self::get_edit_url();
                 $strparams = array('editurl' => $editurl->__toString());
@@ -270,6 +253,10 @@ class lessonmap {
             } else {
                 \redirect($url);
             }
+        } elseif (count(self::$lessonmaps[self::get_lesson_id()]) > 1) {
+            // Redirect to selection list.
+            $url = new \moodle_url('/local/webuntis/landing.php', array());
+            \redirect($url);
         }
     }
 }

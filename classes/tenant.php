@@ -33,17 +33,6 @@ class tenant {
 
     public static function load($tenant_id = 0, $school = "") {
         global $debug; self::$debug = $debug;
-        $tenant = \local_webuntis\locallib::cache_get('session', 'tenant');
-        if (!empty($tenant->tenant_id)) {
-            self::$tenant = $tenant;
-        }
-
-        if (!empty($tenant->tenant_id) && ($tenant->tenant_id == $tenant_id || empty($tenant_id))) {
-            // Tenant was loaded from cache and we are done.
-            self::$isloaded = true;
-            return;
-        }
-
         global $DB;
         $sql = "SELECT *
             FROM {local_webuntis_tenant}
@@ -68,16 +57,14 @@ class tenant {
             $DB->set_field('local_webuntis_tenant', 'school', $school, array('id' => self::$tenant->id));
         }
 
-        if (!empty(self::$tenant->id) && empty(self::$tenant->host)) {
-            global $_SERVER;
-            self::$tenant->host = $_SERVER['HTTP_REFERER'];
-            self::$tenant->host = str_replace('https://', '', self::$tenant->host);
-            self::$tenant->host = str_replace('.webuntis.com', '', self::$tenant->host);
-            self::$tenant->host = str_replace('/', '', self::$tenant->host);
-            $DB->set_field('local_webuntis_tenant', 'host', self::$tenant->host, array('id' => self::$tenant->id));
+        // Check if tenant has changed somehow, so we need to invalidated caches.
+        $lasttimemodified = \local_webuntis\locallib::cache_get('session', "tenant_lasttimemodified_$tenant->id");
+        if ($lasttimemodified != self::$tenant->timemodified) {
+            // Invalidate all chaches!
+            \local_webuntis\locallib::cache_invalidate();
         }
+        \local_webuntis\locallib::cache_set('session', "tenant_lasttimemodified_$tenant->id", self::$tenant->timemodified);
 
-        \local_webuntis\locallib::cache_set('session', 'tenant', self::$tenant);
         self::$isloaded = true;
     }
 
@@ -103,7 +90,6 @@ class tenant {
                     'response_type' => 'code',
                     'scope' => 'openid roster-core.readonly',
                     'client_id' => self::get_client(),
-                    'school' => self::get_school(true),
                     'redirect_uri' => $CFG->wwwroot . '/local/webuntis/index.php',
                 ]);
                 redirect($url);
@@ -171,7 +157,7 @@ class tenant {
         $endpoints = \local_webuntis\locallib::cache_get('application', 'endpoints-' . self::get_tenant_id());
         if (empty($endpoints) || empty($endpoints->authorization_endpoint)) {
             $host = self::get_host();
-            $school = self::get_school(true);
+            $school = self::get_school(false);
             if (empty($host) || empty($school)) {
                 throw new \moodle_exception('invalid_webuntis_instance', 'local_webuntis', $CFG->wwwroot);
             }
@@ -273,5 +259,14 @@ class tenant {
     public static function static_uuid($uuid) {
         self::is_loaded();
         \local_webuntis\locallib::cache_set('session', 'uuid', $uuid);
+    }
+
+    /**
+     * Indicates something has changed within this tenant, that requires invalidation of all chaches.
+     */
+    public static function touch() {
+        self::is_loaded();
+        global $DB;
+        $DB->set_field('local_webuntis_tenant', 'timemodified', time(), [ 'tenant_id' => self::get_tenant_id() ]);
     }
 }

@@ -42,6 +42,12 @@ class locallib {
         return $cache->get($key);
     }
     /**
+     * Invalidate all known session caches.
+     */
+    public static function cache_invalidate() {
+        self::cache_set('session', 'lessonmaps', null, true);
+    }
+    /**
      * Store caches temporarily to preserve them when logging user in or out.
      * @param read if true store contents in local variable, if false restore cache.
      */
@@ -49,7 +55,7 @@ class locallib {
         // Only session caches need to be preserved.
         $preserves = array(
             // lessonmap
-            array('type' => 'session', 'identifier' => \local_webuntis\lessonmap::get_cacheidentifier()),
+            array('type' => 'session', 'identifier' => 'lessonmaps'),
             array('type' => 'session', 'identifier' => 'synced_lessonmap-' . \local_webuntis\lessonmap::get_lesson_id()),
             array('type' => 'session', 'identifier' => 'lesson_id'),
             // orgmap
