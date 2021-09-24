@@ -34,6 +34,14 @@ class tenant {
     public static function load($tenant_id = 0, $school = "") {
         global $debug; self::$debug = $debug;
         global $DB;
+
+        if (empty($tenant_id)) {
+            $tenant_id = \local_webuntis\locallib::cache_get('session', 'tenant_id');
+        }
+        if (empty($tenant_id)) {
+            return;
+        }
+
         $sql = "SELECT *
             FROM {local_webuntis_tenant}
             WHERE tenant_id = :tenant_id
@@ -56,14 +64,15 @@ class tenant {
             self::$tenant->school = $school;
             $DB->set_field('local_webuntis_tenant', 'school', $school, array('id' => self::$tenant->id));
         }
+        \local_webuntis\locallib::cache_set('session', 'tenant_id', self::$tenant->id);
 
-        // Check if tenant has changed somehow, so we need to invalidated caches.
-        $lasttimemodified = \local_webuntis\locallib::cache_get('session', "tenant_lasttimemodified_$tenant->id");
-        if ($lasttimemodified != self::$tenant->timemodified) {
+        // Check if tenant has changed somehow, so we need to invalidate caches.
+        $lasttimemodified = \local_webuntis\locallib::cache_get('session', "tenant_lasttimemodified_" . self::$tenant->id);
+        if (empty(self::$tenant->timemodified) || $lasttimemodified != self::$tenant->timemodified) {
             // Invalidate all chaches!
             \local_webuntis\locallib::cache_invalidate();
         }
-        \local_webuntis\locallib::cache_set('session', "tenant_lasttimemodified_$tenant->id", self::$tenant->timemodified);
+        \local_webuntis\locallib::cache_set('session', "tenant_lasttimemodified_" . self::$tenant->id, self::$tenant->timemodified);
 
         self::$isloaded = true;
     }
