@@ -42,33 +42,24 @@ class locallib {
         return $cache->get($key);
     }
     /**
-     * Invalidate all known session caches.
-     */
-    public static function cache_invalidate() {
-        self::cache_set('session', 'lessonmaps', null, true);
-    }
-    /**
      * Store caches temporarily to preserve them when logging user in or out.
      * @param read if true store contents in local variable, if false restore cache.
      */
     public static function cache_preserve($read) {
+        global $TENANT;
         // Only session caches need to be preserved.
         $preserves = array(
             // lessonmap
-            array('type' => 'session', 'identifier' => 'lessonmaps'),
-            array('type' => 'session', 'identifier' => 'synced_lessonmap-' . \local_webuntis\lessonmap::get_lesson_id()),
-            array('type' => 'session', 'identifier' => 'lesson_id'),
-            // orgmap
-            // array('type' => 'application', 'identifier' => 'orgmaps-' . \local_webuntis\tenant::get_tenant_id()),
-            // tenant
-            // array('type' => 'application', 'identifier' => 'endpoints-' . \local_webuntis\tenant::get_tenant_id()),
             array('type' => 'session', 'identifier' => 'code'),
-            array('type' => 'session', 'identifier' => 'tenant'),
+            array('type' => 'session', 'identifier' => 'last_lesson_ids'),
+            array('type' => 'session', 'identifier' => 'last_tenant_id'),
+            array('type' => 'session', 'identifier' => 'lessonmaps'),
+            array('type' => 'session', 'identifier' => 'tenants'),
+            array('type' => 'session', 'identifier' => 'userinfos'),
+            array('type' => 'session', 'identifier' => 'usermaps'),
             array('type' => 'session', 'identifier' => 'uuid'),
             // usermap
             // array('type' => 'session', 'identifier' => 'token'),
-            array('type' => 'session', 'identifier' => 'userinfo'),
-            array('type' => 'session', 'identifier' => 'usermap'),
         );
         switch ($read) {
             case true:

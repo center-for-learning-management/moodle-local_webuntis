@@ -32,14 +32,17 @@ $PAGE->set_pagelayout('standard');
 $PAGE->navbar->add(get_string('landing:pagetitle', 'local_webuntis'), $PAGE->url);
 $PAGE->requires->css('/local/webuntis/style/main.css');
 
+$TENANT = \local_webuntis\tenant::load();
+$LESSONMAP = new \local_webuntis\lessonmap();
+
 $params = [
-    'courses' => array_values(\local_webuntis\lessonmap::get_courses()),
-    'editurl' => \local_webuntis\lessonmap::get_edit_url(),
+    'courses' => $LESSONMAP->get_courses(),
+    'editurl' => $LESSONMAP->get_edit_url(),
     'wwwroot' => $CFG->wwwroot,
 ];
 
 if (count($params['courses']) == 1) {
-    \local_webuntis\lessonmap::redirect();
+    $LESSONMAP->redirect();
 }
 
 echo $OUTPUT->header();

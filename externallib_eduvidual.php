@@ -38,7 +38,7 @@ class local_webuntis_external_eduvidual extends external_api {
      * Toggle status.
      */
     public static function orgmap($orgid, $field, $status) {
-        global $DB, $USER;
+        global $DB, $TENANT, $USER;
         if (!\local_webuntis\locallib::uses_eduvidual()) {
             throw new \moodle_exception('not using eduvidual');
         }
@@ -51,14 +51,16 @@ class local_webuntis_external_eduvidual extends external_api {
             )
         );
 
+        $TENANT = \local_webuntis\tenant::load();
+
         $orgrole = \local_eduvidual\locallib::get_orgrole($params['orgid']);
-        if ($orgrole != 'Manager' && !is_siteadmin() || !\local_webuntis\lessonmap::can_edit()) {
+        if ($orgrole != 'Manager' && !is_siteadmin()) {
             throw new \moodle_exception(get_string('missing_permission', 'local_eduvidual'));
         }
 
         $dbparams = [
             'orgid' => $params['orgid'],
-            'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
+            'tenant_id' => $TENANT->get_tenant_id(),
         ];
         $orgmap = $DB->get_record('local_webuntis_orgmap', $dbparams);
         $DB->set_field('local_webuntis_orgmap', $params['field'], $params['status'], $dbparams);

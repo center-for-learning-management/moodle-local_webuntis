@@ -26,99 +26,40 @@ namespace local_webuntis;
 defined('MOODLE_INTERNAL') || die;
 
 class usermap {
-    private static $debug;
-    private static $isloaded = false;
-    private static $token;
-    private static $userinfo;
-    private static $usermap;
+    private static $userinfos;
+    private static $usermaps;
+    private $userinfo;
+    private $usermap;
 
-    public static function load($userinfo = "") {
-        if (!empty(\local_webuntis\locallib::cache_get('session', 'fakemode'))) {
-            return;
+    public function __construct($userinfo = null) {
+        global $TENANT;
+
+        if (empty(self::$userinfos)) {
+            self::$userinfos = \local_webuntis\locallib::cache_get('session', 'userinfos');
         }
-        global $DB, $USER;
-        global $debug; self::$debug = $debug;
+        if (!empty(self::$userinfos[$TENANT->get_tenant_id()])) {
+            $this->userinfo = self::$userinfos[$TENANT->get_tenant_id()];
+        } else {
+            $this->userinfo = (object) [];
+        }
+        if (empty(self::$usermaps)) {
+            self::$usermaps = \local_webuntis\locallib::cache_get('session', 'usermaps');
+        }
+        if (!empty(self::$usermaps[$TENANT->get_tenant_id()])) {
+            $this->usermap = self::$usermaps[$TENANT->get_tenant_id()];
+        } else {
+            $this->usermap = (object) [];
+        }
 
         if (!empty($userinfo)) {
-            self::$userinfo = $userinfo;
-            if (empty(self::$userinfo->id_token)) {
-                redirect(\local_webuntis\tenant::get_init_url());
-            }
-            self::$token = self::extract_token(self::$userinfo->id_token);
-
-            if (self::$debug) {
-                echo "Userinfo:<pre>" . print_r(self::$userinfo, 1) . "</pre>";
-                echo "Token:<pre>" . print_r(self::$token, 1) . "</pre>";
-            }
-
-            if (!empty(self::$token->sub)) {
-                $params = array(
-                    'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
-                    'remoteuserid' => self::$token->sub
-                );
-                self::$usermap = $DB->get_record('local_webuntis_usermap', $params);
-                if (empty(self::$usermap->id) && !empty(self::$token->sub)) {
-                    self::$usermap = (object) array(
-                        'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
-                        'school' => \local_webuntis\tenant::get_school(),
-                        'remoteuserid' => self::$token->sub,
-                        'remoteuserrole' => 'unknown',
-                        'timecreated' => time(),
-                        'timemodified' => time(),
-                        'lastaccess' => time(),
-                        'userinfo' => json_encode(self::$userinfo, JSON_NUMERIC_CHECK),
-                    );
-                    self::$usermap->id = $DB->insert_record('local_webuntis_usermap', self::$usermap);
-                } else {
-                    $DB->set_field('local_webuntis_usermap', 'lastaccess', time(), $params);
-                    $DB->set_field('local_webuntis_usermap', 'userinfo', json_encode(self::$userinfo, JSON_NUMERIC_CHECK), $params);
-                }
-
-                // ATTENTION: In this section you must not call functions like ::get_id, this will cause a loop.
-                // Try to receive the users role.
-                $integration = (\local_webuntis\tenant::get_host() == 'integration') ? '-integration' : '';
-                $path = "https://api$integration.webuntis.com/ims/oneroster/v1p1/users/" . self::$token->sub;
-                if (self::$debug) {
-                    echo "Path $path<br />";
-                }
-                $headerparams = [ 'Authorization' => "$userinfo->token_type $userinfo->id_token" ];
-                if (self::$debug) {
-                    echo "Getuser (via header):<br /><pre>" . print_r($headerparams, 1) . "</pre>";
-                }
-                $getuser = \local_webuntis\locallib::curl($path, [], $headerparams);
-                $getuser = json_decode($getuser);
-                if (self::$debug) {
-                    echo "<pre>" . print_r($getuser, 1) . "</pre>";
-                }
-
-                if (!empty($getuser->identifier)) {
-                    self::save_user($getuser);
-                }
-
-                $foundrole = !empty($getuser->role) ? $getuser->role : 'student';
-
-                if (self::$usermap->remoteuserrole != $foundrole) {
-                    self::$usermap->remoteuserrole = $foundrole;
-                    global $DB;
-                    $DB->set_field('local_webuntis_usermap', 'remoteuserrole', $foundrole, array('id' => self::$usermap->id));
-                }
-            }
-        } else {
-            self::$usermap = \local_webuntis\locallib::cache_get('session', 'usermap');
-            if (!empty(self::$usermap) && !empty(self::$usermap->userinfo)) {
-                self::$userinfo = json_decode(self::$usermap->userinfo);
-                if (!empty(self::$userinfo->id_token)) {
-                    self::$token = self::extract_token(self::$userinfo->id_token);
-                }
-            }
+            $this->set_userinfo($userinfo);
         }
-        self::$isloaded = true;
-        self::set_cache();
+
         // Ensure the user is logged in.
-        if (!empty(self::$usermap->userid)) {
-            self::do_userlogin();
-            if (self::is_administrator()) {
-                \local_webuntis\orgmaps::load_from_eduvidual();
+        if (!empty($this->usermap->userid)) {
+            $this->do_userlogin();
+            if ($this->is_administrator()) {
+                \local_webuntis\orgmap::load_from_eduvidual();
             }
         } else {
             if ($_SERVER['PHP_SELF'] != '/local/webuntis/landinguser.php') {
@@ -127,30 +68,28 @@ class usermap {
             }
         }
     }
-    public static function can_disconnect() {
-        self::is_loaded();
-        if (empty(self::$usermap->candisconnect)) {
-            return false;
+
+    public function can_disconnect() {
+        if (!empty($this->usermap->candisconnect)) {
+            return $this->usermap->candisconnect;
         }
-        return self::$usermap->candisconnect;
     }
     /**
      * Checks if enough profile data is present from webuntis for
      * creation of a user account.
      */
-    public static function check_data_prior_usercreate() {
-        self::is_loaded();
-        if (empty(self::get_firstname())) {
+    public function check_data_prior_usercreate() {
+        if (empty($this->get_firstname())) {
             return false;
         }
-        if (empty(self::get_lastname())) {
+        if (empty($this->get_lastname())) {
             return false;
         }
         if (!\local_webuntis\locallib::uses_eduvidual()) {
-            if (empty(self::get_email())) {
+            if (empty($this->get_email())) {
                 return false;
             }
-            if (empty(self::get_username())) {
+            if (empty($this->get_username())) {
                 return false;
             }
         }
@@ -160,25 +99,25 @@ class usermap {
      * Do the user login based on the "sub"-value.
      * @param sub user-identificator in webuntis.
      */
-    private static function do_userlogin() {
-        global $DB, $USER;
+    private function do_userlogin() {
+        global $DB, $TENANT, $USER;
 
-        if (!empty(self::$usermap->userid) && self::$usermap->userid != $USER->id) {
+        if (!empty($this->get_userid()) && $this->get_userid() != $USER->id) {
             \local_webuntis\locallib::cache_preserve(true);
-            $user = \core_user::get_user(self::$usermap->userid);
+            $user = \core_user::get_user($this->get_userid());
             \complete_user_login($user);
             \local_webuntis\locallib::cache_preserve(false);
-            redirect(\local_webuntis\tenant::get_init_url());
+            redirect($TENANT->get_init_url());
         } else {
             if (!isloggedin() || isguestuser()) {
                 require_login();
             } else {
-                self::$usermap->userid = $USER->id;
-                $DB->set_field('local_webuntis_usermap', 'userid', $USER->id, array('id' => self::$usermap->id));
+                $this->usermap->userid = $USER->id;
+                $DB->set_field('local_webuntis_usermap', 'userid', $USER->id, array('id' => $this->usermap->id));
             }
         }
     }
-    private static function extract_token($strtoken) {
+    public static function extract_token($strtoken) {
         return json_decode(
             base64_decode(
                 str_replace(
@@ -189,33 +128,25 @@ class usermap {
             )
         );
     }
-    public static function get_email() {
-        self::is_loaded();
-        if (empty(self::$usermap->email)) {
-            return;
+    public function get_email() {
+        if (!empty($this->usermap->email)) {
+            return $this->usermap->email;
         }
-        return self::$usermap->email;
     }
-    public static function get_firstname() {
-        self::is_loaded();
-        if (empty(self::$usermap->firstname)) {
-            return;
+    public function get_firstname() {
+        if (!empty($this->usermap->firstname)) {
+            return $this->usermap->firstname;
         }
-        return self::$usermap->firstname;
     }
-    public static function get_id() {
-        self::is_loaded();
-        if (empty(self::$usermap->id)) {
-            return;
+    public function get_id() {
+        if (!empty($this->usermap->id)) {
+            return $this->usermap->id;
         }
-        return self::$usermap->id;
     }
-    public static function get_lastname() {
-        self::is_loaded();
-        if (empty(self::$usermap->lastname)) {
-            return;
+    public function get_lastname() {
+        if (!empty($this->usermap->lastname)) {
+            return $this->usermap->lastname;
         }
-        return self::$usermap->lastname;
     }
     public static function get_map_url() {
         return new \moodle_url('/local/webuntis/landinguser.php');
@@ -224,9 +155,9 @@ class usermap {
      * Return webuntis role as Moodle-roleid.
      * @param webuntisrole if empty use remoteuserrole of usermap.
      */
-    public static function get_moodlerole($webuntisrole = 0) {
+    public function get_moodlerole($webuntisrole = 0) {
         if (empty($webuntisrole)) {
-            $webuntisrole = self::get_remoteuserrole();
+            $webuntisrole = $this->get_remoteuserrole();
         }
         // @Todo configure prefereed roles in settings.php
         $webuntisroles = [ 'student', 'parent', 'teacher', 'administrator' ];
@@ -238,78 +169,54 @@ class usermap {
         }
         return 0;
     }
-    public static function get_userid() {
-        self::is_loaded();
-        if (empty(self::$usermap->userid)) {
-            return;
-        }
-        return self::$usermap->userid;
-    }
-    public static function get_userinfo() {
-        self::is_loaded();
-        if (empty(self::$userinfo)) {
-            return;
-        }
-        return self::$userinfo;
-    }
-    public static function get_usermap() {
-        self::is_loaded();
-        if (empty(self::$usermap)) {
-            return;
-        }
-        return self::$usermap;
-    }
-    public static function get_username() {
-        self::is_loaded();
-        if (empty(self::$usermap->username)) {
-            return;
-        }
-        return self::$usermap->username;
-    }
-    public static function get_remoteuserrole() {
-        self::is_loaded();
-        if (empty(self::$usermap->remoteuserrole)) {
-            return;
-        }
-        return self::$usermap->remoteuserrole;
-    }
-    public static function get_token() {
-        self::is_loaded();
-        if (empty(self::$token)) {
-            return;
-        }
-        return self::$token;
-    }
-    public static function is_loaded() {
-        if (!self::$isloaded) {
-            self::load();
+    public function get_userid() {
+        if (!empty($this->usermap->userid)) {
+            return $this->usermap->userid;
         }
     }
-    public static function is_parent() {
-        self::is_loaded();
-        return (self::get_remoteuserrole() == 'parent');
+    public function get_userinfo() {
+        if (!empty($this->userinfo)) {
+            return $this->userinfo;
+        }
     }
-    public static function is_student() {
-        self::is_loaded();
-        return (self::get_remoteuserrole() == 'student');
+    public function get_usermap() {
+        if (!empty($this->usermap)) {
+            return $this->usermap;
+        }
     }
-    public static function is_teacher() {
-        self::is_loaded();
-        return (self::get_remoteuserrole() == 'teacher');
+    public function get_username() {
+        if (!empty($this->usermap->username)) {
+            return $this->usermap->username;
+        }
     }
-    public static function is_administrator() {
-        self::is_loaded();
-        return (self::get_remoteuserrole() == 'administrator');
+    public function get_remoteuserrole() {
+        if (!empty($this->usermap->remoteuserrole)) {
+            return $this->usermap->remoteuserrole;
+        }
     }
-
-    public static function release() {
-        self::is_loaded();
-        global $DB;
-        self::$usermap->userid = 0;
-        $DB->set_field('local_webuntis_usermap', 'userid', 0, array('id' => self::get_id()));
-        self::set_cache();
+    public function get_token() {
+        if (!empty($this->token)) {
+            return $this->token;
+        }
     }
-
+    public function is_parent() {
+        return ($this->get_remoteuserrole() == 'parent');
+    }
+    public function is_student() {
+        return ($this->get_remoteuserrole() == 'student');
+    }
+    public function is_teacher() {
+        return ($this->get_remoteuserrole() == 'teacher');
+    }
+    public function is_administrator() {
+        return ($this->get_remoteuserrole() == 'administrator');
+    }
+    public function release() {
+        global $DB, $TENANT;
+        $this->usermap->userid = 0;
+        $DB->set_field('local_webuntis_usermap', 'userid', 0, array('id' => $this->get_id()));
+        $TENANT->to_cache();
+    }
     /**
      * Store a webuntis user to our database.
      * @param user object.
@@ -318,18 +225,18 @@ class usermap {
         if (empty($user->identifier)) {
             return;
         }
-        global $DB;
+        global $DB, $TENANT;
 
         $dbparams = [
-            'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
+            'tenant_id' => $TENANT->get_tenant_id(),
             'remoteuserid' => $user->identifier,
         ];
         $usermap = $DB->get_record('local_webuntis_usermap', $dbparams);
 
         if (empty($usermap->id)) {
             $usermap = (object) [
-                'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
-                'school' => \local_webuntis\tenant::get_school(),
+                'tenant_id' => $TENANT->get_tenant_id(),
+                'school' => $TENANT->get_school(),
                 'remoteuserid' => $user->identifier,
                 'timecreated' => time(),
             ];
@@ -350,67 +257,136 @@ class usermap {
         }
 
         // Map user role.
-        \local_webuntis\orgmaps::map_role($user);
-    }
-
-    /**
-     * Ensures all data is written to cache.
-     */
-    private static function set_cache() {
-        \local_webuntis\locallib::cache_set('session', 'token', self::$token);
-        \local_webuntis\locallib::cache_set('session', 'usermap', self::$usermap);
-        \local_webuntis\locallib::cache_set('session', 'userinfo', self::$userinfo);
+        \local_webuntis\orgmap::map_role($user);
     }
 
     /**
      * Set the current user in this usermap.
      * @param userid if empty use $USER
      */
-    public static function set_userid($userid = 0) {
-        self::is_loaded();
-        global $DB, $USER;
+    public function set_userid($userid = 0) {
+        global $DB, $TENANT, $USER;
         if (empty($userid)) {
             $userid = $USER->id;
         }
-        self::$usermap->userid = $userid;
-        $DB->set_field('local_webuntis_usermap', 'userid', self::$usermap->userid, array('id' => self::get_id()));
-        self::set_cache();
+        $this->usermap->userid = $userid;
+        $DB->set_field('local_webuntis_usermap', 'userid', $userid, array('id' => $this->get_id()));
+        $TENANT->touch();
     }
 
-    public static function sync($chance = 1) {
-        $userinfo = self::get_userinfo();
-        $token = self::get_token();
+    public function set_userinfo($userinfo) {
+        global $debug, $DB, $TENANT, $USER;
+
+        $this->userinfo = $userinfo;
+        if (empty($this->userinfo->id_token)) {
+            redirect($TENANT->get_init_url());
+        }
+        $token = self::extract_token($this->userinfo->id_token);
+
+        if ($debug) {
+            echo "Userinfo:<pre>" . print_r($this->userinfo, 1) . "</pre>";
+            echo "Token:<pre>" . print_r($token, 1) . "</pre>";
+        }
+
+        if (!empty($token->sub)) {
+            $params = array(
+                'tenant_id' => $TENANT->get_tenant_id(),
+                'remoteuserid' => $token->sub
+            );
+            $this->usermap = $DB->get_record('local_webuntis_usermap', $params);
+            if (empty($this->usermap->id) && !empty($token->sub)) {
+                $this->usermap = (object) array(
+                    'tenant_id' => $TENANT->get_tenant_id(),
+                    'school' => $TENANT->get_school(),
+                    'remoteuserid' => $token->sub,
+                    'remoteuserrole' => 'unknown',
+                    'timecreated' => time(),
+                    'timemodified' => time(),
+                    'lastaccess' => time(),
+                    'userinfo' => json_encode($this->userinfo, JSON_NUMERIC_CHECK),
+                );
+                $this->usermap->id = $DB->insert_record('local_webuntis_usermap', $this->usermap);
+            } else {
+                $DB->set_field('local_webuntis_usermap', 'lastaccess', time(), $params);
+                $DB->set_field('local_webuntis_usermap', 'userinfo', json_encode($this->userinfo, JSON_NUMERIC_CHECK), $params);
+            }
+
+            // ATTENTION: In this section you must not call functions like ::get_id, this will cause a loop.
+            // Try to receive the users role.
+            $integration = ($TENANT->get_host() == 'integration') ? '-integration' : '';
+            $path = "https://api$integration.webuntis.com/ims/oneroster/v1p1/users/" . $token->sub;
+            if ($debug) {
+                echo "Path $path<br />";
+            }
+            $headerparams = [ 'Authorization' => $this->userinfo->token_type . ' ' .  $this->userinfo->id_token ];
+            if ($debug) {
+                echo "Getuser (via header):<br /><pre>" . print_r($headerparams, 1) . "</pre>";
+            }
+            $getuser = \local_webuntis\locallib::curl($path, [], $headerparams);
+            $getuser = json_decode($getuser);
+            if ($debug) {
+                echo "<pre>" . print_r($getuser, 1) . "</pre>";
+            }
+
+            if (!empty($getuser->identifier)) {
+                self::save_user($getuser);
+            }
+
+            $foundrole = !empty($getuser->role) ? $getuser->role : 'student';
+
+            if ($this->usermap->remoteuserrole != $foundrole) {
+                $this->usermap->remoteuserrole = $foundrole;
+                global $DB;
+                $DB->set_field('local_webuntis_usermap', 'remoteuserrole', $foundrole, array('id' => $this->usermap->id));
+            }
+        }
+
+        $this->to_cache();
+    }
+
+    public function sync($chance = 1) {
+        global $debug, $TENANT;
+        $userinfo = $this->get_userinfo();
+        $token = $this->get_token();
         $path = "https://api-integration.webuntis.com/ims/oneroster/v1p1/users";
-        if (self::$debug) {
+        if ($debug) {
             echo "Path $path<br />";
         }
         $headerparams = [
             'Authorization' => "$userinfo->token_type $userinfo->id_token",
         ];
-        if (self::$debug) {
+        if ($debug) {
             echo "<pre>" . print_r($headerparams, 1) . "</pre>";
         }
         $getuser = \local_webuntis\locallib::curl($path, [], $headerparams);
         $getuser = json_decode($getuser);
-        if (self::$debug) {
+        if ($debug) {
             echo "<pre>" . print_r($getuser, 1) . "</pre>";
         }
 
         if (!empty($getuser->users)) {
             foreach ($getuser->users as $user) {
-                self::save_user($user);
+                $this->save_user($user);
             }
         } else {
             if (!empty($getuser[0]) && !empty($getuser[0]->errorCode)) {
                 switch ($getuser[0]->errorCode) {
                     case 401: // token expired.
-                        \local_webuntis\tenant::auth_token();
+                        $TENANT->auth_token();
                         if ($chance == 1) {
-                            self::sync(2);
+                            $this->sync(2);
                         }
                     break;
                 }
             }
         }
+    }
+
+    public function to_cache() {
+        global $TENANT;
+        self::$userinfos[$TENANT->get_tenant_id()] = $this->userinfo;
+        self::$usermaps[$TENANT->get_tenant_id()]  = $this->usermap;
+        \local_webuntis\locallib::cache_set('session', 'userinfos', self::$userinfos);
+        \local_webuntis\locallib::cache_set('session', 'usermaps', self::$usermaps);
     }
 }

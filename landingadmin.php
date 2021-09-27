@@ -34,14 +34,17 @@ $PAGE->navbar->add(get_string('landing:pagetitle', 'local_webuntis'), $url);
 $PAGE->navbar->add(get_string('settings'), $PAGE->url);
 $PAGE->requires->css('/local/webuntis/style/main.css');
 
+$TENANT = \local_webuntis\tenant::load();
+$LESSONMAP = new \local_webuntis\lessonmap();
+
 echo $OUTPUT->header();
 
-if (!\local_webuntis\lessonmap::can_edit()) {
+if (!$LESSONMAP->can_edit()) {
     throw new \moodle_exception(get_string('missing_permission', 'local_eduvidual'));
 }
 
 $params = [
-    'autocreate' => \local_webuntis\tenant::get_autocreate(),
+    'autocreate' => $TENANT->get_autocreate(),
     'sysenabledautocreate' => get_config('local_webuntis', 'autocreate'),
 ];
 echo $OUTPUT->render_from_template('local_webuntis/landingadmin', $params);
@@ -66,7 +69,7 @@ if (\local_webuntis\locallib::uses_eduvidual()) {
             $org = $orgs[$a];
             $dbparams = array(
                 'orgid' => $org->orgid,
-                'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
+                'tenant_id' => $TENANT->get_tenant_id(),
             );
             $orgmap = $DB->get_record('local_webuntis_orgmap', $dbparams);
             for ($b = 0; $b < count($actions); $b++) {

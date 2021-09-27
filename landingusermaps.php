@@ -34,10 +34,12 @@ $PAGE->navbar->add(get_string('landing:pagetitle', 'local_webuntis'), $url);
 $PAGE->navbar->add(get_string('admin:usermaps:pagetitle', 'local_webuntis'), $PAGE->url);
 $PAGE->requires->css('/local/webuntis/style/main.css');
 
-\local_webuntis\usermap::sync();
+$TENANT = \local_webuntis\tenant::load();
+$USERMAP = new \local_webuntis\usermap();
+$USERMAP->sync();
 
 echo $OUTPUT->header();
-$dbparams = array('tenant_id' => \local_webuntis\tenant::get_tenant_id());
+$dbparams = array('tenant_id' => $TENANT->get_tenant_id());
 $usermaps = array_values($DB->get_records('local_webuntis_usermap', $dbparams, 'lastname ASC,firstname ASC'));
 foreach ($usermaps as $usermap) {
     if (!empty($usermap->userid)) {

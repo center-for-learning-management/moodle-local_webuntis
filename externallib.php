@@ -38,12 +38,14 @@ class local_webuntis_external extends external_api {
      * Toggle status.
      */
     public static function autocreate($status) {
-        global $DB;
-        if (!\local_webuntis\usermap::is_administrator()) {
+        global $TENANT;
+        $TENANT = \local_webuntis\tenant::load();
+        $USERMAP = new \local_webuntis\usermap();
+        if (!$USERMAP->is_administrator()) {
             throw new \moodle_error('nopermission');
         }
         $params = self::validate_parameters(self::autocreate_parameters(), array('status' => $status));
-        $params['status'] = \local_webuntis\tenant::set_autocreate($params['status']);
+        $params['status'] = $TENANT->set_autocreate($params['status']);
         return $params;
     }
     /**
@@ -68,19 +70,22 @@ class local_webuntis_external extends external_api {
      * Toggle status.
      */
     public static function selecttarget($courseid, $status) {
-        global $DB, $USER;
+        global $DB, $TENANT, $USER;
         $params = self::validate_parameters(self::selecttarget_parameters(), array('courseid' => $courseid, 'status' => $status));
 
-        if (\local_webuntis\lessonmap::can_edit()) {
+        $TENANT = \local_webuntis\tenant::load();
+        $LESSONMAP = new \local_webuntis\lessonmap();
+
+        if ($LESSONMAP->can_edit()) {
             $courseid = $params['courseid'];
             if ($params['status'] == 0) {
                 $courseid = $courseid * -1;
             }
-            \local_webuntis\lessonmap::change_map($courseid);
+            $LESSONMAP->change_map($courseid);
 
-            $params['canproceed'] = (\local_webuntis\lessonmap::get_count() > 0) ? 1 : 0;
+            $params['canproceed'] = ($LESSONMAP->get_count() > 0) ? 1 : 0;
             $params['lesson_id'] = \local_webuntis\lessonmap::get_lesson_id();
-            $params['tenant_id'] = \local_webuntis\tenant::get_tenant_id();
+            $params['tenant_id'] = $TENANT->get_tenant_id();
         } else {
             $params['canproceed'] = 0;
             $params['lesson_id'] = 0;

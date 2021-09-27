@@ -34,20 +34,22 @@ $PAGE->set_pagelayout('standard');
 $PAGE->navbar->add(get_string('landinguser:pagetitle', 'local_webuntis'), $PAGE->url);
 $PAGE->requires->css('/local/webuntis/style/main.css');
 
-if (\local_webuntis\usermap::get_userid() > 0) {
+$TENANT = \local_webuntis\tenant::load();
+$USERMAP = new \local_webuntis\usermap();
+
+if ($USERMAP->get_userid() > 0) {
     throw new moodle_error('already connected');
 }
 
-$enoughdata = \local_webuntis\usermap::check_data_prior_usercreate();
-$canmapnew = get_config('local_webuntis', 'autocreate') &&
-             \local_webuntis\tenant::get_autocreate();
+$enoughdata = $USERMAP->check_data_prior_usercreate();
+$canmapnew = get_config('local_webuntis', 'autocreate') && $TENANT->get_autocreate();
 $params = [
     'canmapnew' => $canmapnew,
     'canmapcurrent' => (isloggedin() && !isguestuser()) ? 1 : 0,
     'canmapother' => 1,
     'enoughdata' => $enoughdata,
     'userfullname' => \fullname($USER),
-    'usermap' => \local_webuntis\usermap::get_usermap(),
+    'usermap' => $USERMAP->get_usermap(),
     'wwwroot' => $CFG->wwwroot,
 ];
 
@@ -67,11 +69,11 @@ switch ($confirmed) {
             'confirmed' => 1,
             'deleted' => 0,
             'mnethostid' => 1,
-            'username' => \local_webuntis\usermap::get_username(),
-            'firstname' => \local_webuntis\usermap::get_firstname(),
-            'lastname' => \local_webuntis\usermap::get_lastname(),
-            'email' => \local_webuntis\usermap::get_email(),
-            'role' => \local_webuntis\orgmaps::convert_role(\local_webuntis\usermap::get_remoteuserrole()),
+            'username' => $USERMAP->get_username(),
+            'firstname' => $USERMAP->get_firstname(),
+            'lastname' => $USERMAP->get_lastname(),
+            'email' => $USERMAP->get_email(),
+            'role' => \local_webuntis\orgmaps::convert_role($USERMAP->get_remoteuserrole()),
             'auth' => 'manual',
             'policyagreed' => 0,
         ];
@@ -101,11 +103,11 @@ switch ($confirmed) {
         \local_eduvidual\lib_enrol::choose_background($u->id);
         \core\event\user_created::create_from_userid($u->id)->trigger();
 
-        \local_webuntis\usermap::set_userid($u->id);
+        $USERMAP->set_userid($u->id);
         // Ensure we are enrolled in all eduvidual-organisations.
-        \local_webuntis\orgmaps::map_role_usermap(\local_webuntis\usermap::get_usermap());
-        $DB->set_field('local_webuntis_usermap', 'candisconnect', 0, array('id' => \local_webuntis\usermap::get_id()));
-        $url = \local_webuntis\tenant::get_init_url();
+        \local_webuntis\orgmaps::map_role_usermap($USERMAP->get_usermap());
+        $DB->set_field('local_webuntis_usermap', 'candisconnect', 0, array('id' => $USERMAP->get_id()));
+        $url = $TENANT->get_init_url();
         redirect($url);
     break;
     case 2: // Use current user.
@@ -113,9 +115,9 @@ switch ($confirmed) {
             throw new \moodle_exception('forbidden');
         }
         if (isloggedin() && !isguestuser()) {
-            \local_webuntis\usermap::set_userid();
-            if (\local_webuntis\usermap::get_userid() == $USER->id) {
-                $url = \local_webuntis\tenant::get_init_url();
+            $USERMAP->set_userid();
+            if ($USERMAP->get_userid() == $USER->id) {
+                $url = $TENANT->get_init_url();
                 redirect($url, get_string('usermap:success', 'local_webuntis'), 0, \core\output\notification::NOTIFY_SUCCESS);
             } else {
                 throw new \moodle_exception(get_string('usermap:failed', 'local_webuntis'));
@@ -129,15 +131,11 @@ switch ($confirmed) {
             throw new \moodle_exception('forbidden');
         }
         // Safely logout.
-        $url = \local_webuntis\tenant::get_init_url();
-        \local_webuntis\usermap::release();
+        $url = $TENANT->get_init_url();
+        $url->param('redirect', get_login_url());
+        $USERMAP->release();
         require_logout();
-        redirect(new \moodle_url('/local/webuntis/landinguser.php', array('confirmed' => 4, 'initurl' => $url->out(false))));
-    break;
-    case 4:
-        $initurl = required_param('initurl', PARAM_URL);
-        $SESSION->wantsurl = $initurl;
-        redirect(get_login_url());
+        redirect($url);
     break;
 }
 

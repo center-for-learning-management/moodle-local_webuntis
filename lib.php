@@ -24,34 +24,38 @@
 defined('MOODLE_INTERNAL') || die;
 
 function local_webuntis_after_config() {
-    if (empty(\local_webuntis\tenant::get_tenant_id())) {
+    global $CFG, $PAGE;
+    if (empty(\local_webuntis\tenant::last_tenant_id())) {
         return;
     }
-    global $PAGE;
+
     $PAGE->add_body_class('webuntis-loading-check');
 }
 
 function local_webuntis_before_standard_html_head() {
+    global $TENANT;
     // Only do something, if we came through webuntis.
-    if (empty(\local_webuntis\tenant::get_tenant_id())) {
+    if (empty(\local_webuntis\tenant::last_tenant_id())) {
         return;
     }
-    \local_webuntis\usermap::load();
+    $TENANT = \local_webuntis\tenant::load();
+    $USERMAP = new \local_webuntis\usermap();
 }
 
 /**
  * Extend Moodle Navigation.
  */
 function local_webuntis_extend_navigation($navigation) {
-    if(!empty(\local_webuntis\locallib::cache_get('session', 'fakemode'))) {
-        return;
-    }
+    global $TENANT;
     // Only do something, if we came through webuntis.
-    if (empty(\local_webuntis\tenant::get_tenant_id())) {
+    if (empty(\local_webuntis\tenant::last_tenant_id())) {
         return;
     }
 
-    if (\local_webuntis\usermap::get_userid() > 0 && \local_webuntis\usermap::can_disconnect()) {
+    $TENANT = \local_webuntis\tenant::load();
+    $USERMAP = new \local_webuntis\usermap();
+
+    if ($USERMAP->get_userid() > 0 && $USERMAP->can_disconnect()) {
         global $USER;
         $nodehome = $navigation->get('actionmenu');
         if (empty($nodehome)) {
@@ -70,13 +74,7 @@ function local_webuntis_extend_navigation($navigation) {
  */
 function local_webuntis_extend_navigation_course($nav, $course, $context) {
     // Only do something, if we came through webuntis.
-    if (empty(\local_webuntis\tenant::get_tenant_id())) {
+    if (empty(\local_webuntis\tenant::last_tenant_id())) {
         return;
-    }
-
-    $coursecontext = \context_course::instance($course->id);
-    if (has_capability('moodle/course:delete', $coursecontext)) {
-        $url = new \moodle_url('/local/webuntis/disconnect.php', array('courseid' => $course->id));
-        $nav->add(get_string('disconnect:course', 'local_webuntis'), $url);
     }
 }

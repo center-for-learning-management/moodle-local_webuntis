@@ -32,7 +32,10 @@ $PAGE->set_pagelayout('standard');
 $PAGE->navbar->add(get_string('landing:pagetitle', 'local_webuntis'), $PAGE->url);
 $PAGE->requires->css('/local/webuntis/style/main.css');
 
-if (!\local_webuntis\lessonmap::can_edit()) {
+$TENANT = \local_webuntis\tenant::load();
+$LESSONMAP = new \local_webuntis\lessonmap();
+
+if (!$LESSONMAP->can_edit()) {
     throw new \moodle_exception(get_string('nopermissions', 'error', 'edit webuntis target'));
 }
 
@@ -42,16 +45,16 @@ foreach ($allcourses as $course) {
     $ctx = \context_course::instance($course->id);
     if (has_capability('moodle/course:update', $ctx)) {
         $course->courseimage = \local_webuntis\locallib::get_courseimage($course->id);
-        $course->is_selected = \local_webuntis\lessonmap::is_selected($course->id);
+        $course->is_selected = $LESSONMAP->is_selected($course->id);
         $courses[] = $course;
     }
 }
 $params = [
-    'canproceed' => (\local_webuntis\lessonmap::get_count() > 0) ? 1 : 0,
+    'canproceed' => ($LESSONMAP->get_count() > 0) ? 1 : 0,
     'courses' => $courses,
 ];
 
-if (\local_webuntis\lessonmap::get_lesson_id() == 0 && \local_webuntis\lessonmap::can_edit()) {
+if ($LESSONMAP->get_lesson_id() == 0 && $LESSONMAP->can_edit()) {
     $params['canconfig'] = 1;
 }
 

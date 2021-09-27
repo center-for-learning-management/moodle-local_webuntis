@@ -25,22 +25,18 @@ namespace local_webuntis;
 
 defined('MOODLE_INTERNAL') || die;
 
-class orgmaps {
-    private static $debug;
-    private static $isloaded = false;
-    private static $orgmaps;
+class orgmap {
+    private $orgmap;
 
-    public static function load() {
-        global $DB;
-        global $debug; self::$debug = $debug;
+    public function __construct() {
+        global $DB, $TENANT;
 
-        if (empty(\local_webuntis\tenant::get_tenant_id())) {
+        if (empty($TENANT->get_tenant_id())) {
             return;
         }
 
-        self::$orgmaps = \local_webuntis\locallib::cache_get('application', 'orgmaps-' . \local_webuntis\tenant::get_tenant_id());
-        if (empty(self::$orgmaps) || count(self::$orgmaps) == 0) {
-            self::load_from_db();
+        if (empty($TENANT->tenantdata->orgmap)) {
+            self::load_orgmap();
         }
     }
 
@@ -62,16 +58,17 @@ class orgmaps {
         return $role;
     }
 
-    public static function get_orgmaps() {
-        self::is_loaded();
-        return self::$orgmaps;
+    public function get_orgmap() {
+        global $TENANT;
+        return $TENANT->tenantdata->orgmap;
     }
 
     /**
      * Check if at least on orgmap allows autoenrol.
      */
-    public static function has_autoenrol() {
-        foreach (self::get_orgmaps() as $orgmap) {
+    public function has_autoenrol() {
+        global $TENANT;
+        foreach ($this->get_orgmap() as $orgmap) {
             if (!empty($orgmap->autoenrol)) {
                 return true;
             }
@@ -79,59 +76,43 @@ class orgmaps {
         return false;
     }
 
-    private static function is_loaded() {
-        if (!self::$isloaded) {
-            self::load();
-        }
-    }
-
-    private static function load_from_db() {
-        global $DB;
-        $params = [ 'tenant_id' => \local_webuntis\tenant::get_tenant_id()];
-        self::$orgmaps = array_values($DB->get_records('local_webuntis_orgmap', $params));
-
-        \local_webuntis\locallib::cache_set('application', 'orgmaps-' . $params['tenant_id'], self::$orgmaps);
-        self::$isloaded = true;
+    private static function load_orgmap() {
+        global $DB, $TENANT;
+        $params = [ 'tenant_id' => $TENANT->get_tenant_id()];
+        $TENANT->tenantdata->orgmap = array_values($DB->get_records('local_webuntis_orgmap', $params));
+        $TENANT->to_cache();
     }
 
     public static function load_from_eduvidual() {
-        if (!\local_webuntis\locallib::uses_eduvidual()) {
+        global $DB, $TENANT;
+        if (!\local_webuntis\locallib::uses_eduvidual() || empty($TENANT->get_tenant_id())) {
             return;
         }
-        if (empty(\local_webuntis\tenant::get_tenant_id())) {
-            return;
-        }
-        global $DB;
+
         $orgs = \local_eduvidual\locallib::get_organisations('Manager', false);
         foreach ($orgs as $org) {
-            $params = [ 'orgid' => $org->orgid, 'tenant_id' => \local_webuntis\tenant::get_tenant_id()];
+            $params = [ 'orgid' => $org->orgid, 'tenant_id' => $TENANT->get_tenant_id()];
             $orgmap = $DB->get_record('local_webuntis_orgmap', $params);
             if (empty($orgmap->id)) {
                 $orgmap = (object)[
                     'autoenrol' => 0,
                     'orgid' => $org->orgid,
-                    'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
+                    'tenant_id' => $TENANT->get_tenant_id(),
                 ];
                 $orgmap->id = $DB->insert_record('local_webuntis_orgmap', $orgmap);
             }
         }
-        self::load_from_db();
+        self::load_orgmap();
     }
 
     public static function map_role($user) {
-        if (!\local_webuntis\locallib::uses_eduvidual()) {
-            return;
-        }
-        if (empty(\local_webuntis\tenant::get_tenant_id())) {
-            return;
-        }
-        if (empty($user->identifier)) {
+        global $DB, $TENANT;
+        if (empty($user->identifier) || !\local_webuntis\locallib::uses_eduvidual() || empty($TENANT->get_tenant_id())) {
             return;
         }
 
-        global $DB;
         $params = [
-            'tenant_id' => \local_webuntis\tenant::get_tenant_id(),
+            'tenant_id' => $TENANT->get_tenant_id(),
             'remoteuserid' => $user->identifier,
         ];
         $usermap = $DB->get_record('local_webuntis_usermap', $params);
@@ -146,17 +127,13 @@ class orgmaps {
      * @param usermap
      */
     public static function map_role_usermap($usermap) {
-        if (!\local_webuntis\locallib::uses_eduvidual()) {
+        global $TENANT;
+        if (empty($usermap->role) || !\local_webuntis\locallib::uses_eduvidual() || empty($TENANT->get_tenant_id())) {
             return;
         }
-        if (empty(\local_webuntis\tenant::get_tenant_id())) {
-            return;
-        }
-        if (empty($usermap->role)) {
-            return;
-        }
+
         $role = self::convert_role($usermap->role);
-        foreach (self::get_orgmaps() as $orgmap) {
+        foreach ($TENANT->tenantdata->orgmap as $orgmap) {
             if (!empty($orgmap->autoenrol)) {
                 \local_eduvidual\lib_enrol::role_set($usermap->userid, $orgmap->orgid, $role);
             }

@@ -21,15 +21,20 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('../../config.php');
+error_log("credentials.php was called");
+error_log(print_r($_REQUEST));
 
-$pubkey = get_config('local_webuntis', (strpos($_SERVER['HTTP_REFERER'], 'integration.webuntis.com') > 0) ? 'pubkey_integration' : 'pubkey_production');
+require_once('../../config.php');
 
 $encrypted_data = file_get_contents('php://input');
 
 
 error_log("Encrypted: " . $encrypted_data);
 die("FERTICH");
+
+$pubkey = get_config('local_webuntis', (strpos($_SERVER['HTTP_REFERER'], 'integration.webuntis.com') > 0) ? 'pubkey_integration' : 'pubkey_production');
+
+
 //$iv = mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_ECB), MCRYPT_RAND);
 //$decrypted_data mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $pubkey, hex2bin($encrypted_data), MCRYPT_MODE_ECB, $iv);
 

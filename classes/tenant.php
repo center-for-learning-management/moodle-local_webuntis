@@ -26,64 +26,63 @@ namespace local_webuntis;
 defined('MOODLE_INTERNAL') || die;
 
 class tenant {
-    private static $debug;
-    private static $isloaded;
-    private static $tenant;
-    private static $usermap;
+    private static $tenantsdata;
+    public $tenantdata;
 
-    public static function load($tenant_id = 0, $school = "") {
-        global $debug; self::$debug = $debug;
+    public static function last_tenant_id() {
+        return \local_webuntis\locallib::cache_get('session', 'last_tenant_id');
+    }
+
+    public static function load($tenantid = 0) {
+        global $CFG, $debug, $DB;
+
+        if (empty($tenantid)) {
+            $tenantid = \local_webuntis\locallib::cache_get('session', 'last_tenant_id');
+        }
+        if (empty($tenantid)) {
+            \local_webuntis\locallib::cache_print(true);
+            throw new \moodle_exception('invalidwebuntisinstance', 'local_webuntis', $CFG->wwwroot);
+        }
+        return new \local_webuntis\tenant($tenantid);
+    }
+
+    public function __construct($tenantid) {
         global $DB;
-
-        if (empty($tenant_id)) {
-            $tenant_id = \local_webuntis\locallib::cache_get('session', 'tenant_id');
+        self::$tenantsdata = \local_webuntis\locallib::cache_get('session', 'tenants');
+        if (empty(self::$tenantsdata[$tenantid])) {
+            self::$tenantsdata[$tenantid] = (object)[];
         }
-        if (empty($tenant_id)) {
-            return;
-        }
-
-        $sql = "SELECT *
-            FROM {local_webuntis_tenant}
-            WHERE tenant_id = :tenant_id
-                OR (
-                    school LIKE :school
-                    AND school <> ''
-                )";
-        $params = [ 'school' => $school, 'tenant_id' => $tenant_id ];
-        self::$tenant = $DB->get_record_sql($sql, $params);
-
-        if (empty(self::$tenant->id) && !empty($tenant_id)) {
-            self::$tenant = (object) $params;
-            self::$tenant->client = optional_param('client', '', PARAM_TEXT);
-            self::$tenant->consumerkey = optional_param('consumerkey', '', PARAM_TEXT);
-            self::$tenant->consumersecret = optional_param('consumersecret', '', PARAM_TEXT);
-            self::$tenant->autocreate = 0;
-            self::$tenant->id = $DB->insert_record('local_webuntis_tenant', self::$tenant);
-        }
-        if (!empty(self::$tenant->id) && !empty($school) && self::$tenant->school != $school) {
-            self::$tenant->school = $school;
-            $DB->set_field('local_webuntis_tenant', 'school', $school, array('id' => self::$tenant->id));
-        }
-        \local_webuntis\locallib::cache_set('session', 'tenant_id', self::$tenant->id);
 
         // Check if tenant has changed somehow, so we need to invalidate caches.
-        $lasttimemodified = \local_webuntis\locallib::cache_get('session', "tenant_lasttimemodified_" . self::$tenant->id);
-        if (empty(self::$tenant->timemodified) || $lasttimemodified != self::$tenant->timemodified) {
+        $lasttimemodified = \local_webuntis\locallib::cache_get('session', "tenant_lasttimemodified_$tenantid");
+        if (empty($this->tenantdata->timemodified) || $lasttimemodified != $this->tenantdata->timemodified) {
             // Invalidate all chaches!
-            \local_webuntis\locallib::cache_invalidate();
+            $this->tenantdata = (object) [];
+            \local_webuntis\lessonmap::cache_invalidate($tenantid);
+        } else {
+            $this->tenantdata = self::$tenantsdata[$tenantid];
         }
-        \local_webuntis\locallib::cache_set('session', "tenant_lasttimemodified_" . self::$tenant->id, self::$tenant->timemodified);
 
-        self::$isloaded = true;
+        if (empty($this->tenantdata->id)) {
+            $sql = "SELECT *
+                FROM {local_webuntis_tenant}
+                WHERE tenant_id = :tenant_id";
+            $params = [ 'tenant_id' => $tenantid ];
+            $this->tenantdata = $DB->get_record_sql($sql, $params);
+        }
+
+        \local_webuntis\locallib::cache_set('session', "tenant_lasttimemodified_$tenantid", $this->tenantdata->timemodified);
+        \local_webuntis\locallib::cache_set('session', 'last_tenant_id', $tenantid);
+
+        $this->to_cache();
     }
 
     /**
      * Ensure the user was authenticated against WebUntis.
      */
-    public static function auth() {
-        self::is_loaded();
+    public function auth() {
         global $CFG, $PAGE;
-        $endpoints = self::get_endpoints();
+        $endpoints = $this->get_endpoints();
         if (empty($endpoints->authorization_endpoint)) {
             throw new \moodle_exception('endpointmissing', 'local_webuntis', $CFG->wwwroot);
         }
@@ -92,8 +91,7 @@ class tenant {
         if (empty($uuid)) {
             $code = optional_param('code', '', PARAM_TEXT);
             if (!empty($code)) {
-                \local_webuntis\locallib::cache_set('session', 'code', $code);
-                self::auth_token();
+                $this->auth_token($code);
             } else {
                 $url = new \moodle_url($endpoints->authorization_endpoint, [
                     'response_type' => 'code',
@@ -107,175 +105,127 @@ class tenant {
         }
     }
 
-    public static function auth_token() {
-        global $CFG;
-        $code = \local_webuntis\locallib::cache_get('session', 'code');
-        $endpoints = self::get_endpoints();
+    public function auth_token($code) {
+        global $CFG, $debug;
+        $endpoints = $this->get_endpoints();
         $path = $endpoints->token_endpoint;
         $params = [
             'grant_type' => 'authorization_code',
-            'client_id' => self::get_client(),
-            'client_secret' => self::get_consumerkey(),
+            'client_id' => $this->get_client(),
+            'client_secret' => $this->get_consumerkey(),
             'code' => $code,
             'redirect_uri' => $CFG->wwwroot . '/local/webuntis/index.php',
         ];
-        if (self::$debug) {
+        if ($debug) {
             echo "calling $path using the following params<br />";
             echo "<pre>" . print_r($params, 1) . "</pre>";
         }
 
         $userinfo = \local_webuntis\locallib::curl($path, $params);
-
         if (!empty($userinfo)) {
             $userinfo = json_decode($userinfo);
-            \local_webuntis\usermap::load($userinfo);
+            $usermap = new \local_webuntis\usermap($userinfo);
         }
     }
 
-
-    public static function get_autocreate() {
-        self::is_loaded();
-        if (empty(self::$tenant->autocreate)) {
-            return;
-        }
-        return self::$tenant->autocreate;
+    public function get_autocreate() {
+        return $this->tenantdata->autocreate;
     }
-    public static function get_client() {
-        self::is_loaded();
-        if (empty(self::$tenant->client)) {
-            return;
-        }
-        return self::$tenant->client;
+    public function get_client() {
+        return $this->tenantdata->client;
     }
-    public static function get_consumerkey() {
-        self::is_loaded();
-        if (empty(self::$tenant->consumerkey)) {
-            return;
-        }
-        return self::$tenant->consumerkey;
+    public function get_consumerkey() {
+        return $this->tenantdata->consumerkey;
     }
-    public static function get_consumersecret() {
-        self::is_loaded();
-        if (empty(self::$tenant->consumersecret)) {
-            return;
-        }
-        return self::$tenant->consumersecret;
+    public function get_consumersecret() {
+        return $this->tenantdata->consumersecret;
     }
-    private static function get_endpoints() {
-        self::is_loaded();
-        $endpoints = \local_webuntis\locallib::cache_get('application', 'endpoints-' . self::get_tenant_id());
+    private function get_endpoints() {
+        $endpoints = \local_webuntis\locallib::cache_get('application', 'endpoints-' . $this->get_tenant_id());
         if (empty($endpoints) || empty($endpoints->authorization_endpoint)) {
-            $host = self::get_host();
-            $school = self::get_school(false);
+            $host = $this->get_host();
+            $school = $this->get_school(false);
             if (empty($host) || empty($school)) {
                 throw new \moodle_exception('invalid_webuntis_instance', 'local_webuntis', $CFG->wwwroot);
             }
             $path = "https://$host.webuntis.com/WebUntis/api/sso/$school/.well-known/openid-configuration";
             $endpoints = json_decode(\local_webuntis\locallib::curl($path));
-            \local_webuntis\locallib::cache_set('application', 'endpoints-' . self::get_tenant_id(), $endpoints);
+            \local_webuntis\locallib::cache_set('application', 'endpoints-' . $this->get_tenant_id(), $endpoints);
         }
         return $endpoints;
     }
-    public static function get_host() {
-        self::is_loaded();
-        if (empty(self::$tenant->host)) {
-            return;
-        }
-        return self::$tenant->host;
+    public function get_host() {
+        return $this->tenantdata->host;
     }
-    public static function get_id() {
-        self::is_loaded();
-        if (empty(self::$tenant->id)) {
-            return;
-        }
-        return self::$tenant->id;
+    public function get_id() {
+        return $this->tenantdata->id;
     }
-    public static function get_init_url() {
-        self::is_loaded();
+    public function get_init_url() {
         $params = [
-            'tenant_id' => self::get_tenant_id(),
-            'school' => self::get_school(),
+            'tenant_id' => $this->get_tenant_id(),
+            'school' => $this->get_school(),
             'lesson_id' => \local_webuntis\lessonmap::get_lesson_id(),
         ];
         return new \moodle_url('/local/webuntis/index.php', $params);
     }
-    public static function get_school($lcase = false) {
-        self::is_loaded();
+    public function get_school($lcase = false) {
         if ($lcase) {
-            return strtolower(self::$tenant->school);
+            return strtolower($this->tenantdata->school);
         } else {
-            return self::$tenant->school;
+            return $this->tenantdata->school;
         }
     }
-    public static function get_tenant_id() {
-        self::is_loaded();
-        if (empty(self::$tenant->tenant_id)) {
-            return;
-        }
-        return self::$tenant->tenant_id;
+    public function get_tenant_id() {
+        return $this->tenantdata->tenant_id;
     }
     /**
      * @return the webuntis users uuid.
      */
-    public static function get_uuid() {
-        self::is_loaded();
-        return \local_webuntis\locallib::cache_get('session', 'uuid');
+    public function get_uuid() {
+        return \local_webuntis\locallib::cache_get('session', 'uuid_' . $this->tenantdata->id);
     }
 
-    public static function is_loaded() {
-        if (!self::$isloaded) {
-            self::load();
-        }
-    }
-
-    public static function set_autocreate($to) {
-        self::is_loaded();
+    public function set_autocreate($to) {
         global $DB;
-        if (empty(self::get_tenant_id())) {
-            return;
-        }
-
-        if (!\local_webuntis\usermap::is_administrator()) {
+        $USERMAP = new \local_webuntis\usermap();
+        if (!$USERMAP->is_administrator()) {
             throw new \moodle_error('nopermission');
         }
-        self::$tenant->autocreate = $to;
-        $DB->set_field('local_webuntis_tenant', 'autocreate', $to, [ 'tenant_id' => self::get_tenant_id() ]);
-        \local_webuntis\locallib::cache_set('session', 'tenant', self::$tenant);
+        $this->tenantdata->autocreate = $to;
+        $DB->set_field('local_webuntis_tenant', 'autocreate', $to, [ 'tenant_id' => $this->get_tenant_id() ]);
+        $this->to_cache();
         return $to;
     }
 
-    public static function set_init_url() {
-        $params = [
-            'tenant_id' => self::get_tenant_id(),
-            'school' => self::get_school(),
-            'lesson_id' => \local_webuntis\lessonmap::get_lesson_id(),
-        ];
-        $_SESSION['webuntis_init_url'] = new \moodle_url('/local/webuntis/index.php', $params);
+    public function set_oauth_keys($consumerkey, $consumersecret) {
+        global $DB;
+        $this->tenantdata->consumerkey = $consumerkey;
+        $this->tenantdata->consumersecret = $consumersecret;
+        $DB->update_record('local_webuntis_tenant', $this->tenantdata);
+        $this->to_cache();
     }
 
-    public static function set_oauth_keys($consumerkey, $consumersecret) {
-        self::is_loaded();
-        global $DB;
-        self::$tenant->consumerkey = $consumerkey;
-        self::$tenant->consumersecret = $consumersecret;
-        $DB->update_record('local_webuntis_tenant', self::$tenant);
-        \local_webuntis\locallib::cache_set('session', 'tenant', self::$tenant);
-    }
     /**
      * Set the webuntis uuid for this session.
      * @param uuid of webuntis.
      */
-    public static function static_uuid($uuid) {
-        self::is_loaded();
-        \local_webuntis\locallib::cache_set('session', 'uuid', $uuid);
+    public function set_uuid($uuid) {
+        \local_webuntis\locallib::cache_set('session', 'uuid_' . $this->tenantdata->id, $uuid);
+    }
+
+    public function to_cache() {
+        if (empty($this->get_tenant_id())) {
+            return;
+        }
+        self::$tenantsdata[$this->get_tenant_id()] = $this->tenantdata;
+        \local_webuntis\locallib::cache_set('session', 'tenants', self::$tenantsdata);
     }
 
     /**
      * Indicates something has changed within this tenant, that requires invalidation of all chaches.
      */
-    public static function touch() {
-        self::is_loaded();
+    public function touch() {
         global $DB;
-        $DB->set_field('local_webuntis_tenant', 'timemodified', time(), [ 'tenant_id' => self::get_tenant_id() ]);
+        $DB->set_field('local_webuntis_tenant', 'timemodified', time(), [ 'tenant_id' => $this->get_tenant_id() ]);
     }
 }
