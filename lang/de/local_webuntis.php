@@ -52,6 +52,8 @@ $string['landinguser:mapnew:notenoughdata:text'] = 'Ein Nutzerkonto kann aufgrun
 $string['landinguser:mapnew:notenoughdata:showdetails'] = 'Zeige bekannte Profildaten';
 $string['landinguser:pagetitle'] = 'Nutzerkonten verknüpfen';
 $string['landinguser:select_option'] = 'Bitte wählen Sie eine der folgenden Optionen';
+$string['loginexternal'] = 'Öffne in neuem Tab';
+$string['loginexternal:description'] = 'Diese Loginmethode erfordert, dass der Login einmalig in einem neuen Tab ausgeführt wird. Klicken Sie den folgenden Button, um den Login zu starten!';
 $string['pluginname'] = 'WebUntis Integration';
 $string['proceed'] = 'Weiter';
 $string['redirect_edit_landingpage'] = 'Sie wurden automatisch in diesen Kurs weitergeleitet. Falls Sie das Ziel dieses Links ändern möchten, klicken Sie bitte <a href="{$a->editurl}">hier</a>.';
