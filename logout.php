@@ -23,6 +23,7 @@
 
 require_once('../../config.php');
 
-$redirect = get_login_url();
+\local_webuntis\locallib::cors();
 require_logout();
-redirect($redirect);
+
+echo "Logout successful";
