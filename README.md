@@ -1,5 +1,7 @@
 # moodle-local_webuntis
 
+This plugins allows a connection between Moodle and WebUntis Instances of https://webuntis.com.
+
 ## About this plugin
 This plugin allows an integration of Moodle with WebUntis. The core features are:
 - User mapping
@@ -10,13 +12,15 @@ This plugin allows an integration of Moodle with WebUntis. The core features are
 ## Using this plugin
 To use this plugin, you need at least on WebUntis instance and a running Moodle site.
 
-At first, login to your WebUntis instance as Administrator and add the Moodle "platform" (e.g. Eduvidual). In the background, WebUntis tells Moodle the oAuth consumer credentials**). Follow the required steps to add the platform to the various navigation nodes in WebUntis for each user role.
+At first, login to your WebUntis instance as Administrator and add the Moodle "platform". You received oAuth-details of your WebUntis-Instance. In a future version of the plugin these data should be transmitted automatically from WebUntis to your Moodle in the background. At the moment you must add the WebUntis tenant directly in the Moodle database (table 'local_webuntis_tenants'). You need the tenant_id, schoolname, subdomain of webuntis (e.g. for kalliope.webuntis.com it is kalliope), and the oAuth-credentials. Follow the required steps within WebUntis to add the platform to the various navigation nodes in WebUntis for each user role.
 
 When you're done, links to your Moodle site are shown in the main menu of WebUntis and on each lesson page. When a user clicks on such link for the first time, a mapping of user accounts is required (also for the WebUntis-Administrator!)
 
 ### User mapping
 Users can now choose to map an existing Moodle account, or create a new one*). Once this user map has been created, the user is automatically logged in each time. This user mapping can be disconnected by the user using the Button "Disconnect from webuntis" in the Moodle main menu.
 ![Map user account](docs/img/01-map-user.png)
+
+Attention: When external login systems like oAuth are used, the login procedure opens in a new tab. This is due to the reason, that these don't allow to be embedded in an iframe. Due to technical reasons, the browser must not be run in private mode! After the user was mapped, everything runs fine within the iframe.
 
 ### Tenant specific administration
 Using the link to the Moodle on the main menu of WebUntis, the WebUntis-Administrator can choose a target course, and open particular settings regarding the behavior of the sync between WebUntis and Moodle.
@@ -37,4 +41,3 @@ The target course of lesson pages can be selected by Teachers and Administrators
 
 ------------------------------------
 *) Can be disabled in the Moodle Website-Administration, and requires sufficient profile data in WebUntis!
-**) Currently this only works the first time the tenant is added.
