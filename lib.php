@@ -25,7 +25,7 @@ defined('MOODLE_INTERNAL') || die;
 
 function local_webuntis_after_config() {
     global $CFG, $PAGE;
-    if (empty(\local_webuntis\tenant::last_tenant_id())) {
+    if (empty(\local_webuntis\locallib::uses_webuntis())) {
         return;
     }
     $PAGE->add_body_class('webuntis-loading-check');
@@ -41,7 +41,7 @@ function local_webuntis_after_config() {
 function local_webuntis_before_standard_html_head() {
     global $TENANT;
     // Only do something, if we came through webuntis.
-    if (empty(\local_webuntis\tenant::last_tenant_id()) || defined('webuntis_no_action')) {
+    if (empty(\local_webuntis\locallib::uses_webuntis()) || defined('webuntis_no_action')) {
         return;
     }
 
@@ -55,7 +55,7 @@ function local_webuntis_before_standard_html_head() {
 function local_webuntis_extend_navigation($navigation) {
     global $TENANT;
     // Only do something, if we came through webuntis.
-    if (empty(\local_webuntis\tenant::last_tenant_id()) || defined('webuntis_no_action')) {
+    if (empty(\local_webuntis\locallib::uses_webuntis()) || defined('webuntis_no_action')) {
         return;
     }
 
@@ -81,7 +81,7 @@ function local_webuntis_extend_navigation($navigation) {
  */
 function local_webuntis_extend_navigation_course($nav, $course, $context) {
     // Only do something, if we came through webuntis.
-    if (empty(\local_webuntis\tenant::last_tenant_id()) || defined('webuntis_no_action')) {
+    if (empty(\local_webuntis\locallib::uses_webuntis()) || defined('webuntis_no_action')) {
         return;
     }
 }

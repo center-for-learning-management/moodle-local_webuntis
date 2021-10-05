@@ -200,4 +200,20 @@ class locallib {
         global $CFG;
         return file_exists($CFG->dirroot . '/local/eduvidual/version.php');
     }
+
+    /**
+     * Set for a particular user session whether or not we are using webuntis.
+     * @param setto +1 activate, -1 deactivate, 0 get current status.
+     */
+    public static function uses_webuntis($setto = 0) {
+        if (empty($setto)) {
+            return \local_webuntis\locallib::cache_get('session', 'uses_webuntis');
+        }
+        if ($setto = 1) {
+            \local_webuntis\locallib::cache_set('session', 'uses_webuntis', 1);
+        }
+        if ($setto = -1) {
+            \local_webuntis\locallib::cache_set('session', 'uses_webuntis', null, true);
+        }
+    }
 }
