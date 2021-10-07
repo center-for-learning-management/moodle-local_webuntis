@@ -57,9 +57,9 @@ if ($hassiteconfig) {
 
         $name = new lang_string('admin:pubkey:integration', 'local_webuntis');
         $desc = new lang_string('admin:pubkey:integration:description', 'local_webuntis');
-        $default = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvmXfTJ5W9/Wt/70nGsJ9cWBqXEruRRIYZw/j3lHNFud+1hh9Z27PcM4ZXsnyL/WIxxLQ6EVzvzGn/GgqKZy4biiMweFCbWPfV3sl8/F30wSB7GiwhDGB+xN5/15IHukWWjy7675hhma7a+RGaJSdTGGS2z5HSMSaRBjg2i6VSKs3e5jOHV5FdfmKZY++HmFB/wzG+0lYv/d/j2UwzPhJb6wCB62uTKwKLedjs2w0n0YELvzZz4XdU+AnXnlW1ZrGFqwV4wnfkSooRHMca3b0eBHIvWyA2OIjUuidC4/eiru6dOWp2mfPsYQBo+U1KCyWNHxnEKYYPC1DzPokrTajdwIDAQAB';
+        $default = "-----BEGIN PUBLIC KEY-----\n" . 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvmXfTJ5W9/Wt/70nGsJ9cWBqXEruRRIYZw/j3lHNFud+1hh9Z27PcM4ZXsnyL/WIxxLQ6EVzvzGn/GgqKZy4biiMweFCbWPfV3sl8/F30wSB7GiwhDGB+xN5/15IHukWWjy7675hhma7a+RGaJSdTGGS2z5HSMSaRBjg2i6VSKs3e5jOHV5FdfmKZY++HmFB/wzG+0lYv/d/j2UwzPhJb6wCB62uTKwKLedjs2w0n0YELvzZz4XdU+AnXnlW1ZrGFqwV4wnfkSooRHMca3b0eBHIvWyA2OIjUuidC4/eiru6dOWp2mfPsYQBo+U1KCyWNHxnEKYYPC1DzPokrTajdwIDAQAB' . "\n-----END PUBLIC KEY-----";
 
-        $setting = new admin_setting_configtext(
+        $setting = new admin_setting_configtextarea(
             'local_webuntis/pubkey_integration',
             $name,
             $desc,
@@ -69,9 +69,9 @@ if ($hassiteconfig) {
 
         $name = new lang_string('admin:pubkey:production', 'local_webuntis');
         $desc = new lang_string('admin:pubkey:production:description', 'local_webuntis');
-        $default = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArqx5iTI7Vm5V8K865H79svRanqQOB/WR32nd+Fw08vxfcesiO0Frg816dPk6MgRvurQ7fxv4SZaa5T+TNppgdjJBtrLX2uJlaTW8pHMTgZ/TAuoW/IZdvOKGhwsJh6unQwHDEmD7IE35agcyeuglNoHO4z3/Dnd/m9ufraf9HStQNUs820+Y5ENOBd76qfgKeIl0bV/PLnuVXUwMb1K3UQtP3N2xcNurpQB7AyQyrPWoKHUjPka/nROWJouUSficatL8XOay5GKm9SfK7hfNiDxB/vYUV/mdS5JSH9Lq2k/+zbZHDh47ea6CrKRxLM69di0BbnIuQTA1/YUDnm/cnQIDAQAB';
+        $default = "-----BEGIN PUBLIC KEY-----\n" . 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArqx5iTI7Vm5V8K865H79svRanqQOB/WR32nd+Fw08vxfcesiO0Frg816dPk6MgRvurQ7fxv4SZaa5T+TNppgdjJBtrLX2uJlaTW8pHMTgZ/TAuoW/IZdvOKGhwsJh6unQwHDEmD7IE35agcyeuglNoHO4z3/Dnd/m9ufraf9HStQNUs820+Y5ENOBd76qfgKeIl0bV/PLnuVXUwMb1K3UQtP3N2xcNurpQB7AyQyrPWoKHUjPka/nROWJouUSficatL8XOay5GKm9SfK7hfNiDxB/vYUV/mdS5JSH9Lq2k/+zbZHDh47ea6CrKRxLM69di0BbnIuQTA1/YUDnm/cnQIDAQAB' . "\n-----END PUBLIC KEY-----";
 
-        $setting = new admin_setting_configtext(
+        $setting = new admin_setting_configtextarea(
             'local_webuntis/pubkey_production',
             $name,
             $desc,

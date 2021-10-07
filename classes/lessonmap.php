@@ -50,14 +50,6 @@ class lessonmap {
     public function __construct($lessonid = -1) {
         global $debug, $TENANT;
 
-        if (empty(self::$lessonmaps)) {
-            self::$lessonmaps = \local_webuntis\locallib::cache_get('session', 'lessonmaps');
-            if (empty(self::$lessonmaps[$TENANT->get_tenant_id()])) {
-                self::$lessonmaps[$TENANT->get_tenant_id()] = [];
-            }
-        }
-        $this->lessonmap = self::$lessonmaps[$TENANT->get_tenant_id()];
-
         if ($lessonid == -1) {
             $lessonid = self::get_lesson_id();
         }
@@ -67,16 +59,6 @@ class lessonmap {
         if ($lessonid > -1) {
             self::set_lessonid($lessonid);
         }
-
-        if ($debug) {
-            echo "Found lessonmap\n";
-            echo "<pre>" . print_r($this->lessonmap, 1) . "</pre>\n";
-        }
-    }
-
-    public static function cache_invalidate($tenantid) {
-        unset(self::$lessonmaps[$tenantid]);
-        \local_webuntis\locallib::cache_set('session', 'lessonmaps', self::$lessonmaps);
     }
 
     /**
@@ -125,14 +107,25 @@ class lessonmap {
      * Get the amount of courses in this map.
      */
     public function get_count() {
-        return count($this->lessonmap[self::get_lesson_id()]);
+        global $DB, $TENANT;
+        $params = [
+            'tenant_id' => $TENANT->get_tenant_id(),
+            'lesson_id' => self::get_lesson_id(),
+        ];
+        return $DB->count_records('local_webuntis_coursemap', $params);
     }
 
     public function get_courses() {
+        global $DB, $TENANT;
         $courses = array();
 
+        $params = [
+            'tenant_id' => $TENANT->get_tenant_id(),
+            'lesson_id' => self::get_lesson_id(),
+        ];
+        $lessonmaps = $DB->get_records('local_webuntis_coursemap', $params);
         //for ($a = 0; $a < count($this->lessonmap[self::get_lesson_id()]); $a++) {
-        foreach ($this->lessonmap[self::get_lesson_id()] as $lessonmap) {
+        foreach ($lessonmaps as $lessonmap) {
             $courseid = $lessonmap->courseid; //$this->lessonmap[$a]->courseid;
             $context = \context_course::instance($courseid, IGNORE_MISSING);
             if (empty($context->id)) {
@@ -182,19 +175,15 @@ class lessonmap {
         if ($lessonid == -1) {
             $lessonid = self::get_lesson_id();
         }
-        if (empty($this->lessonmap[$lessonid]) || count($this->lessonmap[$lessonid]) == 0) {
-            $this->lessonmap[$lessonid] = array_values(
-                $DB->get_records(
-                    'local_webuntis_coursemap',
-                    [
-                        'tenant_id' => $TENANT->get_tenant_id(),
-                        'lesson_id' => $lessonid,
-                    ]
-                )
-            );
-        }
-
-        $this->to_cache();
+        return array_values(
+            $DB->get_records(
+                'local_webuntis_coursemap',
+                [
+                    'tenant_id' => $TENANT->get_tenant_id(),
+                    'lesson_id' => $lessonid,
+                ]
+            )
+        );
     }
 
     /**
@@ -202,12 +191,14 @@ class lessonmap {
      * @param courseid
      */
     public function is_selected($courseid) {
-        foreach ($this->lessonmap[self::get_lesson_id()] as $lessonmap) {
-            if ($lessonmap->courseid == $courseid) {
-                return true;
-            }
-        }
-        return false;
+        global $DB, $TENANT;
+        $params = [
+            'tenant_id' => $TENANT->get_tenant_id(),
+            'lesson_id' => self::get_lesson_id(),
+            'courseid' => $courseid,
+        ];
+        $count = $DB->count_records('local_webuntis_coursemap', $params);
+        return ($count > 0);
     }
 
     /**
@@ -222,9 +213,19 @@ class lessonmap {
             return;
         }
 
+        $lessonmaps = self::get_lessonmap();
         // We only enrol users once a session.
-        $synced = \local_webuntis\locallib::cache_get('session', 'synced_lessonmap-' . $TENANT->get_tenant_id() . '-' . self::get_lesson_id());
+        $synced = \local_webuntis\locallib::cache_get('session', 'synced_lesson_ids');
         if (empty($synced)) {
+            $synced = [];
+        }
+        if (empty($synced[$TENANT->get_tenant_id()])) {
+            $synced[$TENANT->get_tenant_id()] = [];
+        }
+        if (empty($synced[$TENANT->get_tenant_id()])) {
+            $synced[$TENANT->get_tenant_id()][self::get_lesson_id()] = false;
+        }
+        if (empty($synced[$TENANT->get_tenant_id()][self::get_lesson_id()])) {
             // @todo better implement own enrol-plugin.
             $moodlerole = $usermap->get_moodlerole();
             if (!empty($moodlerole)) {
@@ -232,7 +233,7 @@ class lessonmap {
                 if (empty($enrol)) {
                     throw new \moodle_exception('manualpluginnotinstalled', 'enrol_manual');
                 }
-                foreach ($this->lessonmap[self::get_lesson_id()] as $lessonmap) {
+                foreach ($lessonmaps as $lessonmap) {
                     $ctx = \context_course::instance($lessonmap->courseid, IGNORE_MISSING);
                     if (!empty($ctx->id)) {
                         $enrolinstances = enrol_get_instances($lessonmap->courseid, false);
@@ -258,11 +259,12 @@ class lessonmap {
                     }
                 }
             }
-            \local_webuntis\locallib::cache_set('session', 'synced_lessonmap-' . $TENANT->get_tenant_id() . '-' . self::get_lesson_id(), true);
+            $synced[$TENANT->get_tenant_id()][self::get_lesson_id()] = true;
+            \local_webuntis\locallib::cache_set('session', 'synced_lesson_ids', $synced);
         }
 
-        if (count($this->lessonmap[self::get_lesson_id()]) == 1) {
-            $url = new \moodle_url('/course/view.php', array('id' => $this->lessonmap[self::get_lesson_id()][0]->courseid));
+        if (count($lessonmaps) == 1) {
+            $url = new \moodle_url('/course/view.php', array('id' => $lessonmaps[0]->courseid));
             if (self::can_edit()) {
                 $editurl = self::get_edit_url();
                 $strparams = array('editurl' => $editurl->__toString());
@@ -270,16 +272,10 @@ class lessonmap {
             } else {
                 \redirect($url);
             }
-        } elseif (count($this->lessonmap[self::get_lesson_id()]) > 1) {
+        } elseif (count($lessonmaps) > 1) {
             // Redirect to selection list.
             $url = new \moodle_url('/local/webuntis/landing.php', array());
             \redirect($url);
         }
-    }
-
-    public function to_cache() {
-        global $TENANT;
-        self::$lessonmaps[$TENANT->get_tenant_id()] = $this->lessonmap;
-        \local_webuntis\locallib::cache_set('session', 'lessonmaps', self::$lessonmaps);
     }
 }

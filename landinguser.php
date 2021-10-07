@@ -73,7 +73,7 @@ switch ($confirmed) {
             'firstname' => $USERMAP->get_firstname(),
             'lastname' => $USERMAP->get_lastname(),
             'email' => $USERMAP->get_email(),
-            'role' => \local_webuntis\orgmaps::convert_role($USERMAP->get_remoteuserrole()),
+            'role' => \local_webuntis\orgmap::convert_role($USERMAP->get_remoteuserrole()),
             'auth' => 'manual',
             'policyagreed' => 0,
         ];
@@ -105,7 +105,7 @@ switch ($confirmed) {
 
         $USERMAP->set_userid($u->id);
         // Ensure we are enrolled in all eduvidual-organisations.
-        \local_webuntis\orgmaps::map_role_usermap($USERMAP->get_usermap());
+        \local_webuntis\orgmap::map_role_usermap($USERMAP->get_usermap());
         $DB->set_field('local_webuntis_usermap', 'candisconnect', 0, array('id' => $USERMAP->get_id()));
         $url = $TENANT->get_init_url();
         redirect($url);

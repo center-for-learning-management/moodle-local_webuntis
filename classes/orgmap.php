@@ -19,6 +19,8 @@
  * @copyright  2021 Zentrum für Lernmanagement (www.lernmanagement.at)
  * @author     Robert Schrenk
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
+ * Attention: orgmaps is a feature for eduvidual-based Moodle systems!
  */
 
 namespace local_webuntis;
@@ -26,19 +28,7 @@ namespace local_webuntis;
 defined('MOODLE_INTERNAL') || die;
 
 class orgmap {
-    private $orgmap;
-
-    public function __construct() {
-        global $DB, $TENANT;
-
-        if (empty($TENANT->get_tenant_id())) {
-            return;
-        }
-
-        if (empty($TENANT->tenantdata->orgmap)) {
-            self::load_orgmap();
-        }
-    }
+    private static $orgmap;
 
     /**
      * Convert webuntis role to eduvidual-role.
@@ -58,29 +48,32 @@ class orgmap {
         return $role;
     }
 
-    public function get_orgmap() {
+    /**
+     * Get list of mapped webuntis tenants.
+     */
+    public static function get_orgmap() {
         global $TENANT;
-        return $TENANT->tenantdata->orgmap;
+        if (empty($TENANT->get_tenant_id())) {
+            return [];
+        } elseif (empty(self::$orgmap)) {
+            $params = [ 'tenant_id' => $TENANT->get_tenant_id() ];
+            self::$orgmap = array_values($DB->get_records('local_webuntis_orgmap', $params));
+            return self::$orgmap;
+        } else {
+            return self::$orgmap;
+        }
     }
 
     /**
-     * Check if at least on orgmap allows autoenrol.
+     * Check if at least one orgmap allows autoenrol.
      */
-    public function has_autoenrol() {
-        global $TENANT;
-        foreach ($this->get_orgmap() as $orgmap) {
+    public static function has_autoenrol() {
+        foreach (self::get_orgmap() as $orgmap) {
             if (!empty($orgmap->autoenrol)) {
                 return true;
             }
         }
         return false;
-    }
-
-    private static function load_orgmap() {
-        global $DB, $TENANT;
-        $params = [ 'tenant_id' => $TENANT->get_tenant_id()];
-        $TENANT->tenantdata->orgmap = array_values($DB->get_records('local_webuntis_orgmap', $params));
-        $TENANT->to_cache();
     }
 
     public static function load_from_eduvidual() {
@@ -102,7 +95,6 @@ class orgmap {
                 $orgmap->id = $DB->insert_record('local_webuntis_orgmap', $orgmap);
             }
         }
-        self::load_orgmap();
     }
 
     public static function map_role($user) {
@@ -133,7 +125,7 @@ class orgmap {
         }
 
         $role = self::convert_role($usermap->role);
-        foreach ($TENANT->tenantdata->orgmap as $orgmap) {
+        foreach (self::$orgmap as $orgmap) {
             if (!empty($orgmap->autoenrol)) {
                 \local_eduvidual\lib_enrol::role_set($usermap->userid, $orgmap->orgid, $role);
             }

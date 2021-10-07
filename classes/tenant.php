@@ -26,7 +26,6 @@ namespace local_webuntis;
 defined('MOODLE_INTERNAL') || die;
 
 class tenant {
-    private static $tenantsdata;
     public $tenantdata;
 
     public static function last_tenant_id() {
@@ -48,33 +47,14 @@ class tenant {
 
     public function __construct($tenantid) {
         global $DB;
-        self::$tenantsdata = \local_webuntis\locallib::cache_get('session', 'tenants');
-        if (empty(self::$tenantsdata[$tenantid])) {
-            self::$tenantsdata[$tenantid] = (object)[];
-        }
 
-        // Check if tenant has changed somehow, so we need to invalidate caches.
-        $lasttimemodified = \local_webuntis\locallib::cache_get('session', "tenant_lasttimemodified_$tenantid");
-        if (empty($this->tenantdata->timemodified) || $lasttimemodified != $this->tenantdata->timemodified) {
-            // Invalidate all chaches!
-            $this->tenantdata = (object) [];
-            \local_webuntis\lessonmap::cache_invalidate($tenantid);
-        } else {
-            $this->tenantdata = self::$tenantsdata[$tenantid];
-        }
+        $sql = "SELECT *
+            FROM {local_webuntis_tenant}
+            WHERE tenant_id = :tenant_id";
+        $params = [ 'tenant_id' => $tenantid ];
+        $this->tenantdata = $DB->get_record_sql($sql, $params);
 
-        if (empty($this->tenantdata->id)) {
-            $sql = "SELECT *
-                FROM {local_webuntis_tenant}
-                WHERE tenant_id = :tenant_id";
-            $params = [ 'tenant_id' => $tenantid ];
-            $this->tenantdata = $DB->get_record_sql($sql, $params);
-        }
-
-        \local_webuntis\locallib::cache_set('session', "tenant_lasttimemodified_$tenantid", $this->tenantdata->timemodified);
         \local_webuntis\locallib::cache_set('session', 'last_tenant_id', $tenantid);
-
-        $this->to_cache();
     }
 
     /**
@@ -101,7 +81,6 @@ class tenant {
                 ]);
                 redirect($url);
             }
-
         }
     }
 
@@ -193,7 +172,6 @@ class tenant {
         }
         $this->tenantdata->autocreate = $to;
         $DB->set_field('local_webuntis_tenant', 'autocreate', $to, [ 'tenant_id' => $this->get_tenant_id() ]);
-        $this->to_cache();
         return $to;
     }
 
@@ -202,7 +180,6 @@ class tenant {
         $this->tenantdata->consumerkey = $consumerkey;
         $this->tenantdata->consumersecret = $consumersecret;
         $DB->update_record('local_webuntis_tenant', $this->tenantdata);
-        $this->to_cache();
     }
 
     /**
@@ -211,14 +188,6 @@ class tenant {
      */
     public function set_uuid($uuid) {
         \local_webuntis\locallib::cache_set('session', 'uuid_' . $this->tenantdata->id, $uuid);
-    }
-
-    public function to_cache() {
-        if (empty($this->get_tenant_id())) {
-            return;
-        }
-        self::$tenantsdata[$this->get_tenant_id()] = $this->tenantdata;
-        \local_webuntis\locallib::cache_set('session', 'tenants', self::$tenantsdata);
     }
 
     /**

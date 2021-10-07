@@ -53,13 +53,10 @@ class locallib {
             array('type' => 'session', 'identifier' => 'code'),
             array('type' => 'session', 'identifier' => 'last_lesson_ids'),
             array('type' => 'session', 'identifier' => 'last_tenant_id'),
-            array('type' => 'session', 'identifier' => 'lessonmaps'),
-            array('type' => 'session', 'identifier' => 'tenants'),
+            array('type' => 'session', 'identifier' => 'synced_lesson_ids'),
             array('type' => 'session', 'identifier' => 'userinfos'),
             array('type' => 'session', 'identifier' => 'usermaps'),
             array('type' => 'session', 'identifier' => 'uuid'),
-            // usermap
-            // array('type' => 'session', 'identifier' => 'token'),
         );
         switch ($read) {
             case true:
