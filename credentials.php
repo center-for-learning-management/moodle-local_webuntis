@@ -21,22 +21,93 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-error_log("credentials.php was called");
-error_log(print_r($_REQUEST));
-
 require_once('../../config.php');
 
-$encrypted_data = file_get_contents('php://input');
+/**
+ * As outputs of this programme can not be shown in any frontend,
+ * you can route debug messages to the error_log. To do so, please
+ * set debugging to true in the following line.
+ */
+$debugging = false;
 
+if ($debugging) error_log("====================================");
+if ($debugging) error_log("===== Getting the parameters");
+$DATA = file_get_contents('php://input');
 
-error_log("Encrypted: " . $encrypted_data);
-die("FERTICH");
+foreach (getallheaders() as $name => $value) {
+    switch ($name) {
+        case 'Algorithm':
+            switch($value) {
+                case 'SHA256': $ALGORITHM = OPENSSL_ALGO_SHA256; break;
+                case 'SHA256withRSA': $ALGORITHM = 'sha256WithRSAEncryption'; break;
+                default:
+                    $ALGORITHM = $value;
+            }
+        break;
+        case 'Authorization':
+            $SIGNATURE = base64_decode($value);
+        break;
+    }
+}
 
-$pubkey = get_config('local_webuntis', (strpos($_SERVER['HTTP_REFERER'], 'integration.webuntis.com') > 0) ? 'pubkey_integration' : 'pubkey_production');
+if ($debugging) error_log("Data $DATA");
+if ($debugging) error_log("Signature $SIGNATURE");
+if ($debugging) error_log("Algorithm $ALGORITHM");
 
+if (empty($SIGNATURE) || empty($ALGORITHM)) {
+    throw new moodle_exception('algorithm or signature missing');
+}
 
-//$iv = mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_ECB), MCRYPT_RAND);
-//$decrypted_data mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $pubkey, hex2bin($encrypted_data), MCRYPT_MODE_ECB, $iv);
+// Verifying signature.
+$pubkeys = [
+    'production' => get_config('local_webuntis', 'pubkey_production'),
+    'integration' => get_config('local_webuntis', 'pubkey_integration'),
+];
+$verified = false;
 
-die($decrypted_data);
-error_log("Decrypted: " . $decrypted_data);
+foreach ($pubkeys as $identifier => $pubkey) {
+    if ($debugging) error_log("===== Testing pubkey of $identifier: $pubkey");
+
+    $verified = openssl_verify($DATA, $SIGNATURE, $pubkey, $ALGORITHM);
+    error_log("VERIFIED $verified with $identifier using algorithm $ALGORITHM");
+
+    if (!$verified) {
+        if ($debugging) error_log("Verification of signature failed using public key of $identifier");
+    } else {
+        if ($debugging) error_log("Signature verified using public key of $identifier");
+        break;
+    }
+}
+
+// Updating database.
+if ($verified) {
+    $tenant = json_decode($DATA);
+    if (!empty($tenant->tenantId)) {
+        if ($debugging) error_log("There was valid JSON-Data for tenant {$tenant->tenantId}");
+        $obj = $DB->get_record('local_webuntis_tenant', [ 'tenant_id' => $tenant->tenantId ]);
+        if (!empty($obj->id)) {
+            $obj->school = $tenant->schoolName;
+            $obj->client = $tenant->clientId;
+            $obj->consumerkey = $tenant->secret;
+            $obj->consumesecret = $tenant->password;
+            $obj->timemodified = time();
+            $DB->update_record('local_webuntis_tenant', $obj);
+            if ($debugging) error_log("Tenant {$obj->tenant_id} updated");
+        } else {
+            $obj = (object) [
+                'tenant_id' => $tenant->tenantId,
+                'school' => $tenant->schoolName,
+                'host' => '',
+                'client' => $tenant->clientId,
+                'consumerkey' => $tenant->secret,
+                'consumersecret' => $tenant->password,
+                'timecreated' => time(),
+                'timemodified' => time(),
+            ];
+            $obj->id = $DB->insert_record('local_webuntis_tenant', $obj);
+            if ($debugging) error_log("Tenant {$obj->tenant_id} inserted");
+        }
+    }
+}
+
+if ($debugging) error_log("====================================");

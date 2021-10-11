@@ -56,6 +56,7 @@ class locallib {
             array('type' => 'session', 'identifier' => 'synced_lesson_ids'),
             array('type' => 'session', 'identifier' => 'userinfos'),
             array('type' => 'session', 'identifier' => 'usermaps'),
+            array('type' => 'session', 'identifier' => 'uses_webuntis'),
             array('type' => 'session', 'identifier' => 'uuid'),
         );
         switch ($read) {
@@ -203,6 +204,8 @@ class locallib {
      * @param setto +1 activate, -1 deactivate, 0 get current status.
      */
     public static function uses_webuntis($setto = 0) {
+        return !empty(\local_webuntis\tenant::last_tenant_id());
+        /*
         if (empty($setto)) {
             return \local_webuntis\locallib::cache_get('session', 'uses_webuntis');
         }
@@ -212,5 +215,6 @@ class locallib {
         if ($setto = -1) {
             \local_webuntis\locallib::cache_set('session', 'uses_webuntis', null, true);
         }
+        */
     }
 }

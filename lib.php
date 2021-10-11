@@ -56,6 +56,8 @@ function local_webuntis_extend_navigation($navigation) {
     global $TENANT;
     // Only do something, if we came through webuntis.
     if (empty(\local_webuntis\locallib::uses_webuntis()) || defined('webuntis_no_action')) {
+        //\local_webuntis\locallib::cache_print(true);
+        //die("NOT USING WEBUNTIS");
         return;
     }
 
