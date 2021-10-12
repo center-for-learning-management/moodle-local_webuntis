@@ -42,6 +42,7 @@ $string['eduvidual:features'] = 'eduvidual-Features';
 $string['eduvidual:orgconfig'] = 'Enable eduvidual-specific features:';
 $string['eduvidual:settings'] = 'Settings regarding organisations';
 $string['endpointmissing'] = 'The oAuth-endpoint of the webuntis instance is unknown.';
+$string['exception:already_connected'] = 'This WebUntis account is already linked to a Moodle account!';
 $string['invalidinput'] = 'Invalid input.';
 $string['invalidwebuntisinstance'] = 'The webuntis instance is invalid or has not been configured.';
 $string['landing:pagetitle'] = 'Select course';

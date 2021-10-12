@@ -40,6 +40,7 @@ $string['eduvidual:features'] = 'eduvidual-Funktionen';
 $string['eduvidual:orgconfig'] = 'Verwaltung eduvidual-spezifischer Funktionen:';
 $string['eduvidual:settings'] = 'Einstellungen zur Schulorganisation';
 $string['endpointmissing'] = 'Der oAuth-Endpunkt der Webuntis-Instanz ist unbekannt.';
+$string['exception:already_connected'] = 'Dieses Nutzerkonto aus WebUntis ist bereits mit einem Moodle-Konto verknüpft!';
 $string['invalidinput'] = 'Ungültige Eingabe.';
 $string['invalidwebuntisinstance'] = 'Die Webuntis-Instanz scheint ungültig zu sein oder wurde noch nicht konfiguriert.';
 $string['landing:pagetitle'] = 'Kurs auswählen';

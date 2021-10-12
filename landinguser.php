@@ -38,7 +38,7 @@ $TENANT = \local_webuntis\tenant::load();
 $USERMAP = new \local_webuntis\usermap();
 
 if ($USERMAP->get_userid() > 0) {
-    throw new moodle_error('already connected');
+    throw new moodle_exception('exception:already_connected', 'local_webuntis');
 }
 
 $enoughdata = $USERMAP->check_data_prior_usercreate();

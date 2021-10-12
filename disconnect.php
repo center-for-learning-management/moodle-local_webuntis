@@ -60,8 +60,6 @@ if (empty($confirmed)) {
     if (!empty($userid)) {
         $TENANT = \local_webuntis\tenant::load();
         $USERMAP = new \local_webuntis\usermap();
-        //$url = $TENANT->get_init_url();
-        //$url->param('redirect', '/local/webuntis/disconnect.php?disconnected=1');
         $USERMAP->release();
         require_logout();
         $url = new moodle_url('/local/webuntis/disconnect.php', [ 'disconnected' => 1 ]);

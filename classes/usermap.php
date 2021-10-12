@@ -215,7 +215,6 @@ class usermap {
         global $DB, $TENANT;
         $this->usermap->userid = 0;
         $DB->set_field('local_webuntis_usermap', 'userid', 0, array('id' => $this->get_id()));
-        $TENANT->to_cache();
     }
     /**
      * Store a webuntis user to our database.
