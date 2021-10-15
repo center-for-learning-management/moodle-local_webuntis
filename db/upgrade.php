@@ -39,5 +39,11 @@ function xmldb_local_webuntis_upgrade($oldversion=0) {
         }
         upgrade_plugin_savepoint(true, 2021092400, 'local', 'webuntis');
     }
+    if ($oldversion < 2021101501) {
+        $table = new xmldb_table('local_webuntis_tenant');
+        $field = new xmldb_field('host', XMLDB_TYPE_CHAR, '250', null, XMLDB_NOTNULL, null, null, 'school');
+        $dbman->change_field_precision($table, $field);
+        upgrade_plugin_savepoint(true, 2021101501, 'local', 'webuntis');
+    }
     return true;
 }

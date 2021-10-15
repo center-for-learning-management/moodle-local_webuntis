@@ -28,7 +28,7 @@ require_once('../../config.php');
  * you can route debug messages to the error_log. To do so, please
  * set debugging to true in the following line.
  */
-$debugging = false;
+$debugging = true;
 
 if ($debugging) error_log("====================================");
 if ($debugging) error_log("===== Getting the parameters");
@@ -86,23 +86,24 @@ if ($verified) {
         if ($debugging) error_log("There was valid JSON-Data for tenant {$tenant->tenantId}");
         $obj = $DB->get_record('local_webuntis_tenant', [ 'tenant_id' => $tenant->tenantId ]);
         if (!empty($obj->id)) {
-            $obj->school = $tenant->schoolName;
-            $obj->client = $tenant->clientId;
-            $obj->consumerkey = $tenant->secret;
+            $obj->school        = $tenant->schoolName;
+            $obj->client        = $tenant->clientId;
+            $obj->consumerkey   = $tenant->secret;
             $obj->consumesecret = $tenant->password;
-            $obj->timemodified = time();
+            $obj->host          = $tenant->host;
+            $obj->timemodified  = time();
             $DB->update_record('local_webuntis_tenant', $obj);
             if ($debugging) error_log("Tenant {$obj->tenant_id} updated");
         } else {
             $obj = (object) [
-                'tenant_id' => $tenant->tenantId,
-                'school' => $tenant->schoolName,
-                'host' => '',
-                'client' => $tenant->clientId,
-                'consumerkey' => $tenant->secret,
-                'consumersecret' => $tenant->password,
-                'timecreated' => time(),
-                'timemodified' => time(),
+                'tenant_id'     => $tenant->tenantId,
+                'school'        => $tenant->schoolName,
+                'host'          => $tenant->host,
+                'client'        => $tenant->clientId,
+                'consumerkey'   => $tenant->secret,
+                'consumersecret'=> $tenant->password,
+                'timecreated'   => time(),
+                'timemodified'  => time(),
             ];
             $obj->id = $DB->insert_record('local_webuntis_tenant', $obj);
             if ($debugging) error_log("Tenant {$obj->tenant_id} inserted");

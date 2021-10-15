@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/webuntis/db" VERSION="20210924" COMMENT="XMLDB file for Moodle local/webuntis"
+<XMLDB PATH="local/webuntis/db" VERSION="20211015" COMMENT="XMLDB file for Moodle local/webuntis"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -39,7 +39,7 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="tenant_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="school" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="host" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="webuntis server hostname, e.g. integration.webuntis.com =&amp;gt; integration"/>
+        <FIELD NAME="host" TYPE="char" LENGTH="250" NOTNULL="true" SEQUENCE="false" COMMENT="webuntis server hostname, e.g. integration.webuntis.com =&amp;gt; integration"/>
         <FIELD NAME="client" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="the oauth client name"/>
         <FIELD NAME="consumerkey" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" COMMENT="the oauth consumerkey"/>
         <FIELD NAME="consumersecret" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" COMMENT="the oauth consumer secret"/>
