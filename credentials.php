@@ -28,7 +28,7 @@ require_once('../../config.php');
  * you can route debug messages to the error_log. To do so, please
  * set debugging to true in the following line.
  */
-$debugging = true;
+$debugging = false;
 
 if ($debugging) error_log("====================================");
 if ($debugging) error_log("===== Getting the parameters");
