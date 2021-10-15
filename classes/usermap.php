@@ -323,6 +323,9 @@ class usermap {
             }
             $getuser = \local_webuntis\locallib::curl($path, [], $headerparams);
             $getuser = json_decode($getuser);
+            if (!empty($getuser->user)) {
+                $getuser = $getuser->user;
+            }
             if ($debug) {
                 echo "<pre>" . print_r($getuser, 1) . "</pre>";
             }
