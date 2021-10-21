@@ -127,7 +127,7 @@ class tenant {
             if (empty($host) || empty($school)) {
                 throw new \moodle_exception('invalid_webuntis_instance', 'local_webuntis', $CFG->wwwroot);
             }
-            $path = "https://$host.webuntis.com/WebUntis/api/sso/$school/.well-known/openid-configuration";
+            $path = "https://$host/WebUntis/api/sso/$school/.well-known/openid-configuration";
             $endpoints = json_decode(\local_webuntis\locallib::curl($path));
             \local_webuntis\locallib::cache_set('application', 'endpoints-' . $this->get_tenant_id(), $endpoints);
         }

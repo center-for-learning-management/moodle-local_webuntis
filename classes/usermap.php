@@ -143,6 +143,9 @@ class usermap {
             return $this->usermap->id;
         }
     }
+    public function get_headerparams() {
+        return [ 'Authorization' => $this->userinfo->token_type . ' ' .  $this->userinfo->id_token ];
+    }
     public function get_lastname() {
         if (!empty($this->usermap->lastname)) {
             return $this->usermap->lastname;
@@ -187,6 +190,11 @@ class usermap {
     public function get_username() {
         if (!empty($this->usermap->username)) {
             return $this->usermap->username;
+        }
+    }
+    public function get_remoteuserid() {
+        if (!empty($this->usermap->remoteuserid)) {
+            return $this->usermap->remoteuserid;
         }
     }
     public function get_remoteuserrole() {
@@ -312,7 +320,7 @@ class usermap {
 
             // ATTENTION: In this section you must not call functions like ::get_id, this will cause a loop.
             // Try to receive the users role.
-            $integration = ($TENANT->get_host() == 'integration') ? '-integration' : '';
+            $integration = ($TENANT->get_host() == 'integration.webuntis.com') ? '-integration' : '';
             $path = "https://api$integration.webuntis.com/ims/oneroster/v1p1/users/" . $token->sub;
             if ($debug) {
                 echo "Path $path<br />";
@@ -350,7 +358,8 @@ class usermap {
         global $debug, $TENANT;
         $userinfo = $this->get_userinfo();
         $token = $this->get_token();
-        $path = "https://api-integration.webuntis.com/ims/oneroster/v1p1/users";
+        $integration = ($TENANT->get_host() == 'integration.webuntis.com') ? '-integration' : '';
+        $path = "https://api$integration.webuntis.com/ims/oneroster/v1p1/users";
         if ($debug) {
             echo "Path $path<br />";
         }

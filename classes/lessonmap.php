@@ -104,6 +104,64 @@ class lessonmap {
     }
 
     /**
+     * Checks if a user is enrolled in the target course. If not we have to
+     * check via OneRoster, if the user should have access.
+     */
+    private function check_enrolment() {
+        global $USER;
+        $usermap = new \local_webuntis\usermap();
+        $lessonmaps = self::get_lessonmap();
+        $withcapability = (in_array($usermap->get_remoteuserrole(), ['teacher', 'administrator'])) ? 'moodle/course:update' : '';
+
+        $enrol = enrol_get_plugin('manual');
+        if (empty($enrol)) {
+            throw new \moodle_exception('manualpluginnotinstalled', 'enrol_manual');
+        }
+
+        foreach ($lessonmaps as $lessonmap) {
+            $ctx = \context_course::instance($lessonmap->courseid, IGNORE_MISSING);
+            if (!empty($ctx->id)) {
+                $enrolinstances = enrol_get_instances($lessonmap->courseid, false);
+                $instance = 0;
+                foreach ($enrolinstances as $enrolinstance) {
+                    if ($enrolinstance->enrol == "manual") {
+                        if ($enrolinstance->status == 1) {
+                            // It is inactive - we have to activate it!
+                            $data = (object)array('status' => 0);
+                            $enrol->update_instance($enrolinstance, $data);
+                        }
+                        $instance = $enrolinstance;
+                    }
+                }
+                if (empty($instance->id)) {
+                    $instanceid = $enrol->add_default_instance((object)['id' => $lessonmap->courseid]);
+                    $instance = $DB->get_record('enrol', [ 'id' => $instanceid ]);
+                }
+
+                if (!is_enrolled($ctx, $USER, $withcapability)) {
+                    if (empty($lessonmap->lesson_id)) {
+                        $moodlerole = $usermap->get_moodlerole();
+                    } else {
+
+                        $lessonrole = $this->get_lesson_role($lessonmap->lesson_id);
+                        if (!empty($lessonrole)) {
+                            $moodlerole = $usermap->get_moodlerole($lessonrole);
+                        } else {
+                            $moodlerole = '';
+                        }
+                    }
+                    if (!empty($moodlerole)) {
+                        if (!empty($instance->id)) {
+                            $enrol->enrol_user($instance, $USER->id, $moodlerole, time(), 0, ENROL_USER_ACTIVE);
+                        }
+                        role_assign($moodlerole, $USER->id, $ctx);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Get the amount of courses in this map.
      */
     public function get_count() {
@@ -170,6 +228,47 @@ class lessonmap {
         return empty(self::$lessonid) ? 0 : self::$lessonid;
     }
 
+    /**
+     * Check via OneRoster-API if the user is student or teacher for the lesson.
+     * @param lesson_id the lesson id from webuntis.
+     * @return the webuntis role (only student or teacher)
+     */
+    private function get_lesson_role($lesson_id) {
+        global $debug, $TENANT;
+        $usermap = new \local_webuntis\usermap();
+        $remoteuserid = $usermap->get_remoteuserid();
+        if (empty($remoteuserid)) return;
+        $integration = ($TENANT->get_host() == 'integration.webuntis.com') ? '-integration' : '';
+        $headerparams = $usermap->get_headerparams();
+
+        $calls = [ 'students' => 'student', 'teachers' => 'teacher' ];
+        foreach ($calls as $caller => $webuntisrole) {
+            $path = "https://api$integration.webuntis.com/ims/oneroster/v1p1/classes/$lesson_id/$caller";
+            if ($debug) {
+                echo "Path $path<br />";
+            }
+
+            if ($debug) {
+                echo "Getuser (via header):<br /><pre>" . print_r($headerparams, 1) . "</pre>";
+            }
+            $users = \local_webuntis\locallib::curl($path, [], $headerparams);
+            $users = json_decode($users);
+            if (!empty($users->users)) {
+                $users = $users->users;
+            }
+            if ($debug) {
+                echo "<pre>" . print_r($users, 1) . "</pre>";
+            }
+            if (is_array($users)) {
+                foreach ($users as $user) {
+                    if ($user->identifier == $remoteuserid) {
+                        return $webuntisrole;
+                    }
+                }
+            }
+        }
+    }
+
     public function get_lessonmap($lessonid = -1) {
         global $DB, $TENANT;
         if ($lessonid == -1) {
@@ -208,7 +307,6 @@ class lessonmap {
         global $DB, $TENANT, $USER;
 
         $usermap = new \local_webuntis\usermap();
-
         if ($usermap->get_userid() != $USER->id || isguestuser() || !isloggedin()) {
             return;
         }
@@ -227,38 +325,7 @@ class lessonmap {
         }
         if (empty($synced[$TENANT->get_tenant_id()][self::get_lesson_id()])) {
             // @todo better implement own enrol-plugin.
-            $moodlerole = $usermap->get_moodlerole();
-            if (!empty($moodlerole)) {
-                $enrol = enrol_get_plugin('manual');
-                if (empty($enrol)) {
-                    throw new \moodle_exception('manualpluginnotinstalled', 'enrol_manual');
-                }
-                foreach ($lessonmaps as $lessonmap) {
-                    $ctx = \context_course::instance($lessonmap->courseid, IGNORE_MISSING);
-                    if (!empty($ctx->id)) {
-                        $enrolinstances = enrol_get_instances($lessonmap->courseid, false);
-                        $instance = 0;
-                        foreach ($enrolinstances as $enrolinstance) {
-                            if ($enrolinstance->enrol == "manual") {
-                                if ($enrolinstance->status == 1) {
-                                    // It is inactive - we have to activate it!
-                                    $data = (object)array('status' => 0);
-                                    $enrol->update_instance($enrolinstance, $data);
-                                }
-                                $instance = $enrolinstance;
-                            }
-                        }
-                        if (empty($instance->id)) {
-                            $instanceid = $enrol->add_default_instance((object)['id' => $lessonmap->courseid]);
-                            $instance = $DB->get_record('enrol', [ 'id' => $instanceid ]);
-                        }
-                        if (!empty($instance->id)) {
-                            $enrol->enrol_user($instance, $USER->id, $moodlerole, time(), 0, ENROL_USER_ACTIVE);
-                        }
-                        role_assign($moodlerole, $USER->id, $ctx);
-                    }
-                }
-            }
+            $this->check_enrolment();
             $synced[$TENANT->get_tenant_id()][self::get_lesson_id()] = true;
             \local_webuntis\locallib::cache_set('session', 'synced_lesson_ids', $synced);
         }
