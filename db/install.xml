@@ -39,7 +39,7 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="tenant_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="school" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="host" TYPE="char" LENGTH="250" NOTNULL="true" SEQUENCE="false" COMMENT="webuntis server hostname, e.g. integration.webuntis.com =&amp;gt; integration"/>
+        <FIELD NAME="host" TYPE="char" LENGTH="250" NOTNULL="true" SEQUENCE="false" COMMENT="webuntis server hostname, e.g. https://integration.webuntis.com =&amp;gt; integration"/>
         <FIELD NAME="client" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" COMMENT="the oauth client name"/>
         <FIELD NAME="consumerkey" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" COMMENT="the oauth consumerkey"/>
         <FIELD NAME="consumersecret" TYPE="char" LENGTH="250" NOTNULL="false" SEQUENCE="false" COMMENT="the oauth consumer secret"/>

@@ -238,7 +238,7 @@ class lessonmap {
         $usermap = new \local_webuntis\usermap();
         $remoteuserid = $usermap->get_remoteuserid();
         if (empty($remoteuserid)) return;
-        $integration = ($TENANT->get_host() == 'integration.webuntis.com') ? '-integration' : '';
+        $integration = ($TENANT->get_host() == 'https://integration.webuntis.com') ? '-integration' : '';
         $headerparams = $usermap->get_headerparams();
 
         $calls = [ 'students' => 'student', 'teachers' => 'teacher' ];
