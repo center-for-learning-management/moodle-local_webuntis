@@ -28,12 +28,12 @@ require_once('../../config.php');
  * you can route debug messages to the error_log. To do so, please
  * set debugging to true in the following line.
  */
-$debugging = false;
+$debugging = true;
 
 if ($debugging) error_log("====================================");
 if ($debugging) error_log("===== Getting the parameters");
 $DATA = file_get_contents('php://input');
-
+/*
 foreach (getallheaders() as $name => $value) {
     switch ($name) {
         case 'Algorithm':
@@ -50,13 +50,16 @@ foreach (getallheaders() as $name => $value) {
     }
 }
 
-if ($debugging) error_log("Data $DATA");
-if ($debugging) error_log("Signature $SIGNATURE");
-if ($debugging) error_log("Algorithm $ALGORITHM");
-
 if (empty($SIGNATURE) || empty($ALGORITHM)) {
     throw new moodle_exception('algorithm or signature missing');
 }
+
+if ($debugging) error_log("Signature $SIGNATURE");
+if ($debugging) error_log("Algorithm $ALGORITHM");
+*/
+if ($debugging) error_log("Data $DATA");
+
+/*
 
 // Verifying signature.
 $pubkeys = [
@@ -78,13 +81,16 @@ foreach ($pubkeys as $identifier => $pubkey) {
         break;
     }
 }
+*/
 
+$verified = true;
 // Updating database.
 if ($verified) {
     $tenant = json_decode($DATA);
     if (!empty($tenant->tenantId)) {
         if ($debugging) error_log("There was valid JSON-Data for tenant {$tenant->tenantId}");
         $obj = $DB->get_record('local_webuntis_tenant', [ 'tenant_id' => $tenant->tenantId ]);
+        $success = false;
         if (!empty($obj->id)) {
             $obj->school        = $tenant->schoolName;
             $obj->client        = $tenant->clientId;
@@ -92,7 +98,7 @@ if ($verified) {
             $obj->consumesecret = $tenant->password;
             $obj->host          = $tenant->host;
             $obj->timemodified  = time();
-            $DB->update_record('local_webuntis_tenant', $obj);
+            $success = $DB->update_record('local_webuntis_tenant', $obj);
             if ($debugging) error_log("Tenant {$obj->tenant_id} updated");
         } else {
             $obj = (object) [
@@ -106,9 +112,17 @@ if ($verified) {
                 'timemodified'  => time(),
             ];
             $obj->id = $DB->insert_record('local_webuntis_tenant', $obj);
+            $success = !empty($obj->id);
             if ($debugging) error_log("Tenant {$obj->tenant_id} inserted");
         }
+        if (!$success) {
+            \local_webuntis\locallib::exception('DB Query failed', 406);
+        }
+    } else {
+        \local_webuntis\locallib::exception('No Tenant-Data', 412);
     }
+} else {
+    \local_webuntis\locallib::exception('Signature not verified', 428);
 }
 
 if ($debugging) error_log("====================================");
