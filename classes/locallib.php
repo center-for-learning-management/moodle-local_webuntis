@@ -53,6 +53,7 @@ class locallib {
             array('type' => 'session', 'identifier' => 'code'),
             array('type' => 'session', 'identifier' => 'last_lesson_ids'),
             array('type' => 'session', 'identifier' => 'last_tenant_id'),
+            array('type' => 'session', 'identifier' => 'last_tenant_sync'),
             array('type' => 'session', 'identifier' => 'synced_lesson_ids'),
             array('type' => 'session', 'identifier' => 'userinfos'),
             array('type' => 'session', 'identifier' => 'usermaps'),

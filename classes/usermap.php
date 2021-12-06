@@ -356,6 +356,12 @@ class usermap {
 
     public function sync($chance = 1) {
         global $debug, $TENANT;
+
+        $lastsync = \local_webuntis\locallib::cache_get('session', 'last_tenant_sync');
+        if (!empty($lastsync) && $lastsync > (time() - 600)) {
+            return;
+        }
+
         $userinfo = $this->get_userinfo();
         $token = $this->get_token();
         $integration = ($TENANT->get_host() == 'https://integration.webuntis.com') ? '-integration' : '';
@@ -379,6 +385,7 @@ class usermap {
             foreach ($getuser->users as $user) {
                 $this->save_user($user);
             }
+            \local_webuntis\locallib::cache_set('session', 'last_tenant_sync', time());
         } else {
             if (!empty($getuser[0]) && !empty($getuser[0]->errorCode)) {
                 switch ($getuser[0]->errorCode) {

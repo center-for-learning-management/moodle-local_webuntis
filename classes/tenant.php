@@ -71,6 +71,7 @@ class tenant {
         if (empty($uuid)) {
             $code = optional_param('code', '', PARAM_TEXT);
             if (!empty($code)) {
+                \local_webuntis\locallib::cache_set('session', 'code', $code);
                 $this->auth_token($code);
             } else {
                 $url = new \moodle_url($endpoints->authorization_endpoint, [
@@ -84,8 +85,11 @@ class tenant {
         }
     }
 
-    public function auth_token($code) {
+    public function auth_token($code = "") {
         global $CFG, $debug;
+        if (empty($code)) {
+            $code = \local_webuntis\locallib::cache_get('session', 'code');
+        }
         $endpoints = $this->get_endpoints();
         $path = $endpoints->token_endpoint;
         $params = [
