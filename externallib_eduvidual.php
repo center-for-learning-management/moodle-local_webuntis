@@ -77,4 +77,57 @@ class local_webuntis_external_eduvidual extends external_api {
             'status' => new external_value(PARAM_INT, 'current status'),
         ));
     }
+
+    /**
+     * Define parameters.
+     */
+    public static function usersync_roles_parameters() {
+        return new external_function_parameters(array(
+            'userid' => new external_value(PARAM_INT, 'the userid'),
+            'orgid' => new external_value(PARAM_INT, 'the orgid'),
+            'role' => new external_value(PARAM_ALPHANUM, 'the role'),
+        ));
+    }
+    /**
+     * Create the user if possible.
+     */
+    public static function usersync_roles($userid, $orgid, $role) {
+        global $CFG, $DB, $TENANT, $USERMAP;
+        $params = self::validate_parameters(
+            self::usersync_roles_parameters(),
+            array(
+                'userid' => $userid,
+                'orgid' => $orgid,
+                'role' => $role,
+            )
+        );
+
+        $roles = [ 'Manager', 'Teacher', 'Student', 'Parent' ];
+        if (!in_array($params['role'], $roles)) {
+            throw new \moodle_exception('exception:invalid_data', 'local_webuntis');
+        }
+
+        $TENANT = \local_webuntis\tenant::load();
+        $USERMAP = new \local_webuntis\usermap();
+        $useseduvidual = \local_webuntis\locallib::uses_eduvidual();
+        if (empty($useseduvidual)) {
+            throw new \moodle_exception('exception:invalid_data', 'local_webuntis');
+        }
+
+        if ($USERMAP->is_administrator() && \local_eduvidual\locallib::get_orgrole($params['orgid']) == 'Manager') {
+            \local_eduvidual\lib_enrol::role_set($params['userid'], $params['orgid'], $params['role']);
+            return [ 'role' => $params['role'] ];
+        } else {
+            throw new \moodle_exception('exception:permission_denied', 'local_webuntis');
+        }
+    }
+    /**
+     * Return definition.
+     * @return external_value
+     */
+    public static function usersync_roles_returns() {
+        return new external_single_structure(array(
+            'role' => new external_value(PARAM_ALPHANUM, 'the role that was set'),
+        ));
+    }
 }

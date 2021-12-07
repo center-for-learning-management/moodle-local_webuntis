@@ -24,7 +24,7 @@
 require_once('../../config.php');
 
 $PAGE->set_context(\context_system::instance());
-$PAGE->set_url(new \moodle_url('/local/webuntis/landingusermaps.php', array()));
+$PAGE->set_url(new \moodle_url('/local/webuntis/landingusermaps.php', [ ]));
 $PAGE->set_title(get_string('admin:usermaps:pagetitle', 'local_webuntis'));
 $PAGE->set_heading(get_string('admin:usermaps:pagetitle', 'local_webuntis'));
 $PAGE->set_pagelayout('standard');
@@ -38,20 +38,23 @@ $TENANT = \local_webuntis\tenant::load();
 $USERMAP = new \local_webuntis\usermap();
 $USERMAP->sync();
 
+$params = (object)[
+    'usermaps' => [],
+    'wwwroot' => $CFG->wwwroot,
+];
+
 echo $OUTPUT->header();
 $dbparams = array('tenant_id' => $TENANT->get_tenant_id());
-$usermaps = array_values($DB->get_records('local_webuntis_usermap', $dbparams, 'lastname ASC,firstname ASC'));
-foreach ($usermaps as $usermap) {
+$params->usermaps = array_values($DB->get_records('local_webuntis_usermap', $dbparams, 'lastname ASC,firstname ASC'));
+foreach ($params->usermaps as $usermap) {
     if (!empty($usermap->userid)) {
         $user = \core_user::get_user($usermap->userid);
         $user->fullname = fullname($user);
         $usermap->moodleuser = $user;
     }
 }
-$params = [
-    'usermaps' => $usermaps,
-    'wwwroot' => $CFG->wwwroot,
-];
+$actions = \local_webuntis\locallib::get_actions('usermaps', 'landingusermaps');
+echo $OUTPUT->render_from_template('local_webuntis/navbar', [ 'actions' => $actions ]);
 echo $OUTPUT->render_from_template('local_webuntis/landingusermaps', $params);
 
 echo $OUTPUT->footer();

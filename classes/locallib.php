@@ -274,31 +274,59 @@ class locallib {
         }
         die($message);
     }
+    /**
+     * Get actions for a particular purpose.
+     * @param for specifies the purpose.
+     * @param active specifies which item should be marked as active.
+     */
+    public static function get_actions($for, $active = '') {
+        $actions = [];
+        switch($for) {
+            case 'usermaps':
+                // Administrator managing usermappings.
+                $actions[] = (object) [
+                        'active' => ($active == 'landingusermaps'),
+                        'label' => get_string('admin:usermaps:pagetitle', 'local_webuntis'),
+                        'relativepath' => '/local/webuntis/landingusermaps.php',
+                    ];
+                $actions[] = (object) [
+                        'active' => ($active == 'landingusersync::create'),
+                        'label' => get_string('admin:usersync:usercreate', 'local_webuntis'),
+                        'relativepath' => '/local/webuntis/usersync.php?action=create',
+                    ];
+                $actions[] = (object) [
+                        'active' => ($active == 'landingusersync::purge'),
+                        'label' => get_string('admin:usersync:userpurge', 'local_webuntis'),
+                        'relativepath' => '/local/webuntis/usersync.php?action=purge',
+                    ];
+
+                if (\local_webuntis\locallib::uses_eduvidual()) {
+                    $orgs = array_values(\local_eduvidual\locallib::get_organisations('Manager', false));
+                    if (count($orgs) > 0) {
+                        $actions[] = (object) [
+                            'active' => ($active == 'landingusersync::roles'),
+                            'label' => get_string('admin:usersync:userroles', 'local_webuntis'),
+                            'relativepath' => "/local/webuntis/usersync.php?action=roles",
+                        ];
+                    }
+                }
+            break;
+        }
+        return $actions;
+    }
 
     /**
      * Determines if eduvidual is installed on this system.
+     * @return version-number
      */
     public static function uses_eduvidual() {
-        global $CFG;
-        return file_exists($CFG->dirroot . '/local/eduvidual/version.php');
+        return $version = get_config('local_eduvidual', 'version');
     }
 
     /**
      * Set for a particular user session whether or not we are using webuntis.
-     * @param setto +1 activate, -1 deactivate, 0 get current status.
      */
-    public static function uses_webuntis($setto = 0) {
+    public static function uses_webuntis() {
         return !empty(\local_webuntis\tenant::last_tenant_id());
-        /*
-        if (empty($setto)) {
-            return \local_webuntis\locallib::cache_get('session', 'uses_webuntis');
-        }
-        if ($setto = 1) {
-            \local_webuntis\locallib::cache_set('session', 'uses_webuntis', 1);
-        }
-        if ($setto = -1) {
-            \local_webuntis\locallib::cache_set('session', 'uses_webuntis', null, true);
-        }
-        */
     }
 }

@@ -1,0 +1,58 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_webuntis/usersync_selectorg
+
+    List organisations that a user can manage (eduvidual only)
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * usermaps
+    * wwwroot
+
+    Example context (json):
+    {
+        "notmappedusers": [
+            {
+                "email": "abc@xy.z",
+                "exists": true, // account exists but was not mapped.
+                "firstname": "demo",
+                "lastname": "demo",
+                ...
+            }
+        ],
+        "wwwroot": 'https://x.yz.com'
+    }
+}}
+
+<div class="local_webuntis usersync_selectorg">
+    <p>{{#str}} admin:usersync:selectorg, local_webuntis {{/str}}</p>
+    <ul>
+        {{#orgs}}
+        <li>
+            <a href="{{wwwroot}}/local/webuntis/usersync.php?action={{action}}&orgid={{orgid}}">
+                {{name}}
+            </a>
+        </li>
+        {{/orgs}}
+    </ul>
+</div>

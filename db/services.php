@@ -57,4 +57,28 @@ $functions = array(
         'type'        => 'write',
         'ajax'        => 1,
     ),
+    'local_webuntis_usersync_create' => array(
+        'classname'   => 'local_webuntis_external',
+        'methodname'  => 'usersync_create',
+        'classpath'   => 'local/webuntis/externallib.php',
+        'description' => 'Create user accounts.',
+        'type'        => 'write',
+        'ajax'        => 1,
+    ),
+    'local_webuntis_usersync_purge' => array(
+        'classname'   => 'local_webuntis_external',
+        'methodname'  => 'usersync_purge',
+        'classpath'   => 'local/webuntis/externallib.php',
+        'description' => 'Purge user accounts.',
+        'type'        => 'write',
+        'ajax'        => 1,
+    ),
+    'local_webuntis_usersync_roles' => array(
+        'classname'   => 'local_webuntis_external_eduvidual',
+        'methodname'  => 'usersync_roles',
+        'classpath'   => 'local/webuntis/externallib_eduvidual.php',
+        'description' => 'Manage user roles.',
+        'type'        => 'write',
+        'ajax'        => 1,
+    ),
 );

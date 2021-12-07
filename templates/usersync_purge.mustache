@@ -1,0 +1,94 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_webuntis/usersync_purge
+
+    List users that do not exist in Webuntis.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * usermaps
+    * wwwroot
+
+    Example context (json):
+    {
+        "purgecandidates": [
+            {
+                "email": "abc@xy.z",
+                "exists": true, // account exists but was not mapped.
+                "firstname": "demo",
+                "id": 323,
+                "lastname": "demo",
+                ...
+            }
+        ],
+        "wwwroot": 'https://x.yz.com'
+    }
+}}
+
+<div class="local_webuntis usersync_purge">
+    <table class="generaltable">
+        <thead>
+            <tr>
+                <th>{{#str}} profile {{/str}}</th>
+                <th>{{#str}} username {{/str}}</th>
+                <th>{{#str}} firstname {{/str}}</th>
+                <th>{{#str}} lastname {{/str}}</th>
+                <th>{{#str}} email {{/str}}</th>
+                {{#uses_eduvidual}}
+                <th style="border-right: 1px solid lightgray;">{{#str}} role {{/str}}</th>
+                {{/uses_eduvidual}}
+                <th>
+                    <a href="#" class="btn btn-primary btn-block"
+                        onclick="require(['local_webuntis/main'], function(M) { M.usersync_purge('{{uniqid}}'); }); return false;">
+                        {{#str}} admin:usersync:purgeall, local_webuntis {{/str}}
+                    </a>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#purgecandidates}}
+                <tr data-userid="{{id}}" data-orgid="{{orgid}}">
+                    <td>
+                        <a href="{{wwwroot}}/user/profile.php?id={{id}}">
+                            {{{profileimage}}}
+                        </a>
+                    </td>
+                    <td>{{username}}</td>
+                    <td>{{firstname}}</td>
+                    <td>{{lastname}}</td>
+                    <td>{{email}}</td>
+                    {{#uses_eduvidual}}
+                    <td style="border-right: 1px solid lightgray;">{{userrole}}</td>
+                    {{/uses_eduvidual}}
+                    <td>
+                        <a href="#" class="{{uniqid}}-purgeme btn btn-secondary btn-block"
+                            onclick="var a = $(this); require(['local_webuntis/main'], function(M) { M.usersync_purge('{{uniqid}}', a); }); return false;">
+                            <i class="fa fa-check-square"></i>
+                            {{#str}} admin:usersync:purgeuser, local_webuntis {{/str}}
+                        </a>
+                    </td>
+                </tr>
+            {{/purgecandidates}}
+        </tbody>
+    </table>
+</div>

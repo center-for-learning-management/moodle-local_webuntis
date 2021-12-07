@@ -1,8 +1,12 @@
 define(
-    ['jquery', 'core/ajax', 'core/notification'],
-    function($, AJAX, NOTIFICATION) {
+    ['jquery', 'core/ajax', 'core/notification', 'core/modal_factory', 'core/str'],
+    function($, AJAX, Notification, ModalFactory, str) {
     return {
-        debug: false,
+        debug: true,
+        sync_queue_create: [],
+        sync_queue_purge: [],
+        sync_queue_roles: [],
+
         selectTarget: function(uniqid, courseid) {
             var MAIN = this;
             if (MAIN.debug) {
@@ -45,7 +49,7 @@ define(
                         }
                     }
                 },
-                fail: NOTIFICATION.exception
+                fail: Notification.exception
             }]);
         },
         setAutoCreate: function(uniqid) {
@@ -81,7 +85,7 @@ define(
                         }
                     }
                 },
-                fail: NOTIFICATION.exception
+                fail: Notification.exception
             }]);
         },
         tenantData: function(tenant_id, sender) {
@@ -119,8 +123,154 @@ define(
                         $(sender).removeClass('alert-danger');
                     }
                 },
-                fail: NOTIFICATION.exception
+                fail: Notification.exception
             }]);
-        }
+        },
+        /**
+         * Create user accounts.
+         * @param uniqid of the controls.
+         * @param item only execute particular item, if empty, execute all.
+         */
+        usersync_create: function(uniqid, item) {
+            if (this.debug) console.log('local_webuntis/main::usersync_create(uniqid, item)', uniqid, item);
+            var MAIN = this;
+            if (typeof(item) === 'undefined') {
+                $('.' + uniqid + '-createme').each(function() {
+                    MAIN.sync_queue_create.push({ 'uniqid': uniqid, 'item': this});
+                });
+                if (MAIN.sync_queue_create.length > 0) {
+                    var queueitem = MAIN.sync_queue_create.shift();
+                    MAIN.usersync_create(queueitem.uniqid, queueitem.item);
+                }
+            } else {
+                $(item).css('filter', 'blur(2px)');
+                var tr = $(item).closest('tr');
+                var remoteuserid = tr.attr('data-remoteuserid');
+                AJAX.call([{
+                    methodname: 'local_webuntis_usersync_create',
+                    args: { 'remoteuserid': remoteuserid },
+                    done: function(result) {
+                        $(item).css('filter', 'unset');
+                        if (MAIN.debug) {
+                            console.log('=> Result for ' + uniqid + '-' + remoteuserid, result);
+                        }
+                        if (result.userid > 0) {
+                            var html = $(item).html();
+                            var span = $("<span style=\"color: green;\">").html(html);
+                            $(item).parent().empty().append(span);
+                        }
+                        if (MAIN.sync_queue_create.length > 0) {
+                            var queueitem = MAIN.sync_queue_create.shift();
+                            MAIN.usersync_create(queueitem.uniqid, queueitem.item);
+                        }
+                    },
+                    fail: Notification.exception
+                }]);
+            }
+        },
+        /**
+         * Purge user accounts.
+         * @param uniqid of the controls.
+         * @param item only execute particular item, if empty, execute all.
+         */
+        usersync_purge: function(uniqid, item) {
+            if (this.debug) console.log('local_webuntis/main::usersync_purge(uniqid, item)', uniqid, item);
+            var MAIN = this;
+            if (typeof(item) === 'undefined') {
+                str.get_strings([
+                    {'key' : 'admin:usersync:userpurge:confirm:title', 'component': 'local_webuntis'},
+                    {'key' : 'admin:usersync:userpurge:confirm:text', 'component': 'local_webuntis'},
+                    {'key' : 'proceed'},
+                    {'key' : 'cancel'},
+                ]).done(function(s) {
+                    Notification.confirm(s[0], s[1], s[2], s[3], function() {
+                        $('.' + uniqid + '-purgeme').each(function() {
+                            MAIN.sync_queue_purge.push({ 'uniqid': uniqid, 'item': this});
+                        });
+                        if (MAIN.sync_queue_purge.length > 0) {
+                            var queueitem = MAIN.sync_queue_purge.shift();
+                            MAIN.usersync_purge(queueitem.uniqid, queueitem.item);
+                        }
+                    });
+                }).fail(Notification.exception);
+            } else {
+                $(item).css('filter', 'blur(2px)');
+                var tr = $(item).closest('tr');
+                var userid = tr.attr('data-userid');
+                var orgid = tr.attr('data-orgid');
+                AJAX.call([{
+                    methodname: 'local_webuntis_usersync_purge',
+                    args: { 'userid': userid, 'orgid': orgid },
+                    done: function(result) {
+                        $(item).css('filter', 'unset');
+                        if (MAIN.debug) {
+                            console.log('=> Result for ' + uniqid + '-' + userid, result);
+                        }
+                        if (result.status > 0) {
+                            var html = $(item).html();
+                            var span = $("<span style=\"color: green;\">").html(html);
+                            $(item).parent().empty().append(span);
+                        }
+                        if (MAIN.sync_queue_purge.length > 0) {
+                            var queueitem = MAIN.sync_queue_purge.shift();
+                            MAIN.usersync_purge(queueitem.uniqid, queueitem.item);
+                        }
+                    },
+                    fail: Notification.exception
+                }]);
+            }
+        },
+        /**
+         * Set roles of user accounts.
+         * @param uniqid of the controls.
+         * @param item only execute particular item, if empty, execute all.
+         */
+        usersync_roles: function(uniqid, item) {
+            if (this.debug) console.log('local_webuntis/main::usersync_roles(uniqid, item)', uniqid, item);
+            var MAIN = this;
+            if (typeof(item) === 'undefined') {
+                str.get_strings([
+                    {'key' : 'admin:usersync:userroles:confirm:title', 'component': 'local_webuntis'},
+                    {'key' : 'admin:usersync:userroles:confirm:text', 'component': 'local_webuntis'},
+                    {'key' : 'proceed'},
+                    {'key' : 'cancel'},
+                ]).done(function(s) {
+                    Notification.confirm(s[0], s[1], s[2], s[3], function() {
+                        $('.' + uniqid + '-rolesme').each(function() {
+                            MAIN.sync_queue_roles.push({ 'uniqid': uniqid, 'item': this});
+                        });
+                        if (MAIN.sync_queue_roles.length > 0) {
+                            var queueitem = MAIN.sync_queue_roles.shift();
+                            MAIN.usersync_roles(queueitem.uniqid, queueitem.item);
+                        }
+                    });
+                }).fail(Notification.exception);
+            } else {
+                $(item).css('filter', 'blur(2px)');
+                var tr = $(item).closest('tr');
+                var userid = tr.attr('data-userid');
+                var orgid = tr.attr('data-orgid');
+                var role = tr.find('.w_role').html().replace('Administrator', 'Manager');
+                AJAX.call([{
+                    methodname: 'local_webuntis_usersync_roles',
+                    args: { 'userid': userid, 'orgid': orgid, 'role': role },
+                    done: function(result) {
+                        $(item).css('filter', 'unset');
+                        if (MAIN.debug) {
+                            console.log('=> Result for ' + uniqid + '-' + userid, result);
+                        }
+                        if (typeof(result.role) !== 'undefined') {
+                            $(tr).find('.sync-btn').empty();
+                            $(tr).find('.m_role').css('color', 'green').html(result.role);
+                        }
+                        if (MAIN.sync_queue_roles.length > 0) {
+                            var queueitem = MAIN.sync_queue_roles.shift();
+                            MAIN.usersync_roles(queueitem.uniqid, queueitem.item);
+                        }
+                    },
+                    fail: Notification.exception
+                }]);
+            }
+        },
     };
 });

@@ -153,4 +153,137 @@ class local_webuntis_external extends external_api {
         ));
     }
 
+    /**
+     * Define parameters.
+     */
+    public static function usersync_create_parameters() {
+        return new external_function_parameters(array(
+            'remoteuserid' => new external_value(PARAM_TEXT, 'the remoteuserid'),
+        ));
+    }
+    /**
+     * Create the user if possible.
+     */
+    public static function usersync_create($remoteuserid) {
+        global $CFG, $DB, $TENANT, $USERMAP;
+        $params = self::validate_parameters(
+            self::usersync_create_parameters(),
+            array(
+                'remoteuserid' => $remoteuserid,
+            )
+        );
+        $TENANT = \local_webuntis\tenant::load();
+        $USERMAP = new \local_webuntis\usermap();
+        $useseduvidual = \local_webuntis\locallib::uses_eduvidual();
+        if (!empty($useseduvidual)) {
+            $orgs = \local_eduvidual\locallib::get_organisations('Manager', false);
+        } else {
+            $orgs = [];
+        }
+
+        if ($USERMAP->is_administrator()
+                && (is_siteadmin()
+                    || (!empty($useseduvidual) && \local_eduvidual\locallib::get_highest_role() == 'Manager')
+                )) {
+            $remoteuser = $DB->get_record('local_webuntis_usermap', $params);
+            if (empty($remoteuser->email) || empty($remoteuser->firstname) || empty($remoteuser->email)) {
+                throw new \moodle_exception('admin:usersync:missingdata', 'local_webuntis');
+            }
+
+            $sql = "SELECT id
+                        FROM {user}
+                        WHERE username LIKE ? OR email LIKE ?";
+            $chk = $DB->get_records_sql($sql, [ $remoteuser->email, $remoteuser->email ]);
+            if (count($chk) > 0) {
+                throw new \moodle_exception('exception:already_exists', 'local_webuntis');
+            }
+
+            require_once("$CFG->dirroot/user/lib.php");
+            $u = (object) [
+                'confirmed' => 1,
+                'mnethostid' => 1,
+                'username' => $remoteuser->email,
+                'firstname' => $remoteuser->firstname,
+                'lastname' => $remoteuser->lastname,
+                'email' => $remoteuser->email,
+                'auth' => 'manual',
+                'password' => uniqid(rand(0,9999)),
+            ];
+            $u->id = \user_create_user($u);
+
+            if (!empty($useseduvidual)) {
+                \local_eduvidual\locallib::get_user_secret($u->id);
+                \local_eduvidual\lib_enrol::choose_background($u->id);
+            }
+
+            $DB->set_field('local_webuntis_usermap', 'userid', $u->id, [ 'tenant_id' => $remoteuser->tenant_id, 'remoteuserid' => $remoteuser->remoteuserid ]);
+
+            return [ 'userid' => $u->id ];
+        } else {
+            throw new \moodle_exception('exception:permission_denied', 'local_webuntis');
+        }
+    }
+    /**
+     * Return definition.
+     * @return external_value
+     */
+    public static function usersync_create_returns() {
+        return new external_single_structure(array(
+            'userid' => new external_value(PARAM_INT, 'id of the created user'),
+        ));
+    }
+
+    /**
+     * Define parameters.
+     */
+    public static function usersync_purge_parameters() {
+        return new external_function_parameters(array(
+            'userid' => new external_value(PARAM_INT, 'the userid'),
+            'orgid' => new external_value(PARAM_INT, 'the orgid (for eduvidual)'),
+        ));
+    }
+    /**
+     * Create the user if possible.
+     */
+    public static function usersync_purge($userid, $orgid) {
+        global $CFG, $DB, $TENANT, $USERMAP;
+        $params = self::validate_parameters(
+            self::usersync_purge_parameters(),
+            array(
+                'userid' => $userid,
+                'orgid' => $orgid,
+            )
+        );
+        $TENANT = \local_webuntis\tenant::load();
+        $USERMAP = new \local_webuntis\usermap();
+        $useseduvidual = \local_webuntis\locallib::uses_eduvidual();
+
+        if ($USERMAP->is_administrator()
+                && (is_siteadmin()
+                    || (!empty($useseduvidual) && \local_eduvidual\locallib::get_orgrole($params['orgid']) == 'Manager')
+                )) {
+
+            if ($useseduvidual) {
+                \local_eduvidual\lib_enrol::role_set($params['userid'], $params['orgid'], 'remove');
+            } else {
+                require_once("$CFG->dirroot/user/lib.php");
+                $user = \core_user::get_user($params['userid']);
+                \user_delete_user($user);
+            }
+
+            return [ 'status' => 1 ];
+        } else {
+            throw new \moodle_exception('exception:permission_denied', 'local_webuntis');
+        }
+    }
+    /**
+     * Return definition.
+     * @return external_value
+     */
+    public static function usersync_purge_returns() {
+        return new external_single_structure(array(
+            'status' => new external_value(PARAM_INT, '1 for success, 0 for error'),
+        ));
+    }
+
 }
