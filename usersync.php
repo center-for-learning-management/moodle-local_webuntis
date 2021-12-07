@@ -134,8 +134,7 @@ switch ($action) {
                             AND id > 1
                             AND id NOT IN ($CFG->siteadmins)
                             AND deleted = 0
-                        ORDER BY lastname ASC, firstname ASC
-                        LIMIT 0,10";
+                        ORDER BY lastname ASC, firstname ASC";
             $params->purgecandidates = array_values($DB->get_records_sql($sql, [ $TENANT->get_tenant_id() ]));
             foreach ($params->purgecandidates as $pc) {
                 $u = \core_user::get_user($pc->id);
