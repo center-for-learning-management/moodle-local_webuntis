@@ -44,12 +44,17 @@
     }
 }}
 
-<div class="local_webuntis usersync_create">
+<div class="local_webuntis usersync_create {{uniqid}}">
     <table class="generaltable" data-tenant_id="{{tenant_id}}">
         <thead>
             <tr>
                 <th colspan="5" style="border-right: 1px solid lightgray;">WebUntis</th>
-                <th>Moodle</th>
+                <th>
+                    <a href="#" class="btn btn-primary btn-block"
+                        onclick="require(['local_webuntis/main'], function(M) { M.usersync_create('{{uniqid}}'); }); return false;">
+                        {{#str}} admin:usersync:createall, local_webuntis {{/str}}
+                    </a>
+                </th>
             </tr>
             <tr>
                 <th>{{#str}} username {{/str}}</th>
@@ -57,11 +62,9 @@
                 <th>{{#str}} lastname {{/str}}</th>
                 <th>{{#str}} email {{/str}}</th>
                 <th style="border-right: 1px solid lightgray;">{{#str}} role {{/str}}</th>
-                <th>
-                    <a href="#" class="btn btn-primary btn-block"
-                        onclick="require(['local_webuntis/main'], function(M) { M.usersync_create('{{uniqid}}'); }); return false;">
-                        {{#str}} admin:usersync:createall, local_webuntis {{/str}}
-                    </a>
+                <th style="text-align: center;">
+                    <input type="checkbox" onclick="$('.{{uniqid}} .m_doit').prop('checked', $(this).prop('checked'));" />
+                    {{#str}} selectall, local_webuntis {{/str}}
                 </th>
             </tr>
         </thead>
@@ -73,7 +76,7 @@
                     <td>{{lastname}}</td>
                     <td>{{email}}</td>
                     <td style="border-right: 1px solid lightgray;">{{remoteuserrole}}</td>
-                    <td>
+                    <td style="text-align: center;">
                         {{#missingdata}}
                             <span class="exists" style="color: darkred;">
                                 <i class="fa fa-id-card"></i>
@@ -88,11 +91,7 @@
                                 </span>
                             {{/exists}}
                             {{^exists}}
-                                <a href="#" class="{{uniqid}}-createme btn btn-secondary btn-block"
-                                    onclick="var a = $(this); require(['local_webuntis/main'], function(M) { M.usersync_create('{{uniqid}}', a); }); return false;">
-                                    <i class="fa fa-check-square"></i>
-                                    {{#str}} admin:usersync:createuser, local_webuntis {{/str}}
-                                </a>
+                                <input type="checkbox" class="m_doit">
                             {{/exists}}
                         {{/missingdata}}
                     </td>

@@ -135,7 +135,7 @@ define(
             if (this.debug) console.log('local_webuntis/main::usersync_create(uniqid, item)', uniqid, item);
             var MAIN = this;
             if (typeof(item) === 'undefined') {
-                $('.' + uniqid + '-createme').each(function() {
+                $('.' + uniqid + ' .m_doit:checked').each(function() {
                     MAIN.sync_queue_create.push({ 'uniqid': uniqid, 'item': this});
                 });
                 if (MAIN.sync_queue_create.length > 0) {
@@ -155,8 +155,7 @@ define(
                             console.log('=> Result for ' + uniqid + '-' + remoteuserid, result);
                         }
                         if (result.userid > 0) {
-                            var html = $(item).html();
-                            var span = $("<span style=\"color: green;\">").html(html);
+                            var span = $("<span style=\"color: green;\">").html(result.message);
                             $(item).parent().empty().append(span);
                         }
                         if (MAIN.sync_queue_create.length > 0) {
@@ -184,7 +183,7 @@ define(
                     {'key' : 'cancel'},
                 ]).done(function(s) {
                     Notification.confirm(s[0], s[1], s[2], s[3], function() {
-                        $('.' + uniqid + '-purgeme').each(function() {
+                        $('.' + uniqid + ' .m_doit:checked').each(function() {
                             MAIN.sync_queue_purge.push({ 'uniqid': uniqid, 'item': this});
                         });
                         if (MAIN.sync_queue_purge.length > 0) {
@@ -207,8 +206,7 @@ define(
                             console.log('=> Result for ' + uniqid + '-' + userid, result);
                         }
                         if (result.status > 0) {
-                            var html = $(item).html();
-                            var span = $("<span style=\"color: green;\">").html(html);
+                            var span = $("<span style=\"color: green;\">").html(result.message);
                             $(item).parent().empty().append(span);
                         }
                         if (MAIN.sync_queue_purge.length > 0) {
@@ -236,7 +234,7 @@ define(
                     {'key' : 'cancel'},
                 ]).done(function(s) {
                     Notification.confirm(s[0], s[1], s[2], s[3], function() {
-                        $('.' + uniqid + '-rolesme').each(function() {
+                        $('.' + uniqid + ' .m_doit:checked').each(function() {
                             MAIN.sync_queue_roles.push({ 'uniqid': uniqid, 'item': this});
                         });
                         if (MAIN.sync_queue_roles.length > 0) {
@@ -251,6 +249,7 @@ define(
                 var userid = tr.attr('data-userid');
                 var orgid = tr.attr('data-orgid');
                 var role = tr.find('.w_role').html().replace('Administrator', 'Manager');
+
                 AJAX.call([{
                     methodname: 'local_webuntis_usersync_roles',
                     args: { 'userid': userid, 'orgid': orgid, 'role': role },

@@ -54,12 +54,12 @@
     }
 }}
 
-<div class="local_webuntis usersync_create">
+<div class="local_webuntis usersync_create {{uniqid}}">
     <table class="generaltable" data-tenant_id="{{tenant_id}}">
         <thead>
             <tr>
                 <th colspan="5" style="border-right: 1px solid lightgray;">WebUntis</th>
-                <th rowspan="2">
+                <th style="border-right: 1px solid lightgray;">
                     <a href="#" class="btn btn-primary btn-block"
                         onclick="require(['local_webuntis/main'], function(M) { M.usersync_roles('{{uniqid}}'); }); return false;">
                         {{#str}} admin:usersync:rolesall, local_webuntis {{/str}}
@@ -72,9 +72,12 @@
                 <th>{{#str}} firstname {{/str}}</th>
                 <th>{{#str}} lastname {{/str}}</th>
                 <th>{{#str}} email {{/str}}</th>
-                <th>{{#str}} role {{/str}}</th>
+                <th style="border-right: 1px solid lightgray;">{{#str}} role {{/str}}</th>
 
-
+                <th style="border-right: 1px solid lightgray;">
+                    <input type="checkbox" onclick="$('.{{uniqid}} .m_doit').prop('checked', $(this).prop('checked'));" />
+                    {{#str}} selectall, local_webuntis {{/str}}
+                </th>
 
                 <th>{{#str}} role {{/str}}</th>
                 <th>{{#str}} username {{/str}}</th>
@@ -90,13 +93,10 @@
                     <td>{{w_firstname}}</td>
                     <td>{{w_lastname}}</td>
                     <td>{{w_email}}</td>
-                    <td class="w_role">{{w_role}}</td>
-                    <td class="sync-btn">
+                    <td class="w_role" style="border-right: 1px solid lightgray;">{{w_role}}</td>
+                    <td class="sync-btn" style="border-right: 1px solid lightgray; text-align: center;">
                         {{#role_differ}}
-                        <a href="#" class="btn btn-secondary btn-block {{uniqid}}-rolesme"
-                            onclick="var item = $(this); require(['local_webuntis/main'], function(M) { M.usersync_roles('{{uniqid}}', item); }); return false;">
-                            {{#str}} admin:usersync:rolesuser, local_webuntis {{/str}}
-                        </a>
+                        <input type="checkbox" class="m_doit">
                         {{/role_differ}}
                     </td>
                     <td class="m_role">{{m_role}}</td>

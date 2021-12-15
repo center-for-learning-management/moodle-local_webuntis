@@ -102,18 +102,19 @@ switch ($action) {
                                 SELECT userid
                                     FROM {local_eduvidual_orgid_userid}
                                     WHERE orgid = ?
-                            ) AND id NOT IN (
+                            ) AND id IN (
                                 SELECT userid
                                     FROM {local_webuntis_usermap}
                                     WHERE tenant_id = ?
                                         AND userid > 0
                                         AND userid IS NOT NULL
                             )
+                            AND id <> ?
                             AND id > 1
                             AND id NOT IN ($CFG->siteadmins)
                             AND deleted = 0
                             ORDER BY lastname ASC, firstname ASC";
-                $params->purgecandidates = array_values($DB->get_records_sql($sql, [ $params->orgid, $TENANT->get_tenant_id() ]));
+                $params->purgecandidates = array_values($DB->get_records_sql($sql, [ $params->orgid, $TENANT->get_tenant_id(), $USER->id ]));
 
                 foreach ($params->purgecandidates as $pc) {
                     $u = \core_user::get_user($pc->id);

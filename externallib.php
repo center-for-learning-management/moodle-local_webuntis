@@ -218,7 +218,7 @@ class local_webuntis_external extends external_api {
 
             $DB->set_field('local_webuntis_usermap', 'userid', $u->id, [ 'tenant_id' => $remoteuser->tenant_id, 'remoteuserid' => $remoteuser->remoteuserid ]);
 
-            return [ 'userid' => $u->id ];
+            return [ 'message' => get_string('admin:usersync:created', 'local_webuntis'), 'userid' => $u->id ];
         } else {
             throw new \moodle_exception('exception:permission_denied', 'local_webuntis');
         }
@@ -229,6 +229,7 @@ class local_webuntis_external extends external_api {
      */
     public static function usersync_create_returns() {
         return new external_single_structure(array(
+            'message' => new external_value(PARAM_TEXT, 'message to show to user'),
             'userid' => new external_value(PARAM_INT, 'id of the created user'),
         ));
     }
@@ -271,7 +272,7 @@ class local_webuntis_external extends external_api {
                 \user_delete_user($user);
             }
 
-            return [ 'status' => 1 ];
+            return [ 'message' => get_string('admin:usersync:purged', 'local_webuntis'), 'status' => 1 ];
         } else {
             throw new \moodle_exception('exception:permission_denied', 'local_webuntis');
         }
@@ -282,6 +283,7 @@ class local_webuntis_external extends external_api {
      */
     public static function usersync_purge_returns() {
         return new external_single_structure(array(
+            'message' => new external_value(PARAM_TEXT, 'message to show to user'),
             'status' => new external_value(PARAM_INT, '1 for success, 0 for error'),
         ));
     }

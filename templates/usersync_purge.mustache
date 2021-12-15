@@ -45,9 +45,21 @@
     }
 }}
 
-<div class="local_webuntis usersync_purge">
+<div class="local_webuntis usersync_purge {{uniqid}}">
     <table class="generaltable">
         <thead>
+            <tr>
+                <th colspan="5">&nbsp;</th>
+                {{#uses_eduvidual}}
+                <th style="border-right: 1px solid lightgray;">&nbsp;</th>
+                {{/uses_eduvidual}}
+                <th>
+                    <a href="#" class="btn btn-primary btn-block"
+                        onclick="require(['local_webuntis/main'], function(M) { M.usersync_purge('{{uniqid}}'); }); return false;">
+                        {{#str}} admin:usersync:purgeall, local_webuntis {{/str}}
+                    </a>
+                </th>
+            </tr>
             <tr>
                 <th>{{#str}} profile {{/str}}</th>
                 <th>{{#str}} username {{/str}}</th>
@@ -58,10 +70,8 @@
                 <th style="border-right: 1px solid lightgray;">{{#str}} role {{/str}}</th>
                 {{/uses_eduvidual}}
                 <th>
-                    <a href="#" class="btn btn-primary btn-block"
-                        onclick="require(['local_webuntis/main'], function(M) { M.usersync_purge('{{uniqid}}'); }); return false;">
-                        {{#str}} admin:usersync:purgeall, local_webuntis {{/str}}
-                    </a>
+                    <input type="checkbox" onclick="$('.{{uniqid}} .m_doit').prop('checked', $(this).prop('checked'));" />
+                    {{#str}} selectall, local_webuntis {{/str}}
                 </th>
             </tr>
         </thead>
@@ -80,12 +90,8 @@
                     {{#uses_eduvidual}}
                     <td style="border-right: 1px solid lightgray;">{{userrole}}</td>
                     {{/uses_eduvidual}}
-                    <td>
-                        <a href="#" class="{{uniqid}}-purgeme btn btn-secondary btn-block"
-                            onclick="var a = $(this); require(['local_webuntis/main'], function(M) { M.usersync_purge('{{uniqid}}', a); }); return false;">
-                            <i class="fa fa-check-square"></i>
-                            {{#str}} admin:usersync:purgeuser, local_webuntis {{/str}}
-                        </a>
+                    <td style="text-align: center;">
+                        <input type="checkbox" class="m_doit">
                     </td>
                 </tr>
             {{/purgecandidates}}
