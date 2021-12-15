@@ -34,8 +34,7 @@ $PAGE->navbar->add(get_string('landing:pagetitle', 'local_webuntis'), $url);
 $PAGE->navbar->add(get_string('admin:usermaps:pagetitle', 'local_webuntis'), $PAGE->url);
 $PAGE->requires->css('/local/webuntis/style/main.css');
 
-$TENANT = \local_webuntis\tenant::load();
-$USERMAP = new \local_webuntis\usermap();
+\local_webuntis\tenant::load();
 $USERMAP->sync();
 
 $params = (object)[

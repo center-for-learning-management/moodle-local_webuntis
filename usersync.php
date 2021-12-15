@@ -45,8 +45,7 @@ if (!empty(\local_webuntis\locallib::uses_eduvidual())) {
     throw new \moodle_exception('exception:permission_denied', 'local_webuntis');
 }
 
-$TENANT = \local_webuntis\tenant::load();
-$USERMAP = new \local_webuntis\usermap();
+\local_webuntis\tenant::load();
 $USERMAP->sync();
 
 $params = (object)[

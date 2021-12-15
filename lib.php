@@ -39,30 +39,25 @@ function local_webuntis_after_config() {
 }
 
 function local_webuntis_before_standard_html_head() {
-    global $TENANT;
     // Only do something, if we came through webuntis.
     if (empty(\local_webuntis\locallib::uses_webuntis()) || defined('webuntis_no_action')) {
         return;
     }
 
-    $TENANT = \local_webuntis\tenant::load();
-    $USERMAP = new \local_webuntis\usermap();
+    \local_webuntis\tenant::load();
 }
 
 /**
  * Extend Moodle Navigation.
  */
 function local_webuntis_extend_navigation($navigation) {
-    global $TENANT;
+    global $ORGMAP, $TENANT, $USERMAP;
     // Only do something, if we came through webuntis.
     if (empty(\local_webuntis\locallib::uses_webuntis()) || defined('webuntis_no_action')) {
-        //\local_webuntis\locallib::cache_print(true);
-        //die("NOT USING WEBUNTIS");
         return;
     }
 
-    $TENANT = \local_webuntis\tenant::load();
-    $USERMAP = new \local_webuntis\usermap();
+    \local_webuntis\tenant::load();
 
     if ($USERMAP->get_userid() > 0 && $USERMAP->can_disconnect()) {
         global $USER;

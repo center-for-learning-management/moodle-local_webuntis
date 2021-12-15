@@ -58,8 +58,7 @@ if (empty($confirmed)) {
     echo $OUTPUT->footer();
 } else {
     if (!empty($userid)) {
-        $TENANT = \local_webuntis\tenant::load();
-        $USERMAP = new \local_webuntis\usermap();
+        \local_webuntis\tenant::load();
         $USERMAP->release();
         require_logout();
         $url = new moodle_url('/local/webuntis/disconnect.php', [ 'disconnected' => 1 ]);

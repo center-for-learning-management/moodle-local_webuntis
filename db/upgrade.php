@@ -45,5 +45,14 @@ function xmldb_local_webuntis_upgrade($oldversion=0) {
         $dbman->change_field_precision($table, $field);
         upgrade_plugin_savepoint(true, 2021101501, 'local', 'webuntis');
     }
+    if ($oldversion < 2021121500) {
+        $table = new xmldb_table('local_webuntis_orgmap');
+        $field = new xmldb_field('connected', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'orgid');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2021121500, 'local', 'webuntis');
+    }
+
     return true;
 }

@@ -32,7 +32,7 @@ $PAGE->set_pagelayout('standard');
 $PAGE->navbar->add(get_string('landing:pagetitle', 'local_webuntis'), $PAGE->url);
 $PAGE->requires->css('/local/webuntis/style/main.css');
 
-$TENANT = \local_webuntis\tenant::load();
+\local_webuntis\tenant::load();
 $LESSONMAP = new \local_webuntis\lessonmap();
 
 if (!$LESSONMAP->can_edit()) {
@@ -52,6 +52,7 @@ foreach ($allcourses as $course) {
 $params = [
     'canproceed' => ($LESSONMAP->get_count() > 0) ? 1 : 0,
     'courses' => $courses,
+    'uses_eduvidual' => \local_webuntis\locallib::uses_eduvidual(),
 ];
 
 if ($LESSONMAP->get_lesson_id() == 0 && $LESSONMAP->can_edit()) {

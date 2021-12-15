@@ -32,7 +32,7 @@ $PAGE->set_pagelayout('standard');
 $PAGE->navbar->add(get_string('landing:pagetitle', 'local_webuntis'), $PAGE->url);
 $PAGE->requires->css('/local/webuntis/style/main.css');
 
-$TENANT = \local_webuntis\tenant::load();
+\local_webuntis\tenant::load();
 $LESSONMAP = new \local_webuntis\lessonmap();
 
 $params = [

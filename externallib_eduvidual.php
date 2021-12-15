@@ -23,6 +23,8 @@
 
 defined('MOODLE_INTERNAL') || die;
 
+define('WEBUNTIS_NO_ORGMAP_REDIRECT', true);
+
 require_once($CFG->libdir . "/externallib.php");
 
 class local_webuntis_external_eduvidual extends external_api {
@@ -38,7 +40,8 @@ class local_webuntis_external_eduvidual extends external_api {
      * Toggle status.
      */
     public static function orgmap($orgid, $field, $status) {
-        global $DB, $TENANT, $USER;
+        global $DB, $ORGMAP, $TENANT, $USER, $USERMAP;
+        \local_webuntis\tenant::load();
         if (!\local_webuntis\locallib::uses_eduvidual()) {
             throw new \moodle_exception('not using eduvidual');
         }
@@ -51,18 +54,18 @@ class local_webuntis_external_eduvidual extends external_api {
             )
         );
 
-        $TENANT = \local_webuntis\tenant::load();
+
+        \local_webuntis\tenant::load();
+        $dbparams = [
+            'orgid' => $orgid,
+            'tenant_id' => $TENANT->get_tenant_id(),
+        ];
 
         $orgrole = \local_eduvidual\locallib::get_orgrole($params['orgid']);
-        if ($orgrole != 'Manager' && !is_siteadmin()) {
+        if (!$USERMAP->is_administrator() && $orgrole != 'Manager' && !is_siteadmin()) {
             throw new \moodle_exception(get_string('missing_permission', 'local_eduvidual'));
         }
 
-        $dbparams = [
-            'orgid' => $params['orgid'],
-            'tenant_id' => $TENANT->get_tenant_id(),
-        ];
-        $orgmap = $DB->get_record('local_webuntis_orgmap', $dbparams);
         $DB->set_field('local_webuntis_orgmap', $params['field'], $params['status'], $dbparams);
         return $params;
     }
@@ -107,8 +110,7 @@ class local_webuntis_external_eduvidual extends external_api {
             throw new \moodle_exception('exception:invalid_data', 'local_webuntis');
         }
 
-        $TENANT = \local_webuntis\tenant::load();
-        $USERMAP = new \local_webuntis\usermap();
+        \local_webuntis\tenant::load();
         $useseduvidual = \local_webuntis\locallib::uses_eduvidual();
         if (empty($useseduvidual)) {
             throw new \moodle_exception('exception:invalid_data', 'local_webuntis');

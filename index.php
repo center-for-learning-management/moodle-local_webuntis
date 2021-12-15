@@ -41,7 +41,7 @@ if ($lesson_id == -1 && !empty($tenant_id) && !empty($school)) {
 }
 
 //\local_webuntis\locallib::uses_webuntis(1);
-$TENANT = \local_webuntis\tenant::load($tenant_id);
+\local_webuntis\tenant::load($tenant_id);
 $LESSONMAP = new \local_webuntis\lessonmap($lesson_id);
 
 if (!empty($redirect)) {

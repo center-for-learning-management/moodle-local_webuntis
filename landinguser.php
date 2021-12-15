@@ -34,8 +34,7 @@ $PAGE->set_pagelayout('standard');
 $PAGE->navbar->add(get_string('landinguser:pagetitle', 'local_webuntis'), $PAGE->url);
 $PAGE->requires->css('/local/webuntis/style/main.css');
 
-$TENANT = \local_webuntis\tenant::load();
-$USERMAP = new \local_webuntis\usermap();
+\local_webuntis\tenant::load();
 
 if ($USERMAP->get_userid() > 0) {
     throw new moodle_exception('exception:already_connected', 'local_webuntis');

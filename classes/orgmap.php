@@ -29,6 +29,7 @@ defined('MOODLE_INTERNAL') || die;
 
 class orgmap {
     private static $orgmap;
+    private static $orgmap_connected;
 
     /**
      * Convert webuntis role to eduvidual-role.
@@ -49,15 +50,37 @@ class orgmap {
     }
 
     /**
+     * Filters the orgmap and only returns array of connected orgs.
+     * @return array
+     */
+    public static function get_connected_orgs() {
+        if (!empty(self::$orgmap_connected)) {
+            return self::$orgmap_connected;
+        }
+        self::$orgmap_connected = [];
+        foreach (self::$orgmap as $orgmap) {
+            if (!empty($orgmap->connected)) {
+                self::$orgmap_connected[] = $orgmap;
+            }
+        }
+        return self::$orgmap_connected;
+    }
+
+    /**
      * Get list of mapped webuntis tenants.
      */
     public static function get_orgmap() {
-        global $TENANT;
+        global $DB, $TENANT, $USERMAP;
         if (empty($TENANT->get_tenant_id())) {
             return [];
         } elseif (empty(self::$orgmap)) {
             $params = [ 'tenant_id' => $TENANT->get_tenant_id() ];
             self::$orgmap = array_values($DB->get_records('local_webuntis_orgmap', $params));
+            self::get_connected_orgs();
+
+            if (count(self::$orgmap_connected) == 0 && $USERMAP->is_administrator() && !defined('WEBUNTIS_NO_ORGMAP_REDIRECT')) {
+                redirect('/local/webuntis/landingadmin.php');
+            }
             return self::$orgmap;
         } else {
             return self::$orgmap;

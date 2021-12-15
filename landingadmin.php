@@ -23,6 +23,8 @@
 
 require_once('../../config.php');
 
+define('WEBUNTIS_NO_ORGMAP_REDIRECT', true);
+
 $PAGE->set_context(\context_system::instance());
 $PAGE->set_url(new \moodle_url('/local/webuntis/landingadmin.php', array()));
 $PAGE->set_title(get_string('settings'));
@@ -34,7 +36,7 @@ $PAGE->navbar->add(get_string('landing:pagetitle', 'local_webuntis'), $url);
 $PAGE->navbar->add(get_string('settings'), $PAGE->url);
 $PAGE->requires->css('/local/webuntis/style/main.css');
 
-$TENANT = \local_webuntis\tenant::load();
+\local_webuntis\tenant::load();
 $LESSONMAP = new \local_webuntis\lessonmap();
 
 echo $OUTPUT->header();
@@ -42,12 +44,6 @@ echo $OUTPUT->header();
 if (!$LESSONMAP->can_edit()) {
     throw new \moodle_exception(get_string('missing_permission', 'local_eduvidual'));
 }
-
-$params = [
-    'autocreate' => $TENANT->get_autocreate(),
-    'sysenabledautocreate' => get_config('local_webuntis', 'autocreate'),
-];
-echo $OUTPUT->render_from_template('local_webuntis/landingadmin', $params);
 
 if (\local_webuntis\locallib::uses_eduvidual()) {
     $orgs = array_values(\local_eduvidual\locallib::get_organisations('Manager', false));
@@ -59,8 +55,8 @@ if (\local_webuntis\locallib::uses_eduvidual()) {
                 'orgs' => [],
             ],
             [
-                'field' => 'autoenrol',
-                'label' => get_string('eduvidual:autoenrol', 'local_webuntis'),
+                'field' => 'connected',
+                'label' => get_string('eduvidual:orgs', 'local_webuntis'),
                 'orgs' => [],
             ],
         ];
@@ -90,10 +86,20 @@ if (\local_webuntis\locallib::uses_eduvidual()) {
 
         $params = [
             'actions' => $actions,
+            'header' => get_string('eduvidual:connect_org', 'local_webuntis'),
             'wwwroot' => $CFG->wwwroot,
         ];
 
         echo $OUTPUT->render_from_template('local_webuntis/landingeduvidual', $params);
     }
+} else {
+    $params = [
+        'autocreate' => $TENANT->get_autocreate(),
+        'sysenabledautocreate' => get_config('local_webuntis', 'autocreate'),
+    ];
+    echo $OUTPUT->render_from_template('local_webuntis/landingadmin', $params);
 }
+
+
+
 echo $OUTPUT->footer();

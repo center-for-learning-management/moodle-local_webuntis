@@ -38,9 +38,8 @@ class local_webuntis_external extends external_api {
      * Toggle status.
      */
     public static function autocreate($status) {
-        global $TENANT;
-        $TENANT = \local_webuntis\tenant::load();
-        $USERMAP = new \local_webuntis\usermap();
+        global $TENANT, $USERMAP;
+        \local_webuntis\tenant::load();
         if (!$USERMAP->is_administrator()) {
             throw new \moodle_error('nopermission');
         }
@@ -73,7 +72,7 @@ class local_webuntis_external extends external_api {
         global $DB, $TENANT, $USER;
         $params = self::validate_parameters(self::selecttarget_parameters(), array('courseid' => $courseid, 'status' => $status));
 
-        $TENANT = \local_webuntis\tenant::load();
+        \local_webuntis\tenant::load();
         $LESSONMAP = new \local_webuntis\lessonmap();
 
         if ($LESSONMAP->can_edit()) {
@@ -172,8 +171,7 @@ class local_webuntis_external extends external_api {
                 'remoteuserid' => $remoteuserid,
             )
         );
-        $TENANT = \local_webuntis\tenant::load();
-        $USERMAP = new \local_webuntis\usermap();
+        \local_webuntis\tenant::load();
         $useseduvidual = \local_webuntis\locallib::uses_eduvidual();
         if (!empty($useseduvidual)) {
             $orgs = \local_eduvidual\locallib::get_organisations('Manager', false);
@@ -255,8 +253,7 @@ class local_webuntis_external extends external_api {
                 'orgid' => $orgid,
             )
         );
-        $TENANT = \local_webuntis\tenant::load();
-        $USERMAP = new \local_webuntis\usermap();
+        \local_webuntis\tenant::load();
         $useseduvidual = \local_webuntis\locallib::uses_eduvidual();
 
         if ($USERMAP->is_administrator()
