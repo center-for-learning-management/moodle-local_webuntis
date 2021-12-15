@@ -38,6 +38,7 @@ $PAGE->requires->css('/local/webuntis/style/main.css');
 $USERMAP->sync();
 
 $params = (object)[
+    'sitename' => $CFG->shortname,
     'usermaps' => [],
     'wwwroot' => $CFG->wwwroot,
 ];

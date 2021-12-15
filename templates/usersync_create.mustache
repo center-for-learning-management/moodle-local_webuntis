@@ -48,8 +48,10 @@
     <table class="generaltable" data-tenant_id="{{tenant_id}}">
         <thead>
             <tr>
-                <th colspan="5" style="border-right: 1px solid lightgray;">WebUntis</th>
-                <th>
+                <th colspan="5" style="border-right: 1px solid lightgray; text-align: center;">
+                    <h3>WebUntis</h3>
+                </th>
+                <th style="text-align: center;">
                     <a href="#" class="btn btn-primary btn-block"
                         onclick="require(['local_webuntis/main'], function(M) { M.usersync_create('{{uniqid}}'); }); return false;">
                         {{#str}} admin:usersync:createall, local_webuntis {{/str}}

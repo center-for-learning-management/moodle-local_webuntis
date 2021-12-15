@@ -31,8 +31,15 @@ class usermap {
     private $userinfo;
     private $usermap;
 
-    public function __construct($userinfo = null) {
-        global $TENANT;
+    /**
+     * Load the usermap.
+     * @param userinfo userinfo grabbed from webuntis.
+     * @param requirelogin require the user to be logged in in webuntis.
+     */
+    public function __construct($userinfo = null, $requirelogin = true) {
+        global $DB, $TENANT;
+
+        $requirelogin = false;
 
         if (empty(self::$userinfos)) {
             self::$userinfos = \local_webuntis\locallib::cache_get('session', 'userinfos');
@@ -61,7 +68,8 @@ class usermap {
             if ($this->is_administrator()) {
                 \local_webuntis\orgmap::load_from_eduvidual();
             }
-        } else {
+        } elseif ($requirelogin) {
+            //die("REQUIRE $requirelogin");
             if ($_SERVER['PHP_SELF'] != '/local/webuntis/landinguser.php') {
                 $url = new \moodle_url('/local/webuntis/landinguser.php', array());
                 redirect($url);
@@ -125,6 +133,14 @@ class usermap {
                 )
             )
         );
+    }
+    public static function from_database() {
+        global $DB, $TENANT, $USER;
+        if (empty(self::$usermaps[$TENANT->get_tenant_id()])) {
+            self::$usermaps[$TENANT->get_tenant_id()] = $DB->get_record('local_webuntis_usermap', [ 'userid' => $USER->id, 'tenant_id' => $TENANT->get_tenant_id()]);
+            \local_webuntis\locallib::cache_set('session', 'usermaps', self::$usermaps);
+        }
+        return self::$usermaps[$TENANT->get_tenant_id()];
     }
     public function get_email() {
         if (!empty($this->usermap->email)) {

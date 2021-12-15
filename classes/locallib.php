@@ -170,28 +170,6 @@ class locallib {
         return $result;
     }
 
-    /**
-     * Find the overview image of a course.
-     * @param courseid
-     */
-    public static function get_courseimage($courseid) {
-        global $CFG;
-        $course = \get_course($courseid);
-        $course = new \core_course_list_element($course);
-
-        foreach ($course->get_course_overviewfiles() as $file) {
-            if ($file->is_valid_image()) {
-                $imagepath = '/' . $file->get_contextid() .
-                        '/' . $file->get_component() .
-                        '/' . $file->get_filearea() .
-                        $file->get_filepath() .
-                        $file->get_filename();
-                $imageurl = file_encode_url($CFG->wwwroot . '/pluginfile.php', $imagepath, false);
-                return $imageurl;
-            }
-        }
-    }
-
     public static function exception($message, $code) {
         $http_status_codes = array(
             100 => "Continue",
@@ -278,6 +256,7 @@ class locallib {
      * Get actions for a particular purpose.
      * @param for specifies the purpose.
      * @param active specifies which item should be marked as active.
+     * @param orgid orgid for eduvidual-based moodle instances.
      */
     public static function get_actions($for, $active = '') {
         $actions = [];
@@ -299,20 +278,31 @@ class locallib {
                         'label' => get_string('admin:usersync:userpurge', 'local_webuntis'),
                         'relativepath' => '/local/webuntis/usersync.php?action=purge',
                     ];
-
-                if (\local_webuntis\locallib::uses_eduvidual()) {
-                    $orgs = array_values(\local_eduvidual\locallib::get_organisations('Manager', false));
-                    if (count($orgs) > 0) {
-                        $actions[] = (object) [
-                            'active' => ($active == 'landingusersync::roles'),
-                            'label' => get_string('admin:usersync:userroles', 'local_webuntis'),
-                            'relativepath' => "/local/webuntis/usersync.php?action=roles",
-                        ];
-                    }
-                }
             break;
         }
         return $actions;
+    }
+
+    /**
+     * Find the overview image of a course.
+     * @param courseid
+     */
+    public static function get_courseimage($courseid) {
+        global $CFG;
+        $course = \get_course($courseid);
+        $course = new \core_course_list_element($course);
+
+        foreach ($course->get_course_overviewfiles() as $file) {
+            if ($file->is_valid_image()) {
+                $imagepath = '/' . $file->get_contextid() .
+                        '/' . $file->get_component() .
+                        '/' . $file->get_filearea() .
+                        $file->get_filepath() .
+                        $file->get_filename();
+                $imageurl = file_encode_url($CFG->wwwroot . '/pluginfile.php', $imagepath, false);
+                return $imageurl;
+            }
+        }
     }
 
     /**

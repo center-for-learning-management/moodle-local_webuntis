@@ -116,7 +116,7 @@ class local_webuntis_external_eduvidual extends external_api {
             throw new \moodle_exception('exception:invalid_data', 'local_webuntis');
         }
 
-        if ($USERMAP->is_administrator() && \local_eduvidual\locallib::get_orgrole($params['orgid']) == 'Manager') {
+        if ($USERMAP->is_administrator() || \local_eduvidual\locallib::get_orgrole($params['orgid']) == 'Manager') {
             \local_eduvidual\lib_enrol::role_set($params['userid'], $params['orgid'], $params['role']);
             return [ 'role' => $params['role'] ];
         } else {

@@ -51,6 +51,7 @@ $USERMAP->sync();
 $params = (object)[
     'action' => $action,
     'orgid' => $orgid,
+    'sitename' => $CFG->shortname,
     'uses_eduvidual' => \local_webuntis\locallib::uses_eduvidual(),
     'tenant_id' => $TENANT->get_tenant_id(),
     'wwwroot' => $CFG->wwwroot,
@@ -114,10 +115,12 @@ switch ($action) {
                             AND deleted = 0
                             ORDER BY lastname ASC, firstname ASC";
                 $params->purgecandidates = array_values($DB->get_records_sql($sql, [ $params->orgid, $TENANT->get_tenant_id(), $USER->id ]));
+                $roles = $DB->get_records_sql('SELECT userid,role FROM {local_eduvidual_orgid_userid} WHERE orgid=?', [ 'orgid' => $params->orgid ]);
 
                 foreach ($params->purgecandidates as $pc) {
                     $u = \core_user::get_user($pc->id);
                     $pc->profileimage = $OUTPUT->user_picture($u, array('size' => 30));
+                    $pc->role = $roles[$pc->id]->role;
                 }
                 echo $OUTPUT->render_from_template('local_webuntis/usersync_purge', $params);
             }
@@ -131,11 +134,12 @@ switch ($action) {
                                     AND userid > 0
                                     AND userid IS NOT NULL
                             )
+                            AND id <> ?
                             AND id > 1
                             AND id NOT IN ($CFG->siteadmins)
                             AND deleted = 0
                         ORDER BY lastname ASC, firstname ASC";
-            $params->purgecandidates = array_values($DB->get_records_sql($sql, [ $TENANT->get_tenant_id() ]));
+            $params->purgecandidates = array_values($DB->get_records_sql($sql, [ $TENANT->get_tenant_id(), $USER->id ]));
             foreach ($params->purgecandidates as $pc) {
                 $u = \core_user::get_user($pc->id);
                 $pc->profileimage = $OUTPUT->user_picture($u, array('size' => 30));

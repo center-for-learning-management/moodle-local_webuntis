@@ -58,14 +58,18 @@
     <table class="generaltable" data-tenant_id="{{tenant_id}}">
         <thead>
             <tr>
-                <th colspan="5" style="border-right: 1px solid lightgray;">WebUntis</th>
+                <th colspan="5" style="border-right: 1px solid lightgray; text-align: center;">
+                    <h3>WebUntis</h3>
+                </th>
                 <th style="border-right: 1px solid lightgray;">
                     <a href="#" class="btn btn-primary btn-block"
                         onclick="require(['local_webuntis/main'], function(M) { M.usersync_roles('{{uniqid}}'); }); return false;">
                         {{#str}} admin:usersync:rolesall, local_webuntis {{/str}}
                     </a>
                 </th>
-                <th colspan="5" style="border-right: 1px solid lightgray;">Moodle</th>
+                <th colspan="5" style="border-right: 1px solid lightgray; text-align: center;">
+                    <h3>{{sitename}}</h3>
+                </th>
             </tr>
             <tr>
                 <th>{{#str}} username {{/str}}</th>
@@ -74,7 +78,7 @@
                 <th>{{#str}} email {{/str}}</th>
                 <th style="border-right: 1px solid lightgray;">{{#str}} role {{/str}}</th>
 
-                <th style="border-right: 1px solid lightgray;">
+                <th style="border-right: 1px solid lightgray; text-align: center;">
                     <input type="checkbox" onclick="$('.{{uniqid}} .m_doit').prop('checked', $(this).prop('checked'));" />
                     {{#str}} selectall, local_webuntis {{/str}}
                 </th>

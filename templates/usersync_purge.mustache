@@ -49,7 +49,9 @@
     <table class="generaltable">
         <thead>
             <tr>
-                <th colspan="5">&nbsp;</th>
+                <th colspan="5" style="text-align: center;">
+                    <h3>WebUntis</h3>
+                </th>
                 {{#uses_eduvidual}}
                 <th style="border-right: 1px solid lightgray;">&nbsp;</th>
                 {{/uses_eduvidual}}
@@ -69,7 +71,7 @@
                 {{#uses_eduvidual}}
                 <th style="border-right: 1px solid lightgray;">{{#str}} role {{/str}}</th>
                 {{/uses_eduvidual}}
-                <th>
+                <th style="text-align: center;">
                     <input type="checkbox" onclick="$('.{{uniqid}} .m_doit').prop('checked', $(this).prop('checked'));" />
                     {{#str}} selectall, local_webuntis {{/str}}
                 </th>
@@ -88,7 +90,7 @@
                     <td>{{lastname}}</td>
                     <td>{{email}}</td>
                     {{#uses_eduvidual}}
-                    <td style="border-right: 1px solid lightgray;">{{userrole}}</td>
+                    <td style="border-right: 1px solid lightgray;">{{role}}</td>
                     {{/uses_eduvidual}}
                     <td style="text-align: center;">
                         <input type="checkbox" class="m_doit">

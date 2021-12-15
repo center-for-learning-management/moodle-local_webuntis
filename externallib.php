@@ -256,10 +256,13 @@ class local_webuntis_external extends external_api {
         \local_webuntis\tenant::load();
         $useseduvidual = \local_webuntis\locallib::uses_eduvidual();
 
-        if ($USERMAP->is_administrator()
-                && (is_siteadmin()
-                    || (!empty($useseduvidual) && \local_eduvidual\locallib::get_orgrole($params['orgid']) == 'Manager')
-                )) {
+        if (is_siteadmin() ||
+                $USERMAP->is_administrator() ||
+                (
+                    !empty($useseduvidual) &&
+                    \local_eduvidual\locallib::get_orgrole($params['orgid']) == 'Manager'
+                )
+            ) {
 
             if ($useseduvidual) {
                 \local_eduvidual\lib_enrol::role_set($params['userid'], $params['orgid'], 'remove');

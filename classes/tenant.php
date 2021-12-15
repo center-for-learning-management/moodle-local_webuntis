@@ -32,7 +32,7 @@ class tenant {
         return \local_webuntis\locallib::cache_get('session', 'last_tenant_id');
     }
 
-    public static function load($tenantid = 0) {
+    public static function load($tenantid = 0, $requirelogin = true) {
         global $CFG, $debug, $DB, $ORGMAP, $TENANT, $USERMAP;
 
         if (empty($tenantid)) {
@@ -43,7 +43,7 @@ class tenant {
             throw new \moodle_exception('invalidwebuntisinstance', 'local_webuntis', $CFG->wwwroot);
         }
         $TENANT = new \local_webuntis\tenant($tenantid);
-        $USERMAP = new \local_webuntis\usermap();
+        $USERMAP = new \local_webuntis\usermap(null, $requirelogin);
         if (\local_webuntis\locallib::uses_eduvidual()) {
             $ORGMAP =\local_webuntis\orgmap::get_orgmap();
         }
