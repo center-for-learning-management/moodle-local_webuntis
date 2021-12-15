@@ -85,13 +85,11 @@ class usermap {
         if (empty($this->get_lastname())) {
             return false;
         }
-        if (!\local_webuntis\locallib::uses_eduvidual()) {
-            if (empty($this->get_email())) {
-                return false;
-            }
-            if (empty($this->get_username())) {
-                return false;
-            }
+        if (empty($this->get_email())) {
+            return false;
+        }
+        if (empty($this->get_username())) {
+            return false;
         }
         return true;
     }
