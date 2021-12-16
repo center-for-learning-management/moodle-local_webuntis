@@ -83,7 +83,7 @@ $string['loginexternal'] = 'Öffne in neuem Tab';
 $string['loginexternal:description'] = 'Diese Loginmethode erfordert, dass der Login einmalig in einem neuen Tab ausgeführt wird. Klicken Sie den folgenden Button, um den Login zu starten!';
 $string['pluginname'] = 'WebUntis Integration';
 $string['proceed'] = 'Weiter';
-$string['redirect_edit_landingpage'] = 'Sie wurden automatisch in diesen Kurs weitergeleitet. Falls Sie das Ziel dieses Links ändern möchten, klicken Sie bitte <a href="{$a->editurl}">hier</a>.';
+$string['redirect_edit_landingpage'] = 'Dieser Kurs ist mit WebUntis verknüpft. <a href="{$a->editurl}" class="btn btn-primary">Verknüpfung bearbeiten</a>.';
 $string['selectall'] = 'alle/keine';
 $string['selectcourse_for_target'] = 'Wählen Sie einen Kurs für dieses Ziel';
 $string['sync'] = 'Synchronisiere';
