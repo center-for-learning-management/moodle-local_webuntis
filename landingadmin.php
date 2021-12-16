@@ -46,7 +46,7 @@ if (!$LESSONMAP->can_edit()) {
 }
 
 if (\local_webuntis\locallib::uses_eduvidual()) {
-    $orgs = array_values(\local_eduvidual\locallib::get_organisations('Manager', false));
+    $orgs = array_values(\local_eduvidual\locallib::get_organisations('*', false));
     if (count($orgs) > 0) {
         $actions = [
             [
