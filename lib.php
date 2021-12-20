@@ -67,7 +67,7 @@ function local_webuntis_extend_navigation($navigation) {
         }
         $label = get_string('disconnect:user', 'local_webuntis');
         $url = new moodle_url('/local/webuntis/disconnect.php', array('userid' => $USER->id));
-        $icon = new pix_icon('i/user', '', '');
+        $icon = new pix_icon('logo_untis', $label, 'local_webuntis');
         $nodemyorgs = $nodehome->add($label, $url, navigation_node::NODETYPE_LEAF, $label, 'disconnectuser', $icon);
         $nodemyorgs->showinflatnavigation = true;
     }

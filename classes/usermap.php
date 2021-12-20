@@ -44,11 +44,13 @@ class usermap {
         if (empty(self::$userinfos)) {
             self::$userinfos = \local_webuntis\locallib::cache_get('session', 'userinfos');
         }
+
         if (!empty(self::$userinfos[$TENANT->get_tenant_id()])) {
             $this->userinfo = self::$userinfos[$TENANT->get_tenant_id()];
         } else {
             $this->userinfo = (object) [];
         }
+
         if (empty(self::$usermaps)) {
             self::$usermaps = \local_webuntis\locallib::cache_get('session', 'usermaps');
         }
@@ -123,6 +125,11 @@ class usermap {
             }
         }
     }
+    /**
+     * Extract the token.
+     * @param strtoken
+     * @return the token.
+     */
     public static function extract_token($strtoken) {
         return json_decode(
             base64_decode(
@@ -133,14 +140,6 @@ class usermap {
                 )
             )
         );
-    }
-    public static function from_database() {
-        global $DB, $TENANT, $USER;
-        if (empty(self::$usermaps[$TENANT->get_tenant_id()])) {
-            self::$usermaps[$TENANT->get_tenant_id()] = $DB->get_record('local_webuntis_usermap', [ 'userid' => $USER->id, 'tenant_id' => $TENANT->get_tenant_id()]);
-            \local_webuntis\locallib::cache_set('session', 'usermaps', self::$usermaps);
-        }
-        return self::$usermaps[$TENANT->get_tenant_id()];
     }
     public function get_email() {
         if (!empty($this->usermap->email)) {
@@ -324,12 +323,10 @@ class usermap {
                     'timecreated' => time(),
                     'timemodified' => time(),
                     'lastaccess' => time(),
-                    'userinfo' => json_encode($this->userinfo, JSON_NUMERIC_CHECK),
                 );
                 $this->usermap->id = $DB->insert_record('local_webuntis_usermap', $this->usermap);
             } else {
                 $DB->set_field('local_webuntis_usermap', 'lastaccess', time(), $params);
-                $DB->set_field('local_webuntis_usermap', 'userinfo', json_encode($this->userinfo, JSON_NUMERIC_CHECK), $params);
             }
 
             // ATTENTION: In this section you must not call functions like ::get_id, this will cause a loop.
@@ -370,13 +367,12 @@ class usermap {
 
     public function sync($chance = 1) {
         global $debug, $TENANT;
-
         $lastsync = \local_webuntis\locallib::cache_get('session', 'last_tenant_sync');
         if (!empty($lastsync) && $lastsync > (time() - 600)) {
             return;
         }
 
-        $userinfo = $this->get_userinfo();
+        $serverinfo = $TENANT->auth_server();
         $token = $this->get_token();
         $integration = ($TENANT->get_host() == 'https://integration.webuntis.com') ? '-integration' : '';
         $path = "https://api$integration.webuntis.com/ims/oneroster/v1p1/users";
@@ -384,7 +380,7 @@ class usermap {
             echo "Path $path<br />";
         }
         $headerparams = [
-            'Authorization' => "$userinfo->token_type $userinfo->id_token",
+            'Authorization' => "$serverinfo->token_type $serverinfo->access_token",
         ];
         if ($debug) {
             echo "<pre>" . print_r($headerparams, 1) . "</pre>";
@@ -401,16 +397,7 @@ class usermap {
             }
             \local_webuntis\locallib::cache_set('session', 'last_tenant_sync', time());
         } else {
-            if (!empty($getuser[0]) && !empty($getuser[0]->errorCode)) {
-                switch ($getuser[0]->errorCode) {
-                    case 401: // token expired.
-                        $TENANT->auth_token();
-                        if ($chance == 1) {
-                            $this->sync(2);
-                        }
-                    break;
-                }
-            }
+            throw new \moodle_exception('exception:access_token_expired', 'local_webuntis');
         }
     }
 

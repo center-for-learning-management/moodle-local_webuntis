@@ -53,6 +53,14 @@ function xmldb_local_webuntis_upgrade($oldversion=0) {
         }
         upgrade_plugin_savepoint(true, 2021121500, 'local', 'webuntis');
     }
+    if ($oldversion < 2021122000) {
+        $table = new xmldb_table('local_webuntis_usermap');
+        $field = new xmldb_field('userinfo');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2021122000, 'local', 'webuntis');
+    }
 
     return true;
 }

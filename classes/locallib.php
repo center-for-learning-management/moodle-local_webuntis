@@ -49,6 +49,7 @@ class locallib {
         global $TENANT;
         // Only session caches need to be preserved.
         $preserves = array(
+            array('type' => 'application', 'identifier' => 'userinfos'), // Server2Server API
             // lessonmap
             array('type' => 'session', 'identifier' => 'code'),
             array('type' => 'session', 'identifier' => 'last_lesson_ids'),
@@ -141,8 +142,9 @@ class locallib {
      * @param url the url to open.
      * @param post variables to attach using post.
      * @param headers custom request headers.
+     * @param basicauth username:password as String
      */
-    public static function curl($url, $post = null, $headers = null) {
+    public static function curl($url, $post = null, $headers = null, $basicauth = null) {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -165,6 +167,11 @@ class locallib {
             }
             curl_setopt($ch, CURLOPT_HTTPHEADER, $strheaders);
         }
+        if (!empty($basicauth)) {
+            curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+            curl_setopt($ch, CURLOPT_USERPWD, $basicauth);
+        }
+
         $result = curl_exec($ch);
         curl_close($ch);
         return $result;

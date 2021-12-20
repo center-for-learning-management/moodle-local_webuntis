@@ -58,6 +58,8 @@ class tenant {
         $params = [ 'tenant_id' => $tenantid ];
         $this->tenantdata = $DB->get_record_sql($sql, $params);
 
+        $this->auth_server();
+
         \local_webuntis\locallib::cache_set('session', 'last_tenant_id', $tenantid);
     }
 
@@ -89,6 +91,43 @@ class tenant {
         }
     }
 
+    /**
+     * Get a token for server2server api.
+     * @return token
+     */
+    public function auth_server() {
+        if (!empty($this->serverinfo) && $this->serverinfo->lifeends < time()) {
+            return $this->serverinfo;
+        }
+        $this->serverinfo = \local_webuntis\locallib::cache_get('application', 'serverinfo-' . $this->get_tenant_id());
+        if (empty($this->serverinfo) || $this->serverinfo->lifeends < time()) {
+            // fetch new token.
+            $url = implode('', [ $this->get_host(), '/WebUntis/api/sso/', $this->get_school(), '/token' ]);
+            $post = [
+                'grant_type' => 'client_credentials',
+                'scope' => 'roster-core.readonly',
+            ];
+            $ba = implode(':', [ $this->get_client(), $this->get_consumersecret() ]);
+            $serverinfo = \local_webuntis\locallib::curl($url, $post, null, $ba);
+            $serverinfo = json_decode($serverinfo);
+            // Expires according to Untis GmbH after 3 minutes.
+            if (!empty($serverinfo->access_token)) {
+                $serverinfo->lifeends = time() + 170;
+                $this->serverinfo = $serverinfo;
+                \local_webuntis\locallib::cache_set('application', 'serverinfo-' . $this->get_tenant_id(), $this->serverinfo);
+                return $this->serverinfo;
+            } else {
+                throw new \moodle_exception('exception:no_accesstoken_retrieved', 'local_webuntis', 0, print_r($serverinfo, 1));
+            }
+        } else {
+            return $this->serverinfo;
+        }
+    }
+
+    /**
+     * Get token for user-based API.
+     * @param code the code retrieved by redirect.
+     */
     public function auth_token($code = "") {
         global $CFG, $debug;
         if (empty($code)) {
