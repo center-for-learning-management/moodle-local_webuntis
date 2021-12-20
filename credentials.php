@@ -95,7 +95,7 @@ if ($verified) {
             $obj->school        = $tenant->schoolName;
             $obj->client        = $tenant->clientId;
             $obj->consumerkey   = $tenant->secret;
-            $obj->consumesecret = $tenant->password;
+            $obj->consumersecret= $tenant->password;
             $obj->host          = $tenant->host;
             $obj->timemodified  = time();
             $success = $DB->update_record('local_webuntis_tenant', $obj);
