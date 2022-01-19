@@ -49,8 +49,6 @@ class locallib {
         global $TENANT;
         // Only session caches need to be preserved.
         $preserves = array(
-            array('type' => 'application', 'identifier' => 'userinfos'), // Server2Server API
-            // lessonmap
             array('type' => 'session', 'identifier' => 'code'),
             array('type' => 'session', 'identifier' => 'last_lesson_ids'),
             array('type' => 'session', 'identifier' => 'last_tenant_id'),
