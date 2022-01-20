@@ -39,12 +39,9 @@ class locallib {
             return;
         }
         $cache = \cache::make('local_webuntis', $cache);
-        if($key == 'usermaps' || $key == 'userinfos') {
-            return (array)json_decode($cache->get($key),1);
-        }
-        else {
-            return $cache->get($key);
-        }
+        // All values are json_encoded by default in regard of
+        // compatiblity prolems with certain cache types.
+        return json_decode($cache->get($key),1);
     }
     /**
      * Store caches temporarily to preserve them when logging user in or out.
@@ -109,12 +106,9 @@ class locallib {
         if ($delete) {
             $cache->delete($key);
         } else {
-            if($key == 'usermaps' || $key == 'userinfos') {
-                $cache->set($key, json_encode($value));
-            }
-            else{
-                $cache->set($key, $value);
-            }
+            // All values are json_encoded by default in regard of
+            // compatiblity prolems with certain cache types.
+            $cache->set($key, json_encode($value));
         }
     }
 

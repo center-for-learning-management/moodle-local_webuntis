@@ -39,7 +39,6 @@ class tenant {
             $tenantid = \local_webuntis\locallib::cache_get('session', 'last_tenant_id');
         }
         if (empty($tenantid)) {
-            \local_webuntis\locallib::cache_print(true);
             throw new \moodle_exception('invalidwebuntisinstance', 'local_webuntis', $CFG->wwwroot);
         }
         $TENANT = new \local_webuntis\tenant($tenantid);
@@ -58,9 +57,12 @@ class tenant {
         $params = [ 'tenant_id' => $tenantid ];
         $this->tenantdata = $DB->get_record_sql($sql, $params);
 
-        $this->auth_server();
-
-        \local_webuntis\locallib::cache_set('session', 'last_tenant_id', $tenantid);
+        if (!empty($this->tenantdata->id)) {
+            \local_webuntis\locallib::cache_set('session', 'last_tenant_id', $tenantid);
+            $this->auth_server();
+        } else {
+            throw new \moodle_exception('invalidwebuntisinstance', 'local_webuntis', $CFG->wwwroot);
+        }
     }
 
     /**
@@ -100,7 +102,7 @@ class tenant {
             return $this->serverinfo;
         }
         $this->serverinfo = \local_webuntis\locallib::cache_get('application', 'serverinfo-' . $this->get_tenant_id());
-        if (empty($this->serverinfo) || $this->serverinfo->lifeends < time()) {
+        if (empty($this->serverinfo->lifeends) || $this->serverinfo->lifeends < time()) {
             // fetch new token.
             $url = implode('', [ $this->get_host(), '/WebUntis/api/sso/', $this->get_school(), '/token' ]);
             $post = [
