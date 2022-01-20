@@ -113,12 +113,27 @@ class locallib {
     }
 
     /**
+     * Set the MoodleSession cookie to SameSite=None
+     * to allow embedding in an iframe.
+     */
+    public static function cookie_samesite() {
+        $cookies = headers_list();
+        header_remove('Set-Cookie');
+        $setcookiesession = 'Set-Cookie: ' . session_name() . '=';
+
+        foreach ($cookies as $cookie) {
+            if (strpos($cookie, $setcookiesession) === 0 && strpos($cookie, 'SameSite=None') === false) {
+                $cookie .= '; SameSite=None; Secure';
+            }
+            header($cookie, false);
+        }
+    }
+
+    /**
      * Enable CORS for *.webuntis.com.
      * Code taken from https://stackoverflow.com/a/9866124 and adapted.
      */
     public static function cors() {
-        // Allow from any origin
-
         if (isset($_SERVER['HTTP_ORIGIN']) && substr($_SERVER['HTTP_ORIGIN'], -13) == '.webuntis.com') {
             // Decide if the origin in $_SERVER['HTTP_ORIGIN'] is one
             // you want to allow, and if so:

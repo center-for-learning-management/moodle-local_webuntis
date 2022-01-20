@@ -22,6 +22,8 @@
  */
 
 require_once('../../config.php');
+\local_webuntis\locallib::cookie_samesite();
+
 $debug = false;
 
 if ($debug) {

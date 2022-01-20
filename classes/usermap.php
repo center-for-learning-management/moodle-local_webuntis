@@ -302,7 +302,6 @@ class usermap {
             redirect($TENANT->get_init_url());
         }
         $token = self::extract_token($this->userinfo->id_token);
-
         if ($debug) {
             echo "Userinfo:<pre>" . print_r($this->userinfo, 1) . "</pre>";
             echo "Token:<pre>" . print_r($token, 1) . "</pre>";
