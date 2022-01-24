@@ -28,12 +28,13 @@ function local_webuntis_after_config() {
     if (empty(\local_webuntis\locallib::uses_webuntis())) {
         return;
     }
+    \local_webuntis\locallib::cookie_samesite();
+
     $PAGE->add_body_class('webuntis-loading-check');
 
     // Capture oauth logins within iframes.
-    if (strpos($_SERVER['SCRIPT_FILENAME'], '/auth/oauth2/login.php') > 0 && isset($_SERVER['HTTP_SEC_FETCH_DEST']) && $_SERVER['HTTP_SEC_FETCH_DEST'] == 'iframe') {
+    if (strpos($_SERVER['SCRIPT_FILENAME'], '/auth/oauth2/login.php') > 0 && \local_webuntis\locallib::in_iframe()) {
         $url = new moodle_url('/local/webuntis/loginexternal.php', [ 'url' => $CFG->wwwroot . $_SERVER['REQUEST_URI']]);
-        //die("REdirect to $url");
         redirect($url);
     }
 }

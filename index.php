@@ -22,7 +22,9 @@
  */
 
 require_once('../../config.php');
+
 \local_webuntis\locallib::cookie_samesite();
+\local_webuntis\locallib::cache_fromkey();
 
 $debug = false;
 
@@ -42,7 +44,6 @@ if ($lesson_id == -1 && !empty($tenant_id) && !empty($school)) {
     $lesson_id = 0;
 }
 
-//\local_webuntis\locallib::uses_webuntis(1);
 \local_webuntis\tenant::load($tenant_id);
 $LESSONMAP = new \local_webuntis\lessonmap($lesson_id);
 
@@ -60,11 +61,14 @@ $PAGE->set_pagelayout('standard');
 
 $PAGE->navbar->add(get_string('pluginname', 'local_webuntis'), $PAGE->url);
 
-$TENANT->auth();
+if (empty($USERMAP->get_remoteuserid())) {
+    $TENANT->auth();
+}
 
 if ($LESSONMAP->get_count() > 0) {
     $LESSONMAP->redirect();
 }
+
 if ($LESSONMAP->can_edit()) {
     // If no lesson map was found, we are on eduvidual and manager, and lesson_id is 0,
     // create default map.

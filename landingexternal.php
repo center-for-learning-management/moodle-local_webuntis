@@ -16,36 +16,29 @@
 
 /**
  * @package    local_webuntis
- * @copyright  2021 Zentrum für Lernmanagement (www.lernmanagement.at)
+ * @copyright  2022 Zentrum für Lernmanagement (www.lernmanagement.at)
  * @author     Robert Schrenk
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+define('webuntis_no_action', 1);
 require_once('../../config.php');
 
-$PAGE->set_context(\context_system::instance());
-$PAGE->set_url('/local/webuntis/landing.php', array());
-$PAGE->set_title(get_string('landing:pagetitle', 'local_webuntis'));
-$PAGE->set_heading(get_string('landing:pagetitle', 'local_webuntis'));
-$PAGE->set_pagelayout('standard');
+$url = optional_param('url', '', PARAM_TEXT);
 
-$PAGE->navbar->add(get_string('landing:pagetitle', 'local_webuntis'), $PAGE->url);
+$PAGE->set_context(\context_system::instance());
+$PAGE->set_url(new \moodle_url('/local/webuntis/landingexternal.php', array('url' => $url)));
+$PAGE->set_title(get_string('landingexternal:pagetitle', 'local_webuntis'));
+$PAGE->set_heading(get_string('landingexternal:pagetitle', 'local_webuntis'));
+$PAGE->set_pagelayout('popup');
+
+$PAGE->navbar->add(get_string('landingexternal:pagetitle', 'local_webuntis'), $PAGE->url);
 $PAGE->requires->css('/local/webuntis/style/main.css');
 
-\local_webuntis\tenant::load();
-
-$LESSONMAP = new \local_webuntis\lessonmap();
-
-$params = [
-    'courses' => $LESSONMAP->get_courses(),
-    'editurl' => $LESSONMAP->get_edit_url(),
-    'wwwroot' => $CFG->wwwroot,
-];
-
-if (count($params['courses']) == 1) {
-    $LESSONMAP->redirect();
-}
+$url = new \moodle_url($url);
 
 echo $OUTPUT->header();
-echo $OUTPUT->render_from_template('local_webuntis/landing', $params);
+echo $OUTPUT->render_from_template('local_webuntis/landingexternal', [
+    'url' => $url,
+]);
 echo $OUTPUT->footer();

@@ -23,9 +23,9 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-$plugin->version  = 2022012000;
+$plugin->version  = 2022012400;
 $plugin->requires = 2018051700;
 $plugin->component = 'local_webuntis';
-$plugin->release = '1.4.5 (Build: 2022012000)';
+$plugin->release = '1.4.6 (Build: 2022012400)';
 $plugin->maturity = MATURITY_STABLE;
 $plugin->dependencies = array();

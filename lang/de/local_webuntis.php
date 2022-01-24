@@ -73,6 +73,15 @@ $string['invalidinput'] = 'Ungültige Eingabe.';
 $string['invalidwebuntisinstance'] = 'Die Webuntis-Instanz scheint ungültig zu sein oder wurde noch nicht konfiguriert.';
 $string['landing:pagetitle'] = 'Kurs auswählen';
 $string['landing:select_target'] = 'Bitte wählen Sie aus den folgenden Kursen';
+$string['landingexternal:pagetitle'] = 'Nutzerkonto verknüpfen';
+$string['landingexternal:description'] = '
+    Aufgrund technischer Erfordernisse muss der erste Login
+    in einem separaten Browser-Tab durchgeführt werden. Bitte öffnen Sie
+    daher den separaten Tab mit dem Button unterhalb. Sobald Sie Ihr
+    Nutzerkonto verknüpft haben und den Link in WebUnits
+    erneut anklicken, werden Sie automatisch auch im eingebetteten iFrame
+    angemeldet.
+';
 $string['landingmissing:description'] = 'Leider wurden an dieser Stelle noch keine Kurse verknüpft.';
 $string['landinguser:mapcurrent'] = '<i>{$a->fullname}</i> verknüpfen';
 $string['landinguser:mapother'] = 'Bestehendes Konto verknüpfen';

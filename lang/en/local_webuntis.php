@@ -75,6 +75,13 @@ $string['invalidinput'] = 'Invalid input.';
 $string['invalidwebuntisinstance'] = 'The webuntis instance is invalid or has not been configured.';
 $string['landing:pagetitle'] = 'Select course';
 $string['landing:select_target'] = 'Please select from the following courses';
+$string['landingexternal:pagetitle'] = 'Map user account';
+$string['landingexternal:description'] = '
+    Due to technical reasons the first authentication can not be performed
+    within an iframe. Please open the authentication in a new tab using
+    the button below. Once you have mapped your user account, please click
+    again the link provided in WebUntis.
+';
 $string['landingmissing:description'] = 'Sorry, no courses have been linked yet.';
 $string['landinguser:mapcurrent'] = 'Map <i>{$a->fullname}</i>';
 $string['landinguser:mapother'] = 'Map existing user account';

@@ -26,8 +26,39 @@ namespace local_webuntis;
 defined('MOODLE_INTERNAL') || die;
 
 class locallib {
-    private static $preserved_caches = array();
+    private static $key = '';
+    private static $preserved_caches = [];
+    // Only session caches need to be preserved.
+    private static $preserves = [
+        array('type' => 'session', 'identifier' => 'code'),
+        array('type' => 'session', 'identifier' => 'last_lesson_ids'),
+        array('type' => 'session', 'identifier' => 'last_tenant_id'),
+        array('type' => 'session', 'identifier' => 'last_tenant_sync'),
+        array('type' => 'session', 'identifier' => 'synced_lesson_ids'),
+        array('type' => 'session', 'identifier' => 'userinfos'),
+        array('type' => 'session', 'identifier' => 'usermaps'),
+        array('type' => 'session', 'identifier' => 'uses_webuntis'),
+    ];
 
+    /**
+     * Retrieve preserved cache configuration from application cache
+     * using a cache key. A key is valid only once, cache item is
+     * removed once read.
+     */
+    public static function cache_fromkey() {
+        $key = optional_param('cachekey', '', PARAM_TEXT);
+        if (!empty($key)) {
+            self::$preserved_caches = self::cache_get('application', "cachepreserve-$key");
+            if (!empty(self::$preserved_caches)) {
+                self::cache_set('application', "cachepreserve-$key", null, true);
+                foreach (self::$preserved_caches as $type => $identifiers) {
+                    foreach ($identifiers as $identifier => $value) {
+                        self::cache_set($type, $identifier, $value);
+                    }
+                }
+            }
+        }
+    }
     /**
      * Retrieve a key from cache.
      * @param cache cache object to use (application or session)
@@ -46,35 +77,27 @@ class locallib {
     /**
      * Store caches temporarily to preserve them when logging user in or out.
      * @param read if true store contents in local variable, if false restore cache.
+     * @param url (optional) moodle_url to redirect after session cache was written to application cache.
      */
-    public static function cache_preserve($read) {
+    public static function cache_preserve($read, $url = null) {
         global $TENANT;
-        // Only session caches need to be preserved.
-        $preserves = array(
-            array('type' => 'session', 'identifier' => 'code'),
-            array('type' => 'session', 'identifier' => 'last_lesson_ids'),
-            array('type' => 'session', 'identifier' => 'last_tenant_id'),
-            array('type' => 'session', 'identifier' => 'last_tenant_sync'),
-            array('type' => 'session', 'identifier' => 'synced_lesson_ids'),
-            array('type' => 'session', 'identifier' => 'userinfos'),
-            array('type' => 'session', 'identifier' => 'usermaps'),
-            array('type' => 'session', 'identifier' => 'uses_webuntis'),
-            array('type' => 'session', 'identifier' => 'uuid'),
-        );
+
         switch ($read) {
             case true:
                 self::$preserved_caches = array();
-                foreach ($preserves as $preserve) {
+                foreach (self::$preserves as $preserve) {
                     self::$preserved_caches[$preserve['type']][$preserve['identifier']] =
                         self::cache_get($preserve['type'], $preserve['identifier']);
                 }
             break;
             case false:
-                foreach (self::$preserved_caches as $type => $identifiers) {
-                    foreach ($identifiers as $identifier => $value) {
-                        self::cache_set($type, $identifier, $value);
-                    }
+                if (empty($key)) {
+                    $key = uniqid();
                 }
+                self::cache_set('application', "cachepreserve-$key", self::$preserved_caches);
+                if (empty($url)) $url = $TENANT->get_init_url(false, true);
+                $url->param('cachekey', $key);
+                redirect($url);
             break;
         }
     }
@@ -122,10 +145,10 @@ class locallib {
         $setcookiesession = 'Set-Cookie: ' . session_name() . '=';
 
         foreach ($cookies as $cookie) {
-            if (strpos($cookie, $setcookiesession) === 0 && strpos($cookie, 'SameSite=None') === false) {
-                $cookie .= '; SameSite=None; Secure';
+            if (strpos($cookie, $setcookiesession) === 0) { // && strpos($cookie, 'SameSite=None') === false) {
+                $cookie .= '; SameSite=None';
             }
-            header($cookie, false);
+            header($cookie, true);
         }
     }
 
@@ -327,6 +350,14 @@ class locallib {
                 return $imageurl;
             }
         }
+    }
+
+    /**
+     * Detects if the page is loaded within an iframe.
+     * @return boolean
+     */
+    public static function in_iframe() {
+        return (isset($_SERVER['HTTP_SEC_FETCH_DEST']) && $_SERVER['HTTP_SEC_FETCH_DEST'] == 'iframe');
     }
 
     /**

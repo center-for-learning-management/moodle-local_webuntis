@@ -34,6 +34,11 @@ $PAGE->set_pagelayout('standard');
 $PAGE->navbar->add(get_string('landinguser:pagetitle', 'local_webuntis'), $PAGE->url);
 $PAGE->requires->css('/local/webuntis/style/main.css');
 
+if (\local_webuntis\locallib::in_iframe()) {
+    $url = new \moodle_url('/local/webuntis/landingexternal.php', [ 'url' => $PAGE->url]);
+    redirect($url);
+}
+
 \local_webuntis\tenant::load();
 
 if ($USERMAP->get_userid() > 0) {
@@ -130,7 +135,7 @@ switch ($confirmed) {
             throw new \moodle_exception('forbidden');
         }
         // Safely logout.
-        $url = $TENANT->get_init_url();
+        $url = $TENANT->get_init_url(false, true);
         $url->param('redirect', get_login_url());
         $USERMAP->release();
         require_logout();
