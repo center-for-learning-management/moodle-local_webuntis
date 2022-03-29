@@ -33,7 +33,7 @@ $debugging = true;
 if ($debugging) error_log("====================================");
 if ($debugging) error_log("===== Getting the parameters");
 $DATA = file_get_contents('php://input');
-/*
+
 foreach (getallheaders() as $name => $value) {
     switch ($name) {
         case 'Algorithm':
@@ -56,10 +56,7 @@ if (empty($SIGNATURE) || empty($ALGORITHM)) {
 
 if ($debugging) error_log("Signature $SIGNATURE");
 if ($debugging) error_log("Algorithm $ALGORITHM");
-*/
 if ($debugging) error_log("Data $DATA");
-
-/*
 
 // Verifying signature.
 $pubkeys = [
@@ -70,8 +67,8 @@ $verified = false;
 
 foreach ($pubkeys as $identifier => $pubkey) {
     if ($debugging) error_log("===== Testing pubkey of $identifier: $pubkey");
-
-    $verified = openssl_verify($DATA, $SIGNATURE, $pubkey, $ALGORITHM);
+	$key = openssl_pkey_get_public($pubkey);
+    $verified = openssl_verify($DATA, $SIGNATURE, $key, $ALGORITHM);
     error_log("VERIFIED $verified with $identifier using algorithm $ALGORITHM");
 
     if (!$verified) {
@@ -81,9 +78,7 @@ foreach ($pubkeys as $identifier => $pubkey) {
         break;
     }
 }
-*/
 
-$verified = true;
 // Updating database.
 if ($verified) {
     $tenant = json_decode($DATA);
