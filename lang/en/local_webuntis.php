@@ -21,9 +21,15 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['autoenrol'] = 'Enrolment';
 $string['admin:autocreate'] = 'Allow user creation';
 $string['admin:autocreate:description'] = 'Allow creation of user accounts based on WebUntis user data.';
 $string['admin:autocreate:syswarning'] = 'Attention: auto createn of user accounts is disabled by in the Moodle Website-Administration.';
+$string['admin:autoenrol:force'] = 'Automatic course enrolment';
+$string['admin:autoenrol:force:description'] = 'With this setting you can specify if auto enrolment shall be forced for all courses, disabled for all courses, or if the setting can be set by teachers on a per-course-basis.';
+$string['admin:autoenrol:force:custom'] = 'Toggle on per-course-basis';
+$string['admin:autoenrol:force:disable'] = 'Disable auto-enrolment entirely';
+$string['admin:autoenrol:force:enable'] = 'Force auto-enrolment for all courses';
 $string['admin:pubkey:integration'] = 'Public Key / Integration';
 $string['admin:pubkey:integration:description'] = 'The public key of Untis GmbH to transmit the oAuth credentials of tenants in the integration environment.';
 $string['admin:pubkey:production'] = 'Public Key / Production';

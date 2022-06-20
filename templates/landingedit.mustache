@@ -26,6 +26,7 @@
     * none
 
     Context variables required for this template:
+    * autoenrolforce
     * canconfig
     * canproceed
     * courses
@@ -33,6 +34,7 @@
 
     Example context (json):
     {
+        "autoenrolforce": 0,
         "canconfig": 1,
         "canproceed": 1,
         "courses": [
@@ -40,6 +42,7 @@
                 "courseimage": "http://moodle-url.org/the-image-url",
                 "fullname": 'fullname of course',
                 "id": 123,
+                "is_autoenrolenabled": 1,
                 "is_selected": 1,
                 "shortname": 'shortname of course',
             },
@@ -86,25 +89,55 @@
 
     <div style="height: 500px; overflow-x: auto;">
         <table id="table-{{uniqid}}" class="generaltable">
-        {{#courses}}
-            <tr height="50">
-                <td class="trigger" width="30">
-                    <a href="#" id="trigger_{{uniqid}}_{{id}}" onclick="require(['local_webuntis/main'], function(M) { M.selectTarget('{{uniqid}}', {{id}}); }); return false;">
-                    {{#is_selected}}
-                        <i class="fa fa-icon fa-toggle-on" style="font-size: 18px;"></i>
-                    {{/is_selected}}
-                    {{^is_selected}}
-                        <i class="fa fa-icon fa-toggle-off" style="font-size: 18px;"></i>
-                    {{/is_selected}}
-                    </a>
-                </td>
-                <td width="50" class="courseimage" style="background: url({{{courseimage}}});">
-                </td>
-                <td>
-                    {{{fullname}}}
-                </td>
-            </tr>
-        {{/courses}}
+            <thead>
+                <tr>
+                    <td width="30" align="center">
+                        {{#str}} select {{/str}}
+                    </td>
+                    {{^autoenrolforce}}
+                    <td width="30" align="center">
+                        {{#str}} autoenrol, local_webuntis {{/str}}
+                    </td>
+                    {{/autoenrolforce}}
+                    <td colspan="2">
+                        {{#str}} course {{/str}}
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+            {{#courses}}
+                <tr height="50">
+                    <td class="trigger" width="30" align="center">
+                        <a href="#" id="trigger_{{uniqid}}_{{id}}" onclick="require(['local_webuntis/main'], function(M) { M.selectTarget('{{uniqid}}', {{id}}); }); return false;">
+                        {{#is_selected}}
+                            <i class="fa fa-icon fa-toggle-on" style="font-size: 18px;"></i>
+                        {{/is_selected}}
+                        {{^is_selected}}
+                            <i class="fa fa-icon fa-toggle-off" style="font-size: 18px;"></i>
+                        {{/is_selected}}
+                        </a>
+                    </td>
+                    {{^autoenrolforce}}
+                    <td class="trigger" width="30" align="center">
+                        <a href="#" id="triggerenrol_{{uniqid}}_{{id}}" class="{{^is_selected}}hidden{{/is_selected}}"
+                            onclick="require(['local_webuntis/main'], function(M) { M.selectAutoenrol('{{uniqid}}', {{id}}); }); return false;">
+                        {{#is_autoenrolenabled}}
+                            <i class="fa fa-icon fa-toggle-on" style="font-size: 18px;"></i>
+                        {{/is_autoenrolenabled}}
+                        {{^is_autoenrolenabled}}
+                            <i class="fa fa-icon fa-toggle-off" style="font-size: 18px;"></i>
+                        {{/is_autoenrolenabled}}
+                        </a>
+                    </td>
+                    {{/autoenrolforce}}
+                    <td width="50" class="courseimage" style="background: url({{{courseimage}}});">
+                    </td>
+                    <td>
+                        {{{fullname}}}
+                    </td>
+                </tr>
+            {{/courses}}
+            </tbody>
         </table>
     </div>
 </div>

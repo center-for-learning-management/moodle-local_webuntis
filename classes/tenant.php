@@ -151,6 +151,19 @@ class tenant {
         }
     }
 
+    /**
+     * Returns true if the current tenant is an integration-tenant.
+     * @return boolean
+     */
+    public function is_integration() {
+        // As of 27th June 2022 the URL for integration environments will change.
+        $integrationenvironments = [
+            'https://integration.webuntis.com',
+            'https://tom.integration.webuntis.dev'
+        ];
+        return in_array($this->get_host(), $integrationenvironments);
+    }
+
     public function get_autocreate() {
         return $this->tenantdata->autocreate;
     }

@@ -45,11 +45,16 @@ foreach ($allcourses as $course) {
     $ctx = \context_course::instance($course->id);
     if (has_capability('moodle/course:update', $ctx)) {
         $course->courseimage = \local_webuntis\locallib::get_courseimage($course->id);
+        $course->is_autoenrolenabled = $LESSONMAP->is_autoenrolenabled($course->id);
         $course->is_selected = $LESSONMAP->is_selected($course->id);
         $courses[] = $course;
     }
 }
+
+$autoenrolforce = get_config('local_webuntis', 'autoenrolforce');
+
 $params = [
+    'autoenrolforce' => !empty($autoenrolforce),
     'canproceed' => ($LESSONMAP->get_count() > 0) ? 1 : 0,
     'courses' => $courses,
     'uses_eduvidual' => \local_webuntis\locallib::uses_eduvidual(),

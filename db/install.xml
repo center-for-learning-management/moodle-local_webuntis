@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/webuntis/db" VERSION="20211015" COMMENT="XMLDB file for Moodle local/webuntis"
+<XMLDB PATH="local/webuntis/db" VERSION="20220613" COMMENT="XMLDB file for Moodle local/webuntis"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -10,6 +10,7 @@
         <FIELD NAME="tenant_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="tenant_id"/>
         <FIELD NAME="lesson_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="the lesson identifier, 0 for general sourcepoint"/>
         <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="courseid in moodle"/>
+        <FIELD NAME="autoenrol" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="1" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

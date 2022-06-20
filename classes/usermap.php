@@ -337,7 +337,7 @@ class usermap {
 
             // ATTENTION: In this section you must not call functions like ::get_id, this will cause a loop.
             // Try to receive the users role.
-            $integration = ($TENANT->get_host() == 'https://integration.webuntis.com') ? '-integration' : '';
+            $integration = $TENANT->is_integration() ? '-integration' : '';
             $path = "https://api$integration.webuntis.com/ims/oneroster/v1p1/users/" . $token->sub;
             if ($debug) {
                 echo "Path $path<br />";
@@ -379,7 +379,7 @@ class usermap {
 
         $serverinfo = $TENANT->auth_server();
         $token = $this->get_token();
-        $integration = ($TENANT->get_host() == 'https://integration.webuntis.com') ? '-integration' : '';
+        $integration = $TENANT->is_integration() ? '-integration' : '';
         $path = "https://api$integration.webuntis.com/ims/oneroster/v1p1/users";
         if ($debug) {
             echo "Path $path<br />";

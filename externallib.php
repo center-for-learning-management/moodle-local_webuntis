@@ -59,6 +59,55 @@ class local_webuntis_external extends external_api {
     /**
      * Define parameters.
      */
+    public static function autoenrol_parameters() {
+        return new external_function_parameters(array(
+            'courseid' => new external_value(PARAM_INT, 'the course id'),
+            'status' => new external_value(PARAM_INT, '1 or 0'),
+        ));
+    }
+    /**
+     * Toggle status.
+     */
+    public static function autoenrol($courseid, $status) {
+        global $DB, $TENANT, $USER;
+        $params = self::validate_parameters(self::autoenrol_parameters(), array('courseid' => $courseid, 'status' => $status));
+
+        \local_webuntis\tenant::load();
+        $LESSONMAP = new \local_webuntis\lessonmap();
+
+        if ($LESSONMAP->can_edit()) {
+            foreach ($LESSONMAP->get_lessonmap() as $lessonmap) {
+                if ($lessonmap->courseid == $params['courseid']) {
+                    $lessonmap->autoenrol = $params['status'];
+                    $DB->set_field('local_webuntis_coursemap', 'autoenrol', $params['status'], [ 'id' => $lessonmap->id ]);
+                }
+            }
+            $params['canproceed'] = ($LESSONMAP->get_count() > 0) ? 1 : 0;
+            $params['lesson_id'] = \local_webuntis\lessonmap::get_lesson_id();
+            $params['tenant_id'] = $TENANT->get_tenant_id();
+        } else {
+            $params['canproceed'] = 0;
+            $params['lesson_id'] = 0;
+            $params['tenant_id'] = 0;
+        }
+        return $params;
+    }
+    /**
+     * Return definition.
+     * @return external_value
+     */
+    public static function autoenrol_returns() {
+        return new external_single_structure(array(
+            'canproceed' => new external_value(PARAM_INT, '1 if user can proceed'),
+            'courseid' => new external_value(PARAM_INT, 'courseid or 0 if failed'),
+            'lesson_id' => new external_value(PARAM_INT, 'the lesson id'),
+            'status' => new external_value(PARAM_INT, 'current status'),
+            'tenant_id' => new external_value(PARAM_INT, 'the tenant id'),
+        ));
+    }
+    /**
+     * Define parameters.
+     */
     public static function selecttarget_parameters() {
         return new external_function_parameters(array(
             'courseid' => new external_value(PARAM_INT, 'the course id'),
@@ -80,12 +129,14 @@ class local_webuntis_external extends external_api {
             if ($params['status'] == 0) {
                 $courseid = $courseid * -1;
             }
-            $LESSONMAP->change_map($courseid);
+            $lessonmap = (object) $LESSONMAP->change_map($courseid);
 
+            $params['autoenrol'] = $lessonmap->autoenrol;
             $params['canproceed'] = ($LESSONMAP->get_count() > 0) ? 1 : 0;
             $params['lesson_id'] = \local_webuntis\lessonmap::get_lesson_id();
             $params['tenant_id'] = $TENANT->get_tenant_id();
         } else {
+            $params['autoenrol'] = 0;
             $params['canproceed'] = 0;
             $params['lesson_id'] = 0;
             $params['tenant_id'] = 0;
@@ -98,6 +149,7 @@ class local_webuntis_external extends external_api {
      */
     public static function selecttarget_returns() {
         return new external_single_structure(array(
+            'autoenrol' => new external_value(PARAM_INT, '1 if autoenrol is enabled'),
             'canproceed' => new external_value(PARAM_INT, '1 if user can proceed'),
             'courseid' => new external_value(PARAM_INT, 'courseid or 0 if failed'),
             'lesson_id' => new external_value(PARAM_INT, 'the lesson id'),

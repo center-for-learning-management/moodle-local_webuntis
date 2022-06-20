@@ -76,6 +76,8 @@ class lessonmap {
 
     /**
      * Add or remove a course from map.
+     * @param courseid the courseid to add / remove
+     * @return array containing db entry after modification.
      */
     public function change_map($courseid) {
         global $DB, $TENANT;
@@ -94,13 +96,19 @@ class lessonmap {
             // We want to remove it.
             $dbparams['courseid'] = $dbparams['courseid'] * -1;
             $DB->delete_records('local_webuntis_coursemap', $dbparams);
+            // Reset negative value for returning dbparams
+            $dbparams['courseid'] = $dbparams['courseid'] * -1;
         } else {
             if (!$DB->record_exists('local_webuntis_coursemap', $dbparams)) {
+                $dbparams['autoenrol'] = 1;
                 $dbparams['id'] = $DB->insert_record('local_webuntis_coursemap', $dbparams);
+            } else {
+                $item = $DB->get_record('local_webuntis_coursemap', $dbparams);
+                $dbparams['autoenrol'] = $item->autoenrol;
             }
         }
-
         $TENANT->touch();
+        return $dbparams;
     }
 
     /**
@@ -109,6 +117,13 @@ class lessonmap {
      */
     private function check_enrolment() {
         global $USER;
+
+        $autoenrolforce = get_config('local_webuntis', 'autoenrolforce');
+        // If autoenrolforce is disabled globally, return.
+        if (!empty($autoenrolforce) && $autoenrolforce < 0) {
+            return;
+        }
+
         $usermap = new \local_webuntis\usermap();
         $lessonmaps = self::get_lessonmap();
         $withcapability = (in_array($usermap->get_remoteuserrole(), ['teacher', 'administrator'])) ? 'moodle/course:update' : '';
@@ -119,6 +134,10 @@ class lessonmap {
         }
 
         foreach ($lessonmaps as $lessonmap) {
+            // If autoenrolforce is enabled globally always set toggle to 1.
+            if (!empty($autoenrolforce) && $autoenrolforce > 0) {
+                $lessonmap->autoenrol = 1;
+            }
             $ctx = \context_course::instance($lessonmap->courseid, IGNORE_MISSING);
             if (!empty($ctx->id)) {
                 $enrolinstances = enrol_get_instances($lessonmap->courseid, false);
@@ -142,7 +161,6 @@ class lessonmap {
                     if (empty($lessonmap->lesson_id)) {
                         $moodlerole = $usermap->get_moodlerole();
                     } else {
-
                         $lessonrole = $this->get_lesson_role($lessonmap->lesson_id);
                         if (!empty($lessonrole)) {
                             $moodlerole = $usermap->get_moodlerole($lessonrole);
@@ -234,20 +252,20 @@ class lessonmap {
      * @return the webuntis role (only student or teacher)
      */
     private function get_lesson_role($lesson_id) {
-        global $debug, $TENANT;
-        $usermap = new \local_webuntis\usermap();
-        $remoteuserid = $usermap->get_remoteuserid();
+        global $debug, $TENANT, $USERMAP;
+        $remoteuserid = $USERMAP->get_remoteuserid();
         if (empty($remoteuserid)) return;
-        $integration = ($TENANT->get_host() == 'https://integration.webuntis.com') ? '-integration' : '';
-        $headerparams = $usermap->get_headerparams();
-
+        $serverinfo = $TENANT->auth_server();
+        $integration = $TENANT->is_integration() ? '-integration' : '';
+        $headerparams = [
+            'Authorization' => "$serverinfo->token_type $serverinfo->access_token"
+        ];
         $calls = [ 'students' => 'student', 'teachers' => 'teacher' ];
         foreach ($calls as $caller => $webuntisrole) {
             $path = "https://api$integration.webuntis.com/ims/oneroster/v1p1/classes/$lesson_id/$caller";
             if ($debug) {
                 echo "Path $path<br />";
             }
-
             if ($debug) {
                 echo "Getuser (via header):<br /><pre>" . print_r($headerparams, 1) . "</pre>";
             }
@@ -261,7 +279,7 @@ class lessonmap {
             }
             if (is_array($users)) {
                 foreach ($users as $user) {
-                    if ($user->identifier == $remoteuserid) {
+                    if (!empty($user->identifier) && $user->identifier == $remoteuserid) {
                         return $webuntisrole;
                     }
                 }
@@ -286,18 +304,33 @@ class lessonmap {
     }
 
     /**
+     * Check whether or not autoenrol is enabled for a a course in a lessonmap.
+     * @param courseid
+     * @return boolean
+     */
+    public function is_autoenrolenabled($courseid) {
+        $lessonmaps = self::get_lessonmap();
+        foreach ($lessonmaps as $lessonmap) {
+            if ($lessonmap->courseid == $courseid) {
+                return $lessonmap->autoenrol;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Check whether or not a course is selected in this mapping.
      * @param courseid
+     * @return boolean
      */
     public function is_selected($courseid) {
-        global $DB, $TENANT;
-        $params = [
-            'tenant_id' => $TENANT->get_tenant_id(),
-            'lesson_id' => self::get_lesson_id(),
-            'courseid' => $courseid,
-        ];
-        $count = $DB->count_records('local_webuntis_coursemap', $params);
-        return ($count > 0);
+        $lessonmaps = self::get_lessonmap();
+        foreach ($lessonmaps as $lessonmap) {
+            if ($lessonmap->courseid == $courseid) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

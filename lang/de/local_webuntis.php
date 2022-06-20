@@ -21,9 +21,15 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['autoenrol'] = 'Einschreibung';
 $string['admin:autocreate'] = 'Erlaube Kontenerstellung';
 $string['admin:autocreate:description'] = 'Erlaube die Erstellung von Nutzerkonten auf Basis von WebUntis-Kontodaten.';
 $string['admin:autocreate:syswarning'] = 'Achtung: Die Erstellung von Nutzerkonten wurde durch die Moodle Website-Administration deaktiviert.';
+$string['admin:autoenrol:force'] = 'Automatische Kurseinschreibungen';
+$string['admin:autoenrol:force:description'] = 'Mit dieser Einstellung können Sie festlegen, ob automatische Kurseinschreibungen systemweit immer eingeschaltet oder immer ausgeschaltet sind, oder ob die Lehrer/innen für jeden Kurs individuell selbst entscheiden können.';
+$string['admin:autoenrol:force:custom'] = 'Entscheidung pro Kurs erlauben';
+$string['admin:autoenrol:force:disable'] = 'Automatische Einschreibung global abschalten';
+$string['admin:autoenrol:force:enable'] = 'Automatische Einschreibung in Kursen erzwingen';
 $string['admin:pubkey:integration'] = 'Public Key / Integration';
 $string['admin:pubkey:integration:description'] = 'Der öffentliche Schlüssel von Untis GmbH, um oAuth-Zugangsdaten für Tenants der Integrationsumgebung zu übermitteln.';
 $string['admin:pubkey:production'] = 'Public Key / Produktion';

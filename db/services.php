@@ -33,6 +33,14 @@ $functions = array(
         'type'        => 'write',
         'ajax'        => 1,
     ),
+    'local_webuntis_autoenrol' => array(
+        'classname'   => 'local_webuntis_external',
+        'methodname'  => 'autoenrol',
+        'classpath'   => 'local/webuntis/externallib.php',
+        'description' => 'Toggles autoenrol for a particular lessonmap.',
+        'type'        => 'write',
+        'ajax'        => 1,
+    ),
     'local_webuntis_orgmap' => array(
         'classname'   => 'local_webuntis_external_eduvidual',
         'methodname'  => 'orgmap',

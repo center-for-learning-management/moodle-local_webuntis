@@ -55,6 +55,25 @@ if ($hassiteconfig) {
         );
         $settings->add($setting);
 
+        $name = new lang_string('admin:autoenrol:force', 'local_webuntis');
+        $desc = new lang_string('admin:autoenrol:force:description', 'local_webuntis');
+        $options = [
+            -1 => new lang_string('admin:autoenrol:force:disable', 'local_webuntis'),
+            0 => new lang_string('admin:autoenrol:force:custom', 'local_webuntis'),
+            1 => new lang_string('admin:autoenrol:force:enable', 'local_webuntis')
+        ];
+        $default = 0;
+
+        $settings->add(
+            new admin_setting_configselect(
+                'local_webuntis/autoenrolforce',
+                $name,
+                $desc,
+                $default,
+                $options
+            )
+        );
+
         $name = new lang_string('admin:pubkey:integration', 'local_webuntis');
         $desc = new lang_string('admin:pubkey:integration:description', 'local_webuntis');
         $default = "-----BEGIN PUBLIC KEY-----\n" . 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxmHgTa7Qf4buurWraH9MqcEipr4YrMpIg1NVbV7sx2p1yhZ5HQ5hPfsuRRqk9ss7UYJS4dnTsjLCwJ1j91PmxZBnceSkgjHunZ53AxsQP7h/A8g3igbi+tRw6+9agyM8zRLeAaufQFvm6/81obezB54vjv1qPGXgX07cmgj2w2EMC39Q4S0eKVU8svjw3QTE0ZD7Gc92T+rMIhVrX5sAKviczs8VSA8CZnM7PDASZ/kjZF9umMfEzmxGm5BVCqMqpCTFh3CMljMmoH3lCro3r9Ve2Unl5Cc8wRJekSOIbpKJ54eVL6zwEExfPlTKQZslLKBhaNtquLJJkgV057ANDwIDAQAB' . "\n-----END PUBLIC KEY-----";

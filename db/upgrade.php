@@ -61,6 +61,14 @@ function xmldb_local_webuntis_upgrade($oldversion=0) {
         }
         upgrade_plugin_savepoint(true, 2021122000, 'local', 'webuntis');
     }
+    if ($oldversion < 2022061300) {
+        $table = new xmldb_table('local_webuntis_coursemap');
+        $field = new xmldb_field('autoenrol', XMLDB_TYPE_INTEGER, '1', null, null, null, '1', 'courseid');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        upgrade_plugin_savepoint(true, 2022061300, 'local', 'webuntis');
+    }
 
     return true;
 }
