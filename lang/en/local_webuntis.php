@@ -114,7 +114,7 @@ $string['privacy:metadata:local_webuntis_usermap:userid'] = 'The UserID in Moodl
 $string['privacy:metadata:local_webuntis_usermap:userinfo'] = 'Additional user information, e.g. tokens';
 $string['privacy:usermap'] = 'Usermap';
 $string['proceed'] = 'Proceed';
-$string['redirect_edit_landingpage'] = 'You have been automatically redirected to this course. If you want to change the target of this link, you can edit it <a href="{$a->editurl}">here</a>.';
+$string['redirect_edit_landingpage'] = 'This course is linked to a WebUntis lesson. <a href="{$a->editurl}" class="btn btn-primary">Modify this link</a>.';
 $string['selectall'] = 'all/none';
 $string['selectcourse_for_target'] = 'Select course for this target';
 $string['sync'] = 'Synchronize';
