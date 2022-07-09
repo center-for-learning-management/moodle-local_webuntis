@@ -44,6 +44,9 @@ The target course of lesson pages can be selected by Teachers and Administrators
 *) Can be disabled in the Moodle Website-Administration, requires sufficient profile data in WebUntis!
 
 ## Changelog
+### 1.6.1 (Build: 2022070800)
+According to Untis GmbH, the URL of the integration environment has changed from api-integration.webuntis.com to api.integration.webuntis.dev. The upgrade to version 1.6.1 is only required, if you are using the integration environment of Untis.
+
 ### 1.6 (Build: 2022062000)
 
 Added feature that triggers auto enrolment per course. If admin setting 'local_webuntis/autoenrolforce' is set to the default value, teachers can set per course if users should be automatically enrolled. The admin setting can also disable the feature entirely for the whole Moodle site, or force the enrolment for all courses.

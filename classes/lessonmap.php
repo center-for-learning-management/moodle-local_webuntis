@@ -256,13 +256,13 @@ class lessonmap {
         $remoteuserid = $USERMAP->get_remoteuserid();
         if (empty($remoteuserid)) return;
         $serverinfo = $TENANT->auth_server();
-        $integration = $TENANT->is_integration() ? '-integration' : '';
+        $basepath = $TENANT->is_integration() ? 'https://api.integration.webuntis.dev' : 'https://api.webuntis.com';
         $headerparams = [
             'Authorization' => "$serverinfo->token_type $serverinfo->access_token"
         ];
         $calls = [ 'students' => 'student', 'teachers' => 'teacher' ];
         foreach ($calls as $caller => $webuntisrole) {
-            $path = "https://api$integration.webuntis.com/ims/oneroster/v1p1/classes/$lesson_id/$caller";
+            $path = "$basepath/ims/oneroster/v1p1/classes/$lesson_id/$caller";
             if ($debug) {
                 echo "Path $path<br />";
             }
