@@ -184,15 +184,34 @@ class local_webuntis_external extends external_api {
             throw new \moodle_exception('permission denied');
         }
 
-        $fields = [ 'client', 'consumerkey', 'consumersecret' ];
+        $fields = [ 'tenant_id', 'school', 'host', 'client', 'consumerkey', 'consumersecret' ];
         if (!in_array($params['field'], $fields)) {
-            throw new \moodle_exception('invalid field');
+            return [ 'status' => 0, 'message' => get_string('exception:invalid_field', 'local_webuntis') ];
         }
 
         $dbparams = [ 'tenant_id' => $params['tenant_id']];
-        $status = $DB->set_field('local_webuntis_tenant', $params['field'], $params['value'], $dbparams);
 
-        return [ 'status' => $status ];
+        if ($field == 'tenant_id') {
+            $tables = [ 'local_webuntis_tenant', 'local_webuntis_coursemap', 'local_webuntis_orgmap', 'local_webuntis_usermap' ];
+            $exists = $DB->count_records('local_webuntis_tenant', [ 'tenant_id' => $params['value']]);
+            if ($exists > 0) {
+                return [ 'status' => 0, 'message' => get_string('exception:tenant_id_already_in_use', 'local_webuntis') ];
+            }
+        } else {
+            $tables = [ 'local_webuntis_tenant' ];
+        }
+
+        try {
+             $transaction = $DB->start_delegated_transaction();
+             foreach ($tables as $table) {
+                 $DB->set_field($table, $params['field'], $params['value'], $dbparams);
+             }
+             $transaction->allow_commit();
+             return [ 'status' => 1, 'message' => '' ];
+        } catch(Exception $e) {
+             $transaction->rollback($e);
+             throw new \moodle_exception('DB-Exception: ' . $e->getMessage());
+        }
     }
     /**
      * Return definition.
@@ -201,6 +220,7 @@ class local_webuntis_external extends external_api {
     public static function tenantdata_returns() {
         return new external_single_structure(array(
             'status' => new external_value(PARAM_INT, 'current status'),
+            'message' => new external_value(PARAM_TEXT, 'a message'),
         ));
     }
 

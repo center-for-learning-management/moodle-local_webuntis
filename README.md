@@ -13,9 +13,9 @@ This plugin allows an integration of Moodle with WebUntis. The core features are
 ## Using this plugin
 To use this plugin, you need at least on WebUntis instance and a running Moodle site.
 
-At first, login to your WebUntis instance as Administrator and add the Moodle "platform". As soon as you save the platform, oAuth credentials are transferred from WebUntis to your Moodle-Instance in the background. You can check these in the Website-Configuration of local_webuntis under "tenants". Follow the required steps within WebUntis to add the platform to the various navigation nodes in WebUntis for each user role.
+At first, login to your WebUntis instance as Administrator and add the Moodle "platform". As soon as you save the platform, oAuth credentials are transferred from WebUntis to your Moodle-Instance in the background. You can check these in the Website-Configuration of local_webuntis under the page "tenants". Also, if for any reason the automatic creation of the tenant does not work, you can create the tenant manually on this page.
 
-When you're done, links to your Moodle site are shown in the main menu of WebUntis and on each lesson page. When a user clicks on such link for the first time, a mapping of user accounts is required (also for the WebUntis-Administrator!)
+Follow the required steps within WebUntis to add the platform to the various navigation nodes in WebUntis for each user role. When you're done, links to your Moodle site are shown in the main menu of WebUntis and on each lesson page. When a user clicks on such link for the first time, a mapping of user accounts is required (also for the WebUntis-Administrator!)
 
 ### User mapping
 Users can now choose to map an existing Moodle account, or create a new one*). Once this user map has been created, the user is automatically logged in each time. This user mapping can be disconnected by the user using the Button "Disconnect from webuntis" in the Moodle main menu.

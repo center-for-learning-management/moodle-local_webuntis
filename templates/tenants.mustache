@@ -42,6 +42,7 @@
 }}
 
 <div class="local_webuntis tenants">
+    <form method="post" action="" enctype="multipart/form-data">
     <table class="generaltable" id="tab-{{uniqid}}">
         <thead>
             <tr>
@@ -57,20 +58,28 @@
         <tbody>
             {{#tenants}}
             <tr data-tenant_id="{{tenant_id}}">
-                <td>{{tenant_id}}</td>
-                <td>{{school}}</td>
-                <td>{{host}}</td>
-                <td>
-                    <input data-field="client" value="{{client}}" type="text"
-                        onblur="var inp = this; require(['local_webuntis/main'], function(M) { M.tenantData({{tenant_id}}, inp); });">
+                <td><input data-field="tenant_id" value="{{tenant_id}}" type="text" data-compare="{{tenant_id}}"
+                    onblur="var inp = this; require(['local_webuntis/main'], function(M) { M.tenantData(inp); });">
                 </td>
                 <td>
-                    <input data-field="consumerkey" value="{{consumerkey}}" type="text"
-                        onblur="var inp = this; require(['local_webuntis/main'], function(M) { M.tenantData({{tenant_id}}, inp); });">
+                    <input data-field="school" value="{{school}}" type="text" data-compare="{{school}}"
+                        onblur="var inp = this; require(['local_webuntis/main'], function(M) { M.tenantData(inp); });">
                 </td>
                 <td>
-                    <input data-field="consumersecret" value="{{consumersecret}}" type="text"
-                        onblur="var inp = this; require(['local_webuntis/main'], function(M) { M.tenantData({{tenant_id}}, inp); });">
+                    <input data-field="host" value="{{host}}" type="text" data-compare="{{host}}"
+                        onblur="var inp = this; require(['local_webuntis/main'], function(M) { M.tenantData(inp); });">
+                </td>
+                <td>
+                    <input data-field="client" value="{{client}}" type="text" data-compare="{{client}}"
+                        onblur="var inp = this; require(['local_webuntis/main'], function(M) { M.tenantData(inp); });">
+                </td>
+                <td>
+                    <input data-field="consumerkey" value="{{consumerkey}}" type="text" data-compare="{{consumerkey}}"
+                        onblur="var inp = this; require(['local_webuntis/main'], function(M) { M.tenantData(inp); });">
+                </td>
+                <td>
+                    <input data-field="consumersecret" value="{{consumersecret}}" type="text" data-compare="{{consumersecret}}"
+                        onblur="var inp = this; require(['local_webuntis/main'], function(M) { M.tenantData(inp); });">
                 </td>
                 <td>
                     {{#autocreate}}
@@ -82,6 +91,32 @@
                 </td>
             </tr>
             {{/tenants}}
+            {{#item}}
+            <tr>
+                <td {{#missing_tenant_id}} class="alert-danger" {{/missing_tenant_id}}>
+                    <input name="tenant_id" type="text" value="{{#tenant_id}}{{tenant_id}}{{/tenant_id}}" placeholder="tenant_id" />
+                </td>
+                <td {{#missing_school}} class="alert-danger" {{/missing_school}}>
+                    <input name="school" type="text" value="{{school}}" placeholder="school" />
+                </td>
+                <td {{#missing_host}} class="alert-danger" {{/missing_host}}>
+                    <input name="host" type="text" value="{{host}}" placeholder="host" />
+                </td>
+                <td {{#missing_client}} class="alert-danger" {{/missing_client}}>
+                    <input name="client" type="text" value="{{client}}" placeholder="client" />
+                </td>
+                <td {{#missing_consumerkey}} class="alert-danger" {{/missing_consumerkey}}>
+                    <input name="consumerkey" type="text" value="{{consumerkey}}" placeholder="consumerkey" />
+                </td>
+                <td {{#missing_consumersecret}} class="alert-danger" {{/missing_consumersecret}}>
+                    <input name="consumersecret" type="text" value="{{consumersecret}}" placeholder="consumersecret" />
+                </td>
+                <td>
+                    <input type="submit" class="btn btn-primary" value="{{#str}} create {{/str}}" />
+                </td>
+            </tr>
+            {{/item}}
         </tbody>
     </table>
+    </form>
 </div>

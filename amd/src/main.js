@@ -145,15 +145,32 @@ define(
                 fail: Notification.exception
             }]);
         },
-        tenantData: function(tenant_id, sender) {
+        /**
+         * Send data via Ajax to change.
+         * @param sender the input field that suggests the change.
+         */
+        tenantData: function(sender) {
             var MAIN = this;
             if (MAIN.debug) {
-                console.log('local_webuntis/main:tenantData(tenant_id, sender)', tenant_id, sender);
+                console.log('local_webuntis/main:tenantData(sender)', sender);
             }
-            //var tr = $(sender).closest('tr');
-            //var tenant_id = $(tr).attr('data-tenant_id');
+            var tr = $(sender).closest('tr');
+            var tenant_id = tr.attr('data-tenant_id');
+            if (typeof tenant_id == 'undefined' || tenant_id == '') {
+                ModalFactory.create({
+                    type: ModalFactory.types.OK,
+                    title: 'Exception',
+                    body: 'No Tenant ID for this input',
+                })
+                .then(function(modal) {
+                    modal.show();
+                });
+                return;
+            }
             var field = $(sender).attr('data-field');
             var value = $(sender).val();
+            var compare = $(sender).attr('data-compare');
+            if (value == compare) return;
 
             $(sender).css('filter', 'blur(4px)');
 
@@ -169,15 +186,32 @@ define(
                     if (MAIN.debug) {
                         console.log('=> Result', result);
                     }
-
                     if (result.status != 1) {
                         $(sender).addClass('alert-danger');
+                        setTimeout(function() {
+                            $(sender).removeClass('alert-danger');
+                        }, 1000);
                     } else {
+                        $(sender).attr('data-compare', value);
                         $(sender).addClass('alert-success');
                         setTimeout(function() {
                             $(sender).removeClass('alert-success');
                         }, 1000);
                         $(sender).removeClass('alert-danger');
+                        // Change the tenant_id of the tr itself.
+                        if (field == 'tenant_id') {
+                            tr.attr('data-tenant_id', value);
+                        }
+                    }
+                    if (typeof result.message !== 'undefined' && result.message != '') {
+                        ModalFactory.create({
+                            type: ModalFactory.types.OK,
+                            title: 'Exception',
+                            body: result.message,
+                        })
+                        .then(function(modal) {
+                            modal.show();
+                        });
                     }
                 },
                 fail: Notification.exception
