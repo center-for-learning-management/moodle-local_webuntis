@@ -44,6 +44,9 @@ The target course of lesson pages can be selected by Teachers and Administrators
 *) Can be disabled in the Moodle Website-Administration, requires sufficient profile data in WebUntis!
 
 ## Changelog
+### 1.7 (Build: 2022081400)
+Added a feature to manually create new WebUntis tenants through the Moodle Website Administration
+
 ### 1.6.1 (Build: 2022070800)
 According to Untis GmbH, the URL of the integration environment has changed from api-integration.webuntis.com to api.integration.webuntis.dev. The upgrade to version 1.6.1 is only required, if you are using the integration environment of Untis.
 
