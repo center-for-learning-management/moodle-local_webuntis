@@ -183,12 +183,24 @@ class locallib {
      * @param post variables to attach using post.
      * @param headers custom request headers.
      * @param basicauth username:password as String
+     * @param debug boolean
      */
-    public static function curl($url, $post = null, $headers = null, $basicauth = null) {
+    public static function curl($url, $post = null, $headers = null, $basicauth = null, $debug = false) {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+
+        if ($debug) {
+            ob_start();
+            $out = fopen('php://output', 'w');
+            curl_setopt($ch, CURLOPT_STDERR, $out);
+            curl_setopt($ch, CURLOPT_VERBOSE, true);
+            echo "<h3>URL: $url</h3>";
+            echo "<p>POST: </p><pre>" . print_r($post, 1) . "</pre>";
+            echo "<p>HEADERS: </p><pre>" . print_r($headers, 1) . "</pre>";
+            echo "<p>BASICAUTH: </p><pre>" . print_r($basicauth, 1) . "</pre>";
+        }
 
         if (!empty($post) && count($post) > 0) {
             $fields = array();
@@ -213,6 +225,11 @@ class locallib {
         }
 
         $result = curl_exec($ch);
+        if ($debug) {
+            fclose($out);
+            $debug = ob_get_clean();
+            echo "<p>DEBUG: </p><pre>$debug</pre>";
+        }
         curl_close($ch);
         return $result;
     }
