@@ -97,6 +97,18 @@ if ($hassiteconfig) {
             $default
         );
         $settings->add($setting);
+
+        $name = new lang_string('admin:curldebugging', 'local_webuntis');
+        $desc = new lang_string('admin:curldebugging:description', 'local_webuntis');
+        $default = 0;
+
+        $setting = new admin_setting_configcheckbox(
+            'local_webuntis/curldebugging',
+            $name,
+            $desc,
+            $default
+        );
+        $settings->add($setting);
     }
 
     $ADMIN->add('local_webuntis', $settings);

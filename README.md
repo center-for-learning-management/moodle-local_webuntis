@@ -44,6 +44,9 @@ The target course of lesson pages can be selected by Teachers and Administrators
 *) Can be disabled in the Moodle Website-Administration, requires sufficient profile data in WebUntis!
 
 ## Changelog
+### 1.8 (Build: 2022090200)
+Added admin setting to enable debugging of cURL requests
+
 ### 1.7 (Build: 2022081400)
 Added a feature to manually create new WebUntis tenants through the Moodle Website Administration
 

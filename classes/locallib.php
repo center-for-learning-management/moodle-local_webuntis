@@ -186,6 +186,10 @@ class locallib {
      * @param debug boolean
      */
     public static function curl($url, $post = null, $headers = null, $basicauth = null, $debug = false) {
+        $curldebugging = get_config('local_webuntis', 'curldebugging');
+        if (!empty($curldebugging)) {
+            $debug = $curldebugging;
+        }
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
