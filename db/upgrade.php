@@ -69,6 +69,15 @@ function xmldb_local_webuntis_upgrade($oldversion=0) {
         }
         upgrade_plugin_savepoint(true, 2022061300, 'local', 'webuntis');
     }
+    if ($oldversion < 2022090700) {
+        $table = new xmldb_table('local_webuntis_tenant');
+        $field = new xmldb_field('consumersecret', XMLDB_TYPE_CHAR, '250', null, null, null, null, 'consumerkey');
+        $dbman->rename_field($table, $field, 'consumerpassword');
+        $field = new xmldb_field('consumerkey', XMLDB_TYPE_CHAR, '250', null, null, null, null, 'client');
+        $dbman->rename_field($table, $field, 'consumersecret');
 
+        // Webuntis savepoint reached.
+        upgrade_plugin_savepoint(true, 2022090700, 'local', 'webuntis');
+    }
     return true;
 }

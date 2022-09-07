@@ -102,7 +102,7 @@ class tenant {
                 'grant_type' => 'client_credentials',
                 'scope' => 'roster-core.readonly',
             ];
-            $ba = implode(':', [ $this->get_client(), $this->get_consumersecret() ]);
+            $ba = implode(':', [ $this->get_client(), $this->get_consumerpassword() ]);
             $serverinfo = \local_webuntis\locallib::curl($url, $post, null, $ba);
             $serverinfo = json_decode($serverinfo);
             // Expires according to Untis GmbH after 3 minutes.
@@ -134,7 +134,7 @@ class tenant {
         $params = [
             'grant_type' => 'authorization_code',
             'client_id' => $this->get_client(),
-            'client_secret' => $this->get_consumerkey(),
+            'client_secret' => $this->get_consumersecret(),
             'code' => $code,
             'redirect_uri' => $CFG->wwwroot . '/local/webuntis/index.php',
         ];
@@ -170,11 +170,11 @@ class tenant {
     public function get_client() {
         return $this->tenantdata->client;
     }
-    public function get_consumerkey() {
-        return $this->tenantdata->consumerkey;
-    }
     public function get_consumersecret() {
         return $this->tenantdata->consumersecret;
+    }
+    public function get_consumerpassword() {
+        return $this->tenantdata->consumerpassword;
     }
     private function get_endpoints() {
         $endpoints = \local_webuntis\locallib::cache_get('application', 'endpoints-' . $this->get_tenant_id());
@@ -248,10 +248,10 @@ class tenant {
         return $to;
     }
 
-    public function set_oauth_keys($consumerkey, $consumersecret) {
+    public function set_oauth_keys($consumersecret, $consumerpassword) {
         global $DB;
-        $this->tenantdata->consumerkey = $consumerkey;
         $this->tenantdata->consumersecret = $consumersecret;
+        $this->tenantdata->consumerpassword = $consumerpassword;
         $DB->update_record('local_webuntis_tenant', $this->tenantdata);
     }
 

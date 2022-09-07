@@ -43,8 +43,8 @@ $item = (object) [
     'school'         => optional_param('school', '', PARAM_ALPHANUM),
     'host'           => optional_param('host', '', PARAM_URL),
     'client'         => optional_param('client', '', PARAM_ALPHANUM),
-    'consumerkey'    => optional_param('consumerkey', '', PARAM_TEXT),
-    'consumersecret' => optional_param('consumersecret', '', PARAM_TEXT)
+    'consumersecret'    => optional_param('consumersecret', '', PARAM_TEXT),
+    'consumerpassword' => optional_param('consumerpassword', '', PARAM_TEXT)
 ];
 
 if ($item->tenant_id > 0) {

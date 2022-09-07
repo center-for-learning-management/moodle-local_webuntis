@@ -89,8 +89,8 @@ if ($verified) {
         if (!empty($obj->id)) {
             $obj->school        = $tenant->schoolName;
             $obj->client        = $tenant->clientId;
-            $obj->consumerkey   = $tenant->secret;
-            $obj->consumersecret= $tenant->password;
+            $obj->consumersecret   = $tenant->secret;
+            $obj->consumerpassword= $tenant->password;
             $obj->host          = $tenant->host;
             $obj->timemodified  = time();
             $success = $DB->update_record('local_webuntis_tenant', $obj);
@@ -101,8 +101,8 @@ if ($verified) {
                 'school'        => $tenant->schoolName,
                 'host'          => $tenant->host,
                 'client'        => $tenant->clientId,
-                'consumerkey'   => $tenant->secret,
-                'consumersecret'=> $tenant->password,
+                'consumersecret'   => $tenant->secret,
+                'consumerpassword'=> $tenant->password,
                 'timecreated'   => time(),
                 'timemodified'  => time(),
             ];

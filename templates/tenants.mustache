@@ -46,13 +46,13 @@
     <table class="generaltable" id="tab-{{uniqid}}">
         <thead>
             <tr>
-                <td>tenant_id</td>
-                <td>school</td>
-                <td>host</td>
-                <td>client</td>
-                <td>consumerkey</td>
-                <td>consumersecret</td>
-                <td>autocreate</td>
+                <td>TenantID</td>
+                <td>School</td>
+                <td>Host</td>
+                <td>OIDC-Client</td>
+                <td>OIDC-Secret</td>
+                <td>Password S2S</td>
+                <td>Autocreate</td>
             </tr>
         </thead>
         <tbody>
@@ -74,11 +74,11 @@
                         onblur="var inp = this; require(['local_webuntis/main'], function(M) { M.tenantData(inp); });">
                 </td>
                 <td>
-                    <input data-field="consumerkey" value="{{consumerkey}}" type="text" data-compare="{{consumerkey}}"
+                    <input data-field="consumersecret" value="{{consumersecret}}" type="text" data-compare="{{consumersecret}}"
                         onblur="var inp = this; require(['local_webuntis/main'], function(M) { M.tenantData(inp); });">
                 </td>
                 <td>
-                    <input data-field="consumersecret" value="{{consumersecret}}" type="text" data-compare="{{consumersecret}}"
+                    <input data-field="consumerpassword" value="{{consumerpassword}}" type="text" data-compare="{{consumerpassword}}"
                         onblur="var inp = this; require(['local_webuntis/main'], function(M) { M.tenantData(inp); });">
                 </td>
                 <td>
@@ -105,11 +105,11 @@
                 <td {{#missing_client}} class="alert-danger" {{/missing_client}}>
                     <input name="client" type="text" value="{{client}}" placeholder="client" />
                 </td>
-                <td {{#missing_consumerkey}} class="alert-danger" {{/missing_consumerkey}}>
-                    <input name="consumerkey" type="text" value="{{consumerkey}}" placeholder="consumerkey" />
-                </td>
                 <td {{#missing_consumersecret}} class="alert-danger" {{/missing_consumersecret}}>
                     <input name="consumersecret" type="text" value="{{consumersecret}}" placeholder="consumersecret" />
+                </td>
+                <td {{#missing_consumerpassword}} class="alert-danger" {{/missing_consumerpassword}}>
+                    <input name="consumerpassword" type="text" value="{{consumerpassword}}" placeholder="consumerpassword" />
                 </td>
                 <td>
                     <input type="submit" class="btn btn-primary" value="{{#str}} create {{/str}}" />

@@ -184,7 +184,7 @@ class local_webuntis_external extends external_api {
             throw new \moodle_exception('permission denied');
         }
 
-        $fields = [ 'tenant_id', 'school', 'host', 'client', 'consumerkey', 'consumersecret' ];
+        $fields = [ 'tenant_id', 'school', 'host', 'client', 'consumersecret', 'consumerpassword' ];
         if (!in_array($params['field'], $fields)) {
             return [ 'status' => 0, 'message' => get_string('exception:invalid_field', 'local_webuntis') ];
         }
