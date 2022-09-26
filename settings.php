@@ -88,7 +88,7 @@ if ($hassiteconfig) {
 
         $name = new lang_string('admin:pubkey:production', 'local_webuntis');
         $desc = new lang_string('admin:pubkey:production:description', 'local_webuntis');
-        $default = "-----BEGIN PUBLIC KEY-----\n" . 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArqx5iTI7Vm5V8K865H79svRanqQOB/WR32nd+Fw08vxfcesiO0Frg816dPk6MgRvurQ7fxv4SZaa5T+TNppgdjJBtrLX2uJlaTW8pHMTgZ/TAuoW/IZdvOKGhwsJh6unQwHDEmD7IE35agcyeuglNoHO4z3/Dnd/m9ufraf9HStQNUs820+Y5ENOBd76qfgKeIl0bV/PLnuVXUwMb1K3UQtP3N2xcNurpQB7AyQyrPWoKHUjPka/nROWJouUSficatL8XOay5GKm9SfK7hfNiDxB/vYUV/mdS5JSH9Lq2k/+zbZHDh47ea6CrKRxLM69di0BbnIuQTA1/YUDnm/cnQIDAQAB' . "\n-----END PUBLIC KEY-----";
+        $default = "-----BEGIN PUBLIC KEY-----\n" . 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAy4SObQ2nfru24gRbrx7LqWbvbYyeMgWu6rWk5PdnZ5hFDoabRIdQPeL8EEp/vHz2AUjArYefoNuSY+0stSAdLYpH5OKLxao2fTpwpZxj70DNEPlFPsjQznX9OyXiNEEGKrXdXuuCHYjUsEwgbZijbJXWba/DqPqs9KIzRZBTjAOMKlPIm0cTtQ63GgD41AQoXY9PWnH8mDjrCrwXIgNiUw6imMUjsiR+kF9YP3+SizKDFoeiV7Xl6xdbi953OPVZ/KtSx2hn9RqH7jXv43TYXyRsRnDAH1mWt6ZAYJV+3JaCHGEwvN6yNQcnaBPWGXjw3s614iQgDR5EF0EpU4JtOwIDAQAB' . "\n-----END PUBLIC KEY-----";
 
         $setting = new admin_setting_configtextarea(
             'local_webuntis/pubkey_production',

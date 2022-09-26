@@ -44,6 +44,9 @@ The target course of lesson pages can be selected by Teachers and Administrators
 *) Can be disabled in the Moodle Website-Administration, requires sufficient profile data in WebUntis!
 
 ## Changelog
+### 1.9.1 (Build: 2022092600)
+Changed default public key for production environment of WebUntis.
+
 ### 1.9 (Build: 2022090700)
 Harmonized naming of authentication parameters according to WebUntis: 'consumersecret' is now referred to as 'consumerpassword' (for server2server API), 'consumerkey' is not referred to as 'consumersecret'. Changes apply to database, code and language strings.
 
