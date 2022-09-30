@@ -44,6 +44,9 @@ The target course of lesson pages can be selected by Teachers and Administrators
 *) Can be disabled in the Moodle Website-Administration, requires sufficient profile data in WebUntis!
 
 ## Changelog
+### 1.9.2 (Build: 2022100100)
+Bugfix in regard of wrong use of get_config
+
 ### 1.9.1 (Build: 2022092600)
 Changed default public key for production environment of WebUntis.
 

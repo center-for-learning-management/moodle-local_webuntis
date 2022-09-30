@@ -190,10 +190,36 @@ class locallib {
         if (!empty($curldebugging)) {
             $debug = $curldebugging;
         }
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+
+        $proxyhost = get_config('core', 'proxyhost');
+        $proxyport = get_config('core', 'proxyport');
+        $proxytype = get_config('core', 'proxytype');
+        $proxyuser = get_config('core', 'proxyuser');
+        $proxypassword = get_config('core', 'proxypassword');
+
+        if (!empty($proxyhost)) {
+            curl_setopt($ch, CURLOPT_PROXY, $proxyhost);
+        }
+        if (!empty($proxyport)) {
+            curl_setopt($ch, CURLOPT_PROXYPORT, $proxyport);
+        }
+        if ($proxytype == "HTTP") {
+            curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+        }
+        if ($proxytype == "SOCKS5") {
+            curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+        }
+        if (!empty($proxyuser)) {
+            if (!empty($proxypassword)) {
+                $proxyuser .= ':' . $proxypassword;
+            }
+            curl_setopt($ch, CURLOPT_PROXYUSERPWD, $proxyuser);
+        }
 
         if ($debug) {
             ob_start();
