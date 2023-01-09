@@ -259,6 +259,7 @@ class locallib {
             fclose($out);
             $debug = ob_get_clean();
             echo "<p>DEBUG: </p><pre>$debug</pre>";
+            echo "<p>RESULT: </p><pre>$result</pre>";
         }
         curl_close($ch);
         return $result;
