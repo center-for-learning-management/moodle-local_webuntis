@@ -54,7 +54,7 @@ foreach ($params->usermaps as $usermap) {
     }
 }
 $actions = \local_webuntis\locallib::get_actions('usermaps', 'landingusermaps');
-echo $OUTPUT->render_from_template('local_webuntis/navbar', [ 'actions' => $actions ]);
+echo $OUTPUT->render_from_template('local_webuntis/navbar', [ 'actions' => $actions, 'wwwroot' => $CFG->wwwroot ]);
 echo $OUTPUT->render_from_template('local_webuntis/landingusermaps', $params);
 
 echo $OUTPUT->footer();

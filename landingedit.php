@@ -58,6 +58,7 @@ $params = [
     'canproceed' => ($LESSONMAP->get_count() > 0) ? 1 : 0,
     'courses' => $courses,
     'uses_eduvidual' => \local_webuntis\locallib::uses_eduvidual(),
+    'wwwroot' => $CFG->wwwroot,
 ];
 
 if ($LESSONMAP->get_lesson_id() == 0 && $LESSONMAP->can_edit()) {

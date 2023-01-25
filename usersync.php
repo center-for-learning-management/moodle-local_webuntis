@@ -63,7 +63,7 @@ if ($action == 'roles' && empty($params->uses_eduvidual)) {
 
 echo $OUTPUT->header();
 $actions = \local_webuntis\locallib::get_actions('usermaps', "landingusersync::$action");
-echo $OUTPUT->render_from_template('local_webuntis/navbar', [ 'actions' => $actions ]);
+echo $OUTPUT->render_from_template('local_webuntis/navbar', [ 'actions' => $actions, 'wwwroot' => $CFG->wwwroot ]);
 
 switch ($action) {
     case 'create':
@@ -195,7 +195,4 @@ switch ($action) {
 
     break;
 }
-
-
-
 echo $OUTPUT->footer();
