@@ -79,7 +79,7 @@ class usermap {
                     \local_webuntis\orgmap::load_from_eduvidual();
                 }
             } else {
-                if ($_SERVER['PHP_SELF'] != '/local/webuntis/landinguser.php') {
+                if (!strpos($_SERVER["SCRIPT_FILENAME"], '/local/webuntis/landinguser.php')) {
                     $url = new \moodle_url('/local/webuntis/landinguser.php', array());
                     redirect($url);
                 }
