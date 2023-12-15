@@ -97,7 +97,7 @@ class tenant {
         $this->serverinfo = \local_webuntis\locallib::cache_get('application', 'serverinfo-' . $this->get_tenant_id());
         if (empty($this->serverinfo->lifeends) || $this->serverinfo->lifeends < time()) {
             // fetch new token.
-            $url = implode('', [ $this->get_host(), '/WebUntis/api/sso/', \rawurlencode($this->get_school()), '/token' ]);
+            $url = implode('', [ $this->get_host(), '/WebUntis/api/sso/v2/', $this->get_tenant_id(), '/token' ]);
             $post = [
                 'grant_type' => 'client_credentials',
                 'scope' => 'roster-core.readonly',
