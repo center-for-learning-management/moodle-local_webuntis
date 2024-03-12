@@ -51,7 +51,7 @@ foreach (getallheaders() as $name => $value) {
 }
 
 if (empty($SIGNATURE) || empty($ALGORITHM)) {
-    throw new moodle_exception('algorithm or signature missing');
+    \local_webuntis\locallib::exception('algorithm or signature missing', 405);
 }
 
 if ($debugging) error_log("Signature $SIGNATURE");
