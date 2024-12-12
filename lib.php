@@ -23,6 +23,11 @@
 
 defined('MOODLE_INTERNAL') || die;
 
+// can be removed in moodle 4.5
+function local_webuntis_after_config() {
+    \local_webuntis\hook_callbacks::after_config();
+}
+
 /**
  * Extend Moodle Navigation.
  */
@@ -46,15 +51,5 @@ function local_webuntis_extend_navigation($navigation) {
         $icon = new pix_icon('logo_untis', $label, 'local_webuntis');
         $nodemyorgs = $nodehome->add($label, $url, navigation_node::NODETYPE_LEAF, $label, 'disconnectuser', $icon);
         $nodemyorgs->showinflatnavigation = true;
-    }
-}
-
-/**
- * Extend course settings
- */
-function local_webuntis_extend_navigation_course($nav, $course, $context) {
-    // Only do something, if we came through webuntis.
-    if (empty(\local_webuntis\locallib::uses_webuntis()) || defined('webuntis_no_action')) {
-        return;
     }
 }
