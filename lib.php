@@ -23,31 +23,6 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-function local_webuntis_after_config() {
-    global $CFG, $PAGE;
-    if (empty(\local_webuntis\locallib::uses_webuntis())) {
-        return;
-    }
-    \local_webuntis\locallib::cookie_samesite();
-
-    $PAGE->add_body_class('webuntis-loading-check');
-
-    // Capture oauth logins within iframes.
-    if (strpos($_SERVER['SCRIPT_FILENAME'], '/auth/oauth2/login.php') > 0 && \local_webuntis\locallib::in_iframe()) {
-        $url = new moodle_url('/local/webuntis/loginexternal.php', [ 'url' => $CFG->wwwroot . $_SERVER['REQUEST_URI']]);
-        redirect($url);
-    }
-}
-
-function local_webuntis_before_standard_html_head() {
-    // Only do something, if we came through webuntis.
-    if (empty(\local_webuntis\locallib::uses_webuntis()) || defined('webuntis_no_action')) {
-        return;
-    }
-
-    \local_webuntis\tenant::load();
-}
-
 /**
  * Extend Moodle Navigation.
  */
